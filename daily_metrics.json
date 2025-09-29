@@ -1,0 +1,261 @@
+{
+    "Tickets Created/Updated on 2025-09-21": {
+        "description": "This section provides a summary of all tickets (leads) created or updated on the specified date. It includes client details, status, and contact information, helping you track new and ongoing opportunities.",
+        "records": []
+    },
+    "Quotes & Proforma Invoices Processed/Updated on 2025-09-21": {
+        "description": "This section provides a summary of all Quotes & Proforma Invoices issued on the specified date. It includes customer details, quote amounts, and their current status, giving a comprehensive overview of quote activity.",
+        "records": [],
+        "totals": {
+            "total": 0,
+            "tax": 0
+        }
+    },
+    "Projects Created/Updated on 2025-09-21": {
+        "description": "This section summarizes all projects created or updated on the specified date, including project titles, related quotes, customers, and responsible staff.",
+        "records": []
+    },
+    "Gross Profit for Projects Ended on 2025-09-21": {
+        "description": "This section provides the gross profit analysis for projects that ended on the specified date. It highlights income, expenses, and resulting profit margins.",
+        "records": [],
+        "totals": {
+            "income": 0,
+            "expense": 0,
+            "gross_profit": 0
+        }
+    },
+    "Invoices Processed/Updated on 2025-09-21": {
+        "description": "This section lists all invoices generated or updated on the specified date, including customer details, amounts, taxes, and due dates.",
+        "records": [],
+        "totals": {
+            "total": 0,
+            "tax": 0
+        }
+    },
+    "Invoice Payments Processed/Updated on 2025-09-21": {
+        "description": "This section lists invoice payments processed or updated on the specified date, detailing payment methods, accounts, and amounts.",
+        "records": [],
+        "totals": {
+            "amount": 0,
+            "wh_vat": 0,
+            "wh_tax": 0
+        }
+    },
+    "Purchases Processed/Updated on 2025-09-21": {
+        "description": "This section provides an overview of all purchases created or updated on the specified date, including suppliers, amounts, and tax summaries.",
+        "records": [],
+        "totals": {
+            "total": 0,
+            "tax": 0
+        }
+    },
+    "Purchase Orders Created/Updated on 2025-09-21": {
+        "description": "This section lists purchase orders created or updated on the specified date. It includes supplier, currency, totals, taxes, and amounts paid.",
+        "records": [],
+        "totals": {
+            "total": 0,
+            "paid": 0,
+            "tax": 0
+        }
+    },
+    "GRNs Created/Updated on 2025-09-21": {
+        "description": "This section provides a summary of all Goods Receive Notes (GRNs) created or updated on the specified date.",
+        "records": [],
+        "totals": {
+            "total": 0,
+            "tax": 0
+        }
+    },
+    "Bank Transfers Created/Updated on 2025-09-21": {
+        "description": "This section lists bank transfers created or updated on the specified date, including debit/credit accounts, methods, and amounts.",
+        "records": [],
+        "total": 0
+    },
+    "Bill Payments Created/Updated on 2025-09-21": {
+        "description": "This section summarizes bill payments created or updated on the specified date, including supplier, paid accounts, and allocation details.",
+        "records": [],
+        "totals": {
+            "amount": 0,
+            "unallocated": 0
+        }
+    },
+    "Customer Complaints": {
+        "description": "This section highlights all customer complaints received or updated on the specified date, including type, status, and resolution progress.",
+        "records": []
+    },
+    "Leave Applications": {
+        "description": "This section lists all employee leave applications submitted or updated on the specified date, including category, duration, and approval status.",
+        "records": []
+    },
+    "Document Manager Updates": {
+        "description": "This section provides updates from the document manager, showing documents issued, renewed, or expiring on the specified date.",
+        "records": []
+    },
+    "H&S Tracking": {
+        "description": "This section provides all Health & Safety records logged or updated on the specified date.",
+        "records": []
+    },
+    "Quality Tracking": {
+        "description": "This section provides all Quality Tracking entries created or updated on the specified date.",
+        "records": []
+    },
+    "Environmental Tracking": {
+        "description": "This section provides all Environmental Tracking entries created or updated on the specified date.",
+        "records": []
+    },
+    "Sent SMS on 2025-09-21": {
+        "description": "This section lists all SMS messages sent or scheduled on the specified date, including costs and delivery status.",
+        "records": [],
+        "total": 0
+    },
+    "Cashbook Balance Summary": {
+        "description": "This section summarizes the organization’s cashbook balances across multiple periods (today, yesterday, 7-day, 30-day).",
+        "records": [
+            [
+                "2025-09-21",
+                "2025-09-21",
+                0,
+                0,
+                0
+            ],
+            [
+                "2025-09-20",
+                "2025-09-20",
+                "0.0000",
+                "30.0000",
+                "-30.0000"
+            ],
+            [
+                "2025-09-13",
+                "2025-09-20",
+                "362130.0000",
+                "4012878.5000",
+                "-3650748.5000"
+            ],
+            [
+                "2025-08-21",
+                "2025-09-20",
+                "16728629.5000",
+                "38723631.0000",
+                "-21995001.5000"
+            ]
+        ]
+    },
+    "7 Day Tenants": {
+        "description": "This section lists tenants within 7 days of cutoff, helping monitor potential service suspensions.",
+        "records": {
+            "0": {
+                "name": "LEAN VENTURES LTD",
+                "cutoff_date": "Not Set"
+            },
+            "1": {
+                "name": "Project Management ERP (PME)",
+                "cutoff_date": "Not Set"
+            },
+            "30": {
+                "name": "Biohazard Waste Solutions EA Ltd",
+                "cutoff_date": "25/09/2025 00:00"
+            }
+        },
+        "count": 3
+    },
+    "Birthdays Today": {
+        "description": "This section lists employees celebrating birthdays today.",
+        "records": []
+    },
+    "Stock Alerts": {
+        "description": "This section highlights products whose stock levels have fallen below their defined alert thresholds.",
+        "records": []
+    },
+    "7 Day Labour Hours": {
+        "description": "This section shows the labor hours recorded over the last 7 days, including totals.",
+        "metrics": {
+            "hoursTotals": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "labourDates": [
+                "14th Sep",
+                "15th Sep",
+                "16th Sep",
+                "17th Sep",
+                "18th Sep",
+                "19th Sep",
+                "20th Sep"
+            ],
+            "chartTitle": "Daily Labour Hours from 14th September to 20th September, 2025"
+        },
+        "total": 0
+    },
+    "7 Day Sales & Expenses": {
+        "description": "This section provides sales and expense totals over the last 7 days.",
+        "metrics": {
+            "salesTotals": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "salesDates": [
+                "14th Sep",
+                "15th Sep",
+                "16th Sep",
+                "17th Sep",
+                "18th Sep",
+                "19th Sep",
+                "20th Sep"
+            ],
+            "expensesTotals": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "expensesDates": [
+                "14th Sep",
+                "15th Sep",
+                "16th Sep",
+                "17th Sep",
+                "18th Sep",
+                "19th Sep",
+                "20th Sep"
+            ],
+            "chartTitle": "Daily Sales and Expenses from 14th September to 20th September, 2025"
+        },
+        "sales": 0,
+        "expenses": 0
+    },
+    "EDL Metrics": {
+        "description": "This section summarizes Engineering Daily Log (EDL) metrics captured for the specified date.",
+        "records": {
+            "filledToday": 0,
+            "notFilledToday": 9,
+            "tasksLoggedToday": 0,
+            "hoursLoggedToday": 0,
+            "todayUnreviewedLogs": 0
+        }
+    },
+    "Job Valuations": {
+        "description": "This section lists job valuations processed or updated on the specified date.",
+        "records": []
+    },
+    "BoQ Valuations": {
+        "description": "This section lists Bill of Quantity (BoQ) valuations processed or updated on the specified date.",
+        "records": []
+    },
+    "Tenders": {
+        "description": "This section provides all tenders created or updated on the specified date, including submission and site visit dates, amounts, and bid bonds.",
+        "records": []
+    }
+}

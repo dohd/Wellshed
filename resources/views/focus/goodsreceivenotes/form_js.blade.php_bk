@@ -1,0 +1,137 @@
+{{ Html::script('focus/js/select2.min.js') }}
+{{ Html::script(mix('js/dataTable.js')) }}
+<script>
+    const config = {
+        ajaxSetup: {headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}},
+        date: {format: "{{ config('core.user_date_format')}}", autoHide: true},
+        select2: {
+            allowClear: true,
+        },
+        fetchLpo: (supplier_id) => {
+            return $.ajax({
+                url: "{{ route('biller.suppliers.purchaseorders') }}",
+                type: 'POST',
+                quietMillis: 50,
+                data: {supplier_id, type: 'grn'},
+            });
+        },
+        fetchLpoGoods: (purchaseorder_id) => {
+            return $.ajax({
+                url: "{{ route('biller.purchaseorders.goods') }}",
+                type: 'POST',
+                quietMillis: 50,
+                data: {purchaseorder_id},
+            });
+        }
+    };
+
+    const Form = {
+        grn: @json(@$goodsreceivenote),
+
+        init() {
+            $('.datepicker').datepicker(config.date).datepicker('setDate', new Date());
+            $('#supplier').select2(config.select2);
+
+            if (this.grn) {
+                $('#date').datepicker('setDate', new Date(this.grn.date));
+                if (this.grn.invoice_date) $('#invoice_date').datepicker('setDate', new Date(this.grn.invoice_date));
+
+                $('#supplier').attr('disabled', true).change();
+                $('#purchaseorder').attr('disabled', true);
+                if (this.grn.invoice_no) {
+                    $('#invoice_no').attr('disabled', false);
+                    $('#invoice_date').attr('disabled', false);
+                    $('#invoice_status option:eq(0)').remove();
+                } else {
+                    $('#invoice_status option:eq(1)').remove();
+                }
+            } else {
+                $('#supplier').val('').change();
+            }
+
+            $('#supplier').change(this.supplierChange);
+            $('#purchaseorder').change(this.purchaseorderChange);
+            $('#tax_rate').change(() => Form.columnTotals());
+            $('#invoice_status').change(this.invoiceStatusChange);
+            $('#productTbl').on('keyup', '.qty', () => Form.columnTotals());
+            this.columnTotals();
+        },
+
+        invoiceStatusChange() {
+            const el = $(this);
+            if (el.val() == 'with_invoice') {
+                $('#invoice_no').val('').attr('disabled', false);
+                $('#invoice_date').val('').attr('disabled', false);
+            }
+            else {
+                $('#invoice_no').val('').attr('disabled', true);
+                $('#invoice_date').val('').attr('disabled', true);
+            }
+        },
+
+        supplierChange() {
+            const el = $(this);
+            $('#purchaseorder').html('');
+            $('#productTbl tbody').html('');
+            if (!el.val()) return;
+            config.fetchLpo(el.val()).done(data => {
+                data.forEach(v => {
+                    $('#purchaseorder').append(`
+                        <option value="${v.id}">LPO-${v.tid} - ${v.note}</option>
+                    `);
+                });
+                $('#purchaseorder').change();
+            });
+        },
+
+        purchaseorderChange() {
+            const el = $(this);
+            $('#productTbl tbody').html('');
+            if (!el.val()) return;
+            config.fetchLpoGoods(el.val()).done(data => {
+                data.forEach((v,i) => $('#productTbl tbody').append(Form.productRow(v,i)));
+            });
+        },
+
+        productRow(v,i) {
+            const qty = accounting.formatNumber(v.qty);
+            const received = accounting.formatNumber(v.qty_received);
+            const due = v.qty - v.qty_received;
+            const balance = accounting.formatNumber(due > 0? due : 0);
+            return `
+                <tr>
+                    <td>${i+1}</td>    
+                    <td>${v.description}</td> 
+                    <td>${v.project_tid}</td>  
+                    <td>${v.ware}</td> 
+                    <td>${v.uom}</td>    
+                    <td>${qty}</td>    
+                    <td>${received}</td>    
+                    <td>${balance}</td>    
+                    <td><input name="qty[]" id="qty" class="form-control qty"></td>    
+                    <input type="hidden" name="purchaseorder_item_id[]" value="${v.id}">
+                    <input type="hidden" name="rate[]" value="${parseFloat(v.rate)}" class="rate">
+                    <input type="hidden" name="item_id[]" value="${v.item_id}">
+                </tr>
+            `;
+        },
+
+        columnTotals() {
+            subtotal = 0;
+            total = 0;
+            const tax_rate = 1 + $('#tax_rate').val() / 100;
+            $('#productTbl tbody tr').each(function() {
+                const row = $(this);
+                const qty = accounting.unformat(row.find('.qty').val());
+                const rate = accounting.unformat(row.find('.rate').val());
+                subtotal += qty * rate;
+                total += qty * rate * tax_rate;
+            });
+            $('#subtotal').val(accounting.formatNumber(subtotal));
+            $('#tax').val(accounting.formatNumber(total - subtotal));
+            $('#total').val(accounting.formatNumber(total));
+        },
+    }
+
+    $(() => Form.init());
+</script>

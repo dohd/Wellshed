@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class AddColumnsToSendInvoicesTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('send_invoices', function (Blueprint $table) {
+            $table->unsignedBigInteger('rfq_analysis_id')->nullable();
+            $table->text('supplier_ids')->nullable();
+            $table->date('date')->nullable();
+            $table->text('subject')->nullable();
+            $table->text('text_message')->nullable();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('send_invoices', function (Blueprint $table) {
+            //
+        });
+    }
+}
