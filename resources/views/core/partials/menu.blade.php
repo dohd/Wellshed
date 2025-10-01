@@ -380,7 +380,7 @@
                             </ul>
                         </li>
                         @endauth
-
+                
                         {{-- Client branch --}}
                         @permission('manage-branch')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a
@@ -399,7 +399,27 @@
                                 @endauth
                             </ul>
                         </li>
-                        @endauth                        
+                        @endauth      
+                        
+                        {{-- Customer orders --}}
+                        @permission('manage-branch')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a
+                                    class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i
+                                        class="ft-users"></i></i> Orders Management</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('biller.customer_orders.index') }}"
+                                       data-toggle="dropdown"><i class="ft-list"></i> Manage Orders
+                                    </a>
+                                </li>
+                                @permission('create-branch')
+                                <li><a class="dropdown-item" href="{{ route('biller.customer_orders.create') }}"
+                                       data-toggle="dropdown"><i class="fa fa-plus-circle"></i>Create Orders
+                                    </a>
+                                </li>
+                                @endauth
+                            </ul>
+                        </li>
+                        @endauth        
 
                         {{-- Client group --}}
                         @permission('manage-clientgroup')
