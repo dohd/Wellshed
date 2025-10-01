@@ -18,34 +18,30 @@
 <div class="tab-content px-1 pt-1">
     <!-- Customer Info -->
     <div class="tab-pane active in" id="active1" aria-labelledby="active-tab1" role="tabpanel">
-        <div class="table-responsive">
-            <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
-                @php
-                    $labels = [
-                        'Company', 'Phone', 'Email', 'Address',
-                        'Contact Name' => 'name',
-                         'City', 'Region', 'Country', 'PostBox',
-                        'Tax ID' => 'taxid',  
-                        'Contact Person Info' => 'contact_person_info'
-                    ];
-                @endphp
-                <tbody>
-
-                    <tr>
-                        <th>Code</th>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered zero-configuration" cellspacing="0" width="100%">
                         @php
-                            $prefix = prefixesArray(['customer'], auth()->user()->ins);
+                            $labels = [
+                                'Company', 'Phone', 'Email', 'Address',
+                                'Contact Name' => 'name',
+                                 'City', 'Region', 'Country', 'PostBox',
+                                'Tax ID' => 'taxid',  
+                                'Contact Person Info' => 'contact_person_info'
+                            ];
                         @endphp
-                        <td>{{ ($prefix ? $prefix[0] . '-' : 'CMR-') . $customer['id'] }}</td>
-                    </tr>
-                    @foreach ($labels as $key => $val)
-                        <tr>
-                            <th>{{ is_numeric($key) ? $val : $key }}</th>
-                            <td>{{ $customer[strtolower($val)] }}</td>
-                        </tr>
-                    @endforeach      
-                </tbody>
-            </table>            
+                        <tbody>
+                            @foreach ($labels as $key => $val)
+                                <tr>
+                                    <th>{{ is_numeric($key) ? $val : $key }}</th>
+                                    <td>{{ $customer[strtolower($val)] }}</td>
+                                </tr>
+                            @endforeach      
+                        </tbody>
+                    </table>            
+                </div>
+            </div>
         </div>
     </div>
     <!-- End Customer Info -->

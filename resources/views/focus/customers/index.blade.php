@@ -17,114 +17,29 @@
         </div>
     </div>
     
-    <div class="content-detached content-right d-none d-sm-block">
-        <div class="content-body">
-            <section class="row all-contacts">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <form action="{{route('biller.customers.send_statement')}}" method="post">
-                                @csrf
-                                <button type="submit" class="btn btn-lg btn-success d-none">Send Statements</a>
-                            </form>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-body">
-                                <div class="card-body">
-                                    <ul class="nav nav-tabs nav-top-border no-hover-bg" role="tablist">
-                                        <li class="nav-item">
-                                            <a class="nav-link active" id="active-tab1" data-toggle="tab" href="#active1" aria-controls="active1" role="tab" aria-selected="true">Customer Info</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link " id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">Statement on Account</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">Invoice</a>
-                                        </li> 
-                                        <li class="nav-item">
-                                            <a class="nav-link " id="active-tab3" data-toggle="tab" href="#active4" aria-controls="active4" role="tab">Statement on Invoice</a>
-                                        </li>                                       
-                                    </ul>
-                                    <div class="tab-content px-1 pt-1">
-                                        <div class="tab-pane active in" id="active1" aria-labelledby="active-tab1" role="tabpanel">
-                                            <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
-                                                @php
-                                                    $labels = [
-                                                        'Name', 'Phone', 'Email', 'Address', 'Company', 'City', 'Region', 'Country', 'PostBox',
-                                                        'Tax ID' => 'taxid',  
-                                                        'Contact Person Info' => 'contact_person_info'
-                                                    ];
-                                                @endphp
-                                                <tbody> 
-                                                    @foreach ($labels as $key => $val)
-                                                        <tr>
-                                                            <th>{{ is_numeric($key) ? $val : $key }}</th>
-                                                            <td></td>
-                                                        </tr>
-                                                    @endforeach                        
-                                                </tbody>
-                                            </table>
-                                        </div>
-
-                                        <div class="tab-pane" id="active2" aria-labelledby="link-tab2" role="tabpanel">
-                                            <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
-                                                <thead>
-                                                    <tr>                                            
-                                                        @foreach (['Date', 'Type', 'Note', 'Credit', 'Debit'] as $val)
-                                                            <th>{{ $val }}</th>
-                                                        @endforeach
-                                                    </tr>
-                                                </thead>
-                                                <tbody></tbody>
-                                            </table>
-                                        </div>
-                                        <div class="tab-pane" id="active3" aria-labelledby="link-tab3" role="tabpanel">
-                                            <table class="table table-lg table-bordered zero-configuration" cellspacing="0" width="100%">
-                                                <thead>
-                                                    <tr>                                                    
-                                                        @foreach (['Date', 'Type', 'Note', 'Amount', 'Paid', 'Balance'] as $val)
-                                                            <th>{{ $val }}</th>
-                                                        @endforeach
-                                                    </tr>
-                                                </thead>
-                                                <tbody></tbody>                                               
-                                            </table>                                            
-                                        </div>
-                                        <div class="tab-pane" id="active4" aria-labelledby="link-tab4" role="tabpanel">
-                                          <!-- aging tab -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
-    
-    <div class="sidebar-detached sidebar-left">
-        <div class="sidebar">
-            <div class="bug-list-sidebar-content">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table id="customerTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th>{{ trans('customers.name') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td colspan="100%" class="text-center text-success font-large-1">
-                                            <i class="fa fa-spinner spinner"></i>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>                            
-                        </div>
-                    </div>
+    <div class="content-body">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="customerTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>CUSTOMER NAME</th>
+                                <th>COMPANY</th>
+                                <th>EMAIL</th>
+                                <th>PHONE NO.</th>
+                                <th>RECEIVABLES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="100%" class="text-center text-success font-large-1">
+                                    <i class="fa fa-spinner spinner"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>                            
                 </div>
             </div>
         </div>
@@ -156,10 +71,8 @@
                 type: 'post'
             },
             columns: [
-                {
-                    data: 'company',
-                    name: 'company'
-                },
+                {data: 'DT_Row_Index',name: 'id'},
+                ...['name', 'company', 'email', 'phone', 'balance'].map(v => ({name: v, data: v}))
             ],
             ordering: false,
             searchDelay: 500,

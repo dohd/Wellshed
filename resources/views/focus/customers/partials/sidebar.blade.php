@@ -4,19 +4,27 @@
             <div class="card">
                 <div class="card-head">
                     <div class="media-body media p-1">
-                        <div class="media-middle pr-1">
+                        <div class="media-middle pr-1 mr-auto ml-auto">
                             <span class="avatar avatar-lg rounded-circle ml-2">
                                 <img src="{{ Storage::disk('public')->url('app/public/img/customer/' . $customer->picture) }}" alt="avatar">
                             </span>
                         </div>
                     </div>
                     <div class="ml-1">
-                        <h5 class="info">Customer</h5>
-                        @php
-                            $prefix = prefixesArray(['customer'], auth()->user()->ins);
-                        @endphp
-                        <h5 class="media-heading">{{ $customer->company }} | <b>{{($prefix ? $prefix[0] . '-' : 'CMR-') . $customer->id }}</b></h5>
-                        <h5>Balance: <span class="text-danger">{{ numberFormat($account_balance) }}</span></h5>
+                        <h5 class="media-heading text-primary text-center">
+                            @if ($customer->company && $customer->name)
+                                <small>{{ 'CRM-' . $customer->id }}</small><br>
+                                <b>{{ $customer->company }}</b><br>
+                                <small>{{ $customer->name }}</small>
+                            @elseif ($customer->name)
+                                <small>{{ 'CRM-' . $customer->id }}</small><br>
+                                <b>{{ $customer->name }}</b>
+                            @elseif ($customer->company)
+                                <small>{{ 'CRM-' . $customer->id }}</small><br>
+                                <b>{{ $customer->company }}</b>
+                            @endif                            
+                        </h5>
+                        <h5 class="text-center">Balance: <span class="text-danger">{{ numberFormat($account_balance) }}</span></h5>
                     </div>
                 </div>
                 <div class="card-body">

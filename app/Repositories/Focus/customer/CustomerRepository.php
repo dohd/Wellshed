@@ -68,7 +68,7 @@ class CustomerRepository extends BaseRepository
 
         $q->orderByRaw("CASE WHEN LOWER(name) = LOWER(?) THEN 1 ELSE 2 END", ['Walk-In'])->orderByRaw('LOWER(name) ASC');
 
-        return $q->get(['id','name','company','email', 'currency_id', 'address','picture','active','created_at']);
+        return $q->get(['id','name','company','email', 'phone', 'currency_id', 'address','picture','active','created_at']);
     }
 
     /**

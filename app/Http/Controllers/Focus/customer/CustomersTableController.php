@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Repositories\Focus\customer\CustomerRepository;
 use App\Http\Requests\Focus\customer\ManageCustomerRequest;
+use Illuminate\Support\Facades\Request;
 
 /**
  * Class CustomersTableController.
@@ -34,7 +35,7 @@ class CustomersTableController extends Controller
      *
      * @return mixed
      */
-    public function __invoke(ManageCustomerRequest $request)
+    public function __invoke(Request $request)
     {
         if (request('is_transaction')) return $this->invoke_transaction();
         if (request('is_invoice')) return $this->invoke_invoice();
@@ -45,12 +46,13 @@ class CustomersTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('company', function ($customer) {
-                $customer_name = $customer->company? $customer->company :  $customer->name;
-                $prefix = prefixesArray(['customer'], auth()->user()->ins);
-                $tid = ($prefix ? $prefix[0] . '-' : 'CRM-') . $customer->id;
+                $customer_name = $customer->company? $customer->company :  $customer->name;                
                 $currencyCode = @$customer->currency->code;
-
-                return '<a class="font-weight-bold" href="' . route('biller.customers.show', $customer) . '">' . " {$customer_name} ({$currencyCode}) | {$tid}" . '</a>';
+                $tid = 'CRM-' . $customer->id;
+                return '<a class="font-weight-bold" href="' . route('biller.customers.show', $customer) . '">' . "{$tid} | {$customer_name} ({$currencyCode})" . '</a>';
+            })
+            ->addColumn('balance', function ($customer) {
+                return;
             })
             ->make(true);
     }
