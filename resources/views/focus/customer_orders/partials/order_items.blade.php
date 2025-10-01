@@ -5,7 +5,7 @@
                 <th style="width: 35%;">Product</th>
                 <th style="width: 10%;">Type</th>
                 <th style="width: 10%;">Quantity</th>
-                <th style="width: 10%;">Cost</th>
+                <th style="width: 10%;">Rate</th>
                 <th style="width: 10%;">VAT</th>
                 <th style="width: 15%;">Amount</th>
                 <th style="width: 10%;">Action</th>
