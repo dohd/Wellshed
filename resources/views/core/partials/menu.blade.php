@@ -431,7 +431,7 @@
                                        data-toggle="dropdown"><i class="ft-list"></i> Manage Delivery Schedule
                                     </a>
                                 </li>
-                                @permission('create-branch')
+                                @permission('create-branch*')
                                 <li><a class="dropdown-item" href="{{ route('biller.delivery_schedules.create') }}"
                                        data-toggle="dropdown"><i class="fa fa-plus-circle"></i>Create Delivery Schedule
                                     </a>
