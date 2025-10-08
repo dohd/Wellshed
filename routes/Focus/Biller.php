@@ -185,11 +185,11 @@ Route::group(['namespace' => 'department'], function () {
     //For Datatable
     Route::post('departments/get', 'DepartmentsTableController')->name('departments.get');
 });
-// Route::group(['namespace' => 'delivery'], function () {
-//     Route::resource('deliveries', 'DeliveriesController');
-//     //For Datatable
-//     Route::post('deliveries/get', 'DeliveriesTableController')->name('deliveries.get');
-// });
+Route::group(['namespace' => 'delivery'], function () {
+    Route::resource('deliveries', 'DeliveriesController');
+    //For Datatable
+    Route::post('deliveries/get', 'DeliveriesTableController')->name('deliveries.get');
+});
 Route::group(['namespace' => 'delivery_schedule'], function () {
     Route::post('delivery_schedules/get_schedule_items', 'DeliverySchedulesController@get_schedule_items')->name('delivery_schedules.get_schedule_items');
     Route::post('delivery_schedules/get_schedules', 'DeliverySchedulesController@get_schedules')->name('delivery_schedules.get_schedules');

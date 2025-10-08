@@ -419,7 +419,7 @@
                                 @endauth
                             </ul>
                         </li>
-                        @endauth        
+                        @endauth  
 
                         {{-- Delivery Schedule --}}
                         @permission('manage-branch')
@@ -441,7 +441,7 @@
                         </li>
                         @endauth       
                         {{-- Delivery --}}
-                        {{-- @permission('manage-branch')
+                        @permission('manage-branch')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a
                                     class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i
                                         class="fa fa-truck"></i></i> Delivery Management</a>
@@ -458,7 +458,7 @@
                                 @endauth
                             </ul>
                         </li>
-                        @endauth        --}}
+                        @endauth       
 
                         {{-- Client group --}}
                         @permission('manage-clientgroup')

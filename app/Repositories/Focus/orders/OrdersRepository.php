@@ -98,7 +98,9 @@ class OrdersRepository extends BaseRepository
             if(in_array($key,['total','tax','taxable','subtotal']))
                 $data[$key] = numberClean($val);
         }
-        // dd($data);
+        if($order->status == 'draft'){
+            $data['status'] = 'confirmed';
+        }
         $order->update($data);
 
         $data_items = $input['data_items'];

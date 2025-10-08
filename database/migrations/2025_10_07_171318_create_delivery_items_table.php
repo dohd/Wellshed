@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDeliverySchedulesTable extends Migration
+class CreateDeliveryItemsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,15 @@ class CreateDeliverySchedulesTable extends Migration
      */
     public function up()
     {
-        Schema::create('delivery_schedules', function (Blueprint $table) {
+        Schema::create('delivery_items', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('tid');
-            $table->unsignedBigInteger('order_id');
-            $table->unsignedBigInteger('delivery_frequency_id');
-            $table->date('delivery_date');
-            $table->time('delivery_time');
-            $table->enum('status',['scheduled','delivered','cancelled'])->default('scheduled');
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('delivery_id');
+            $table->unsignedBigInteger('delivery_schedule_item_id');
+            $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('order_item_id');
+            $table->decimal('planned_qty',16,2)->default(0);
+            $table->decimal('delivered_qty',16,2)->default(0);
+            $table->decimal('returned_qty',16,2)->default(0);
             $table->unsignedBigInteger('ins');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
@@ -35,6 +35,6 @@ class CreateDeliverySchedulesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('delivery_schedules');
+        Schema::dropIfExists('delivery_items');
     }
 }

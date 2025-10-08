@@ -75,6 +75,7 @@ class CreateDeliverySchedule extends Command
 
                         // ✅ Create delivery schedule
                         $schedule = DeliverySchedule::create([
+                            'tid' => DeliverySchedule::max('tid')+1,
                             'order_id' => $order->id,
                             'delivery_date' => $date->toDateString(),
                             'delivery_time' => $freq->expected_time,
