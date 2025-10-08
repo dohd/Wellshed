@@ -21,6 +21,8 @@ class CreateCustomerOrdersTable extends Migration
             $table->unsignedBigInteger('driver_id')->nullable();
             $table->longText('description')->nullable();
             $table->text('route')->nullable();
+            $table->string('start_month')->nullable();
+            $table->string('end_month')->nullable();
             $table->enum('order_type', ['one_time', 'recurring'])->default('one_time');
             $table->string('frequency')->nullable();
             $table->enum('status',['draft','confirmed','started','completed','suspended'])->default('draft');
