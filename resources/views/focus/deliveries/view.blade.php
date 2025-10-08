@@ -93,27 +93,29 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach ($delivery->items as $index => $item)
-                                                <tr>
-                                                    <td>
-                                                        {{ $item->product->name }}
-                                                    </td>
-                                                    
-                                                    <td>
-                                                        {{ $item->qty }}
-                                                    </td>
-                                                    <td>
-                                                        {{ numberFormat($item->rate) }}
-                                                    </td>
-                    
-                                                    <td><span class="amt">{{ numberFormat($item->amount) }}</span></td>
-                                                    <td>
-                                                        <button type="button" class="btn btn-outline-light btn-sm mt-1 remove_doc">
-                                                            <i class="fa fa-trash fa-lg text-danger"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
+                                            @if (count($delivery->items) > 0)
+                                                @foreach ($delivery->items as $index => $item)
+                                                    <tr>
+                                                        <td>
+                                                            {{ $item->product->name }}
+                                                        </td>
+                                                        
+                                                        <td>
+                                                            {{ $item->qty }}
+                                                        </td>
+                                                        <td>
+                                                            {{ numberFormat($item->rate) }}
+                                                        </td>
+                        
+                                                        <td><span class="amt">{{ numberFormat($item->amount) }}</span></td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-outline-light btn-sm mt-1 remove_doc">
+                                                                <i class="fa fa-trash fa-lg text-danger"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            @endif
                                         </tbody>
                                     </table>
                                 </div>

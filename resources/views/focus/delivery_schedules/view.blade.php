@@ -83,36 +83,38 @@
                                     <table id="itemsTbl" class="table table-bordered" width="100%">
                                         <thead>
                                             <tr>
-                                                <th style="width: 45%;">Product</th>
-                                                
-                                                <th style="width: 20%;">Quantity</th>
+                                                <th>#</th>
+                                                <th style="width: 10%;">Product Code</th>
+                                                <th style="width: 35%;">Product</th>
+                                                <th style="width: 10%;">Planned Qty</th>
+                                                <th style="width: 10%;">Delivered Qty</th>
+                                                <th style="width: 10%;">Returned Qty</th>
                                                 <th style="width: 10%;">Rate</th>
-                                       
-                                                <th style="width: 15%;">Amount</th>
-                                                <th style="width: 10%;">Action</th>
+
+                                                <th style="width: 10%;">Amount</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {{-- {{ dd($delivery_schedule) }} --}}
                                             @foreach ($delivery_schedule->items as $index => $item)
                                                 <tr>
+                                                    <td>{{ $index + 1 }}</td>
                                                     <td>
-                                                        {{ $item->product->name }}
+                                                        {{ $item->product->code ?? '' }}
                                                     </td>
-                                                    
+                                                    <td>
+                                                        {{ $item->product->name ?? '' }}
+                                                    </td>
+
                                                     <td>
                                                         {{ $item->qty }}
                                                     </td>
+                                                    <td>0</td>
+                                                    <td>0</td>
                                                     <td>
                                                         {{ numberFormat($item->rate) }}
                                                     </td>
-                    
+
                                                     <td><span class="amt">{{ numberFormat($item->amount) }}</span></td>
-                                                    <td>
-                                                        <button type="button" class="btn btn-outline-light btn-sm mt-1 remove_doc">
-                                                            <i class="fa fa-trash fa-lg text-danger"></i>
-                                                        </button>
-                                                    </td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
