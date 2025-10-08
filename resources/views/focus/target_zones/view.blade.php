@@ -59,7 +59,7 @@
                                     <table id="daysTbl" class="table" widht="50%">
                                         <thead>
                                             <tr>
-                                                <th>Sub Zone Name</th>
+                                                <th>Locations</th>
                                             </tr>
                                         </thead>
                                         <tbody>
