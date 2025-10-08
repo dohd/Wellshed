@@ -402,7 +402,7 @@
                         @permission('manage-branch')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a
                                     class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i
-                                        class="fa fa-shopping-cart"></i></i> Orders Management</a>
+                                        class="fa fa-shopping-cart"></i></i> Orders</a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('biller.customer_orders.index') }}"
                                        data-toggle="dropdown"><i class="ft-list"></i> Manage Orders
@@ -410,7 +410,7 @@
                                 </li>
                                 @permission('create-branch')
                                 <li><a class="dropdown-item" href="{{ route('biller.customer_orders.create') }}"
-                                       data-toggle="dropdown"><i class="fa fa-plus-circle"></i>Create Orders
+                                       data-toggle="dropdown"><i class="fa fa-plus-circle"></i>Create Order
                                     </a>
                                 </li>
                                 @endauth
@@ -422,7 +422,7 @@
                         @permission('manage-branch')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a
                                     class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i
-                                        class="fa fa-calendar"></i></i> Delivery Schedule Management</a>
+                                        class="fa fa-calendar"></i></i> Delivery Schedules</a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('biller.delivery_schedules.index') }}"
                                        data-toggle="dropdown"><i class="ft-list"></i> Manage Delivery Schedule
@@ -442,7 +442,7 @@
                         @permission('manage-branch')
                         <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a
                                     class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i
-                                        class="fa fa-truck"></i></i> Delivery Management</a>
+                                        class="fa fa-truck"></i></i> Order Deliveries</a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('biller.deliveries.index') }}"
                                        data-toggle="dropdown"><i class="ft-list"></i> Manage Delivery
