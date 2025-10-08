@@ -24,8 +24,10 @@ use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\additional\Additional;
 use App\Models\customer\Customer;
+use App\Models\hrm\Hrm;
 use App\Models\orders\Orders;
 use App\Repositories\Focus\orders\OrdersRepository;
+use Carbon\Carbon;
 
 /**
  * OrdersController
@@ -68,7 +70,8 @@ class OrdersController extends Controller
         $last_tid = Orders::max('tid');
         $customers = Customer::all();
         $additionals = Additional::all();
-        return view('focus.customer_orders.create', compact('last_tid','customers','additionals'));
+        $users = Hrm::all();
+        return view('focus.customer_orders.create', compact('last_tid','customers','additionals','users'));
     }
 
     /**
@@ -79,11 +82,25 @@ class OrdersController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all());
         //Input received from the request
-        $input = $request->except(['_token', 'ins']);
-        $input['ins'] = auth()->user()->ins;
-        //Create the model using repository create method
-        $this->repository->create($input);
+        $data = $request->only([
+            'tid','customer_id','branch_id','order_type','description',
+            'frequency','subtotal','total','tax','taxable',
+            'start_month','end_month','driver_id','route'
+        ]);
+        // $data['expected_time'] = Carbon::parse($data['expected_time'])->format('H:i:s');
+        $days = $request->only(['delivery_days','expected_time']);
+        $data_items = $request->only(['product_id','qty','type','rate','itemtax','amount']);
+        $data_items = modify_array($data_items);
+        $days = modify_array($days);
+        try {
+            //Create the model using repository create method
+            $this->repository->create(compact('data','data_items','days'));
+        } catch (\Throwable $th) {dd($th);
+            //throw $th
+            return errorHandler('Error Creating Customer Order',$th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.customer_orders.index'), ['flash_success' => 'Order Created Successfully!!']);
     }
@@ -95,12 +112,13 @@ class OrdersController extends Controller
      * @param EditDepartmentRequestNamespace $request
      * @return \App\Http\Responses\Focus\department\EditResponse
      */
-    public function edit(Orders $order)
+    public function edit(Orders $customer_order)
     {
         $last_tid = Orders::max('tid');
         $customers = Customer::all();
         $additionals = Additional::all();
-        return view('focus.customer_orders.edit', compact('order','last_tid','customers','additionals'));
+        $users = Hrm::all();
+        return view('focus.customer_orders.edit', compact('customer_order','last_tid','customers','additionals','users'));
     }
 
     /**
@@ -110,12 +128,26 @@ class OrdersController extends Controller
      * @param App\Models\department\Department $department
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function update(Request $request, Orders $order)
+    public function update(Request $request, $order_id)
     {
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($order, $input);
+        $order = Orders::find($order_id);
+        $data = $request->only([
+            'customer_id','branch_id','order_type','description',
+            'frequency','subtotal','total','tax','taxable',
+            'start_month','end_month','driver_id','route'
+        ]);
+        // dd($data);
+        // $data['expected_time'] = Carbon::parse($data['expected_time'])->format('H:i:s');
+        $data_items = $request->only(['product_id','qty','type','rate','itemtax','amount','id']);
+        $data_items = modify_array($data_items);
+        $days = $request->only(['delivery_days','expected_time','d_id']);
+        $days = modify_array($days);
+        try {
+            //Update the model using repository update method
+            $this->repository->update($order, compact('data','data_items','days'));
+        } catch (\Throwable $th) {dd($th);
+             return errorHandler('Error Updating Customer Order',$th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.customer_orders.index'), ['flash_success' => 'Order Updated Successfully!!']);
     }

@@ -3,17 +3,12 @@
 namespace App\Models\orders;
 
 use App\Models\ModelTrait;
+use App\Models\orders\Traits\OrdersItemRelationship;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\orders\Traits\OrdersAttribute;
-use App\Models\orders\Traits\OrdersRelationship;
 
-class Orders extends Model
+class OrdersItem extends Model
 {
-    use ModelTrait,
-        OrdersAttribute,
-        OrdersRelationship {
-        // OrdersAttribute::getEditButtonAttribute insteadof ModelTrait;
-    }
+    use OrdersItemRelationship;
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -24,7 +19,7 @@ class Orders extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'customer_orders';
+    protected $table = 'customer_order_items';
 
     /**
      * Mass Assignable fields of model
@@ -67,18 +62,6 @@ class Orders extends Model
     protected static function boot()
     {
         parent::boot();
-
-        static::creating(function ($instance) {
-            $instance->user_id = auth()->user()->id;
-            $instance->ins = auth()->user()->ins;
-            return $instance;
-        });
-
-        static::addGlobalScope('ins', function ($builder) {
-            if (isset(auth()->user()->ins)) {
-                $builder->where('ins', auth()->user()->ins);
-            }
-        });
     }
 
 }
