@@ -502,6 +502,25 @@
                             </ul>
                         </li>
                         @endauth
+                        {{-- Target Zones --}}
+                        @permission('manage-branch')
+                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a
+                                    class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i
+                                        class="fa fa-truck"></i></i> Target Zones Management</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('biller.target_zones.index') }}"
+                                       data-toggle="dropdown"><i class="ft-list"></i> Manage Target Zones
+                                    </a>
+                                </li>
+                                @permission('create-branch')
+                                <li><a class="dropdown-item" href="{{ route('biller.target_zones.create') }}"
+                                       data-toggle="dropdown"><i class="fa fa-plus-circle"></i>Create Target Zones
+                                    </a>
+                                </li>
+                                @endauth
+                            </ul>
+                        </li>
+                        @endauth 
 
                         <!-- AI Agent Leads -->
                         @if (access()->allow('crm'))                            
