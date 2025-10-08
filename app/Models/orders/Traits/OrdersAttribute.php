@@ -18,9 +18,9 @@ trait OrdersAttribute
     public function getActionButtonsAttribute()
     {
         return '
-         '.$this->getViewButtonAttribute("manage-order", "biller.orders.show").'
-                '.$this->getEditButtonAttribute("edit-order", "biller.orders.edit").'
-                '.$this->getDeleteButtonAttribute("delete-order", "biller.orders.destroy").'
+         '.$this->getViewButtonAttribute("manage-department", "biller.customer_orders.show").'
+                '.$this->getEditButtonAttribute("edit-department", "biller.customer_orders.edit").'
+                '.$this->getDeleteButtonAttribute("delete-department", "biller.customer_orders.destroy").'
                 ';
     }
 }

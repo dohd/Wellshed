@@ -41,6 +41,7 @@ class Kernel extends ConsoleKernel
         Commands\UpdateLeaveAttendance::class,
         Commands\SendDailyJSON::class,
         Commands\GenerateDbmJson::class,
+        Commands\CreateDeliverySchedule::class,
     ];
 
     /**
@@ -76,6 +77,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('attendance:update-on-leave')->twiceDaily(12, 01);
         $schedule->command('json:dbm-email')->dailyAt('21:00');
         $schedule->command('json:dbm-generate')->dailyAt('20:00');
+        $schedule->command('create:delivery_schedule')->everyMinute();
         // $schedule->command('send:monthly-customer-statements')->monthly();
 
         $schedule->call(function () {

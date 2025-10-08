@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Models\orders;
+namespace App\Models\delivery_frequency;
 
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\orders\Traits\OrdersAttribute;
-use App\Models\orders\Traits\OrdersRelationship;
+use App\Models\delivery_frequency\Traits\DeliveryFreqAttribute;
+use App\Models\delivery_frequency\Traits\DeliveryFreqRelationship;
 
-class Orders extends Model
+class DeliveryFreq extends Model
 {
     use ModelTrait,
-        OrdersAttribute,
-        OrdersRelationship {
-        // OrdersAttribute::getEditButtonAttribute insteadof ModelTrait;
+        DeliveryFreqAttribute,
+        DeliveryFreqRelationship {
+        // DeliveryFreqAttribute::getEditButtonAttribute insteadof ModelTrait;
     }
 
     /**
@@ -24,7 +24,7 @@ class Orders extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'customer_orders';
+    protected $table = 'delivery_frequencies';
 
     /**
      * Mass Assignable fields of model

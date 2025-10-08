@@ -185,6 +185,18 @@ Route::group(['namespace' => 'department'], function () {
     //For Datatable
     Route::post('departments/get', 'DepartmentsTableController')->name('departments.get');
 });
+// Route::group(['namespace' => 'delivery'], function () {
+//     Route::resource('deliveries', 'DeliveriesController');
+//     //For Datatable
+//     Route::post('deliveries/get', 'DeliveriesTableController')->name('deliveries.get');
+// });
+Route::group(['namespace' => 'delivery_schedule'], function () {
+    Route::post('delivery_schedules/get_schedule_items', 'DeliverySchedulesController@get_schedule_items')->name('delivery_schedules.get_schedule_items');
+    Route::post('delivery_schedules/get_schedules', 'DeliverySchedulesController@get_schedules')->name('delivery_schedules.get_schedules');
+    Route::resource('delivery_schedules', 'DeliverySchedulesController');
+    //For Datatable
+    Route::post('delivery_schedules/get', 'DeliverySchedulesTableController')->name('delivery_schedules.get');
+});
 Route::group(['namespace' => 'commission'], function () {
     Route::post('commissions/get_all_commission', 'CommissionsController@get_all_commission')->name('commissions.get_all_commission');
     Route::get('commissions/all_commission', 'CommissionsController@all_commission')->name('commissions.all_commission');

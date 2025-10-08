@@ -40,7 +40,7 @@
                                             <p>Order No</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{$orders['tid']}}</p>
+                                            <p>{{gen4tid('ORD-',$orders['tid'])}}</p>
                                         </div>
                                     </div>
                                     <div class="row">

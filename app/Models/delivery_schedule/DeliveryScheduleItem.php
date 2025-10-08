@@ -1,19 +1,15 @@
 <?php
 
-namespace App\Models\orders;
+namespace App\Models\delivery_schedule;
 
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\orders\Traits\OrdersAttribute;
-use App\Models\orders\Traits\OrdersRelationship;
 
-class Orders extends Model
+use App\Models\delivery_schedule\Traits\DeliveryScheduleItemRelationship;
+
+class DeliveryScheduleItem extends Model
 {
-    use ModelTrait,
-        OrdersAttribute,
-        OrdersRelationship {
-        // OrdersAttribute::getEditButtonAttribute insteadof ModelTrait;
-    }
+    use DeliveryScheduleItemRelationship;
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -24,7 +20,7 @@ class Orders extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'customer_orders';
+    protected $table = 'delivery_schedule_items';
 
     /**
      * Mass Assignable fields of model
@@ -67,12 +63,6 @@ class Orders extends Model
     protected static function boot()
     {
         parent::boot();
-
-        static::creating(function ($instance) {
-            $instance->user_id = auth()->user()->id;
-            $instance->ins = auth()->user()->ins;
-            return $instance;
-        });
 
         static::addGlobalScope('ins', function ($builder) {
             if (isset(auth()->user()->ins)) {

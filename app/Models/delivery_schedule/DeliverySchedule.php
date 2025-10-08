@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Models\orders;
+namespace App\Models\delivery_schedule;
 
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\orders\Traits\OrdersAttribute;
-use App\Models\orders\Traits\OrdersRelationship;
+use App\Models\delivery_schedule\Traits\DeliveryScheduleAttribute;
+use App\Models\delivery_schedule\Traits\DeliveryScheduleRelationship;
 
-class Orders extends Model
+class DeliverySchedule extends Model
 {
     use ModelTrait,
-        OrdersAttribute,
-        OrdersRelationship {
-        // OrdersAttribute::getEditButtonAttribute insteadof ModelTrait;
+        DeliveryScheduleAttribute,
+        DeliveryScheduleRelationship {
+        // DeliveryScheduleAttribute::getEditButtonAttribute insteadof ModelTrait;
     }
 
     /**
@@ -24,7 +24,7 @@ class Orders extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'customer_orders';
+    protected $table = 'delivery_schedules';
 
     /**
      * Mass Assignable fields of model
@@ -68,11 +68,11 @@ class Orders extends Model
     {
         parent::boot();
 
-        static::creating(function ($instance) {
-            $instance->user_id = auth()->user()->id;
-            $instance->ins = auth()->user()->ins;
-            return $instance;
-        });
+        // static::creating(function ($instance) {
+        //     $instance->user_id = auth()->user()->id;
+        //     $instance->ins = auth()->user()->ins;
+        //     return $instance;
+        // });
 
         static::addGlobalScope('ins', function ($builder) {
             if (isset(auth()->user()->ins)) {
