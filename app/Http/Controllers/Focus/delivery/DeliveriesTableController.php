@@ -50,7 +50,7 @@ class DeliveriesTableController extends Controller
                 return optional(optional($delivery->order)->customer)->company ?? '';
             })
             ->addColumn('delivery_schedule', function ($delivery) {
-                return $delivery->delivery_schedule ? gen4tid('DS-',$delivery->delivery_schedule->id) :'';
+                return $delivery->delivery_schedule ? gen4tid('DS-',$delivery->delivery_schedule->tid) :'';
             })
             ->addColumn('date', function ($delivery) {
                 return dateFormat($delivery->date);

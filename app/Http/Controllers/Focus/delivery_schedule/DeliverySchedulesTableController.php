@@ -40,6 +40,9 @@ class DeliverySchedulesTableController extends Controller
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('tid', function ($delivery_schedule) {
+                 return gen4tid('DS-',$delivery_schedule->tid);
+            })
             ->addColumn('order', function ($delivery_schedule) {
                  return $delivery_schedule->order ? gen4tid('ORD-',$delivery_schedule->order->tid) : '';
             })

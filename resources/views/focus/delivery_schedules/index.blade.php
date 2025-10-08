@@ -37,6 +37,7 @@
                                         <thead>
                                         <tr>
                                             <th>#</th>
+                                            <th>Schedule No.</th>
                                             <th>Order</th>
                                             <th>Customer</th>
                                             <th>Delivery Days</th>
@@ -96,6 +97,7 @@
                 },
                 columns: [
                     {data: 'DT_Row_Index', name: 'id'},
+                    {data: 'tid', name: 'tid'},
                     {data: 'order', name: 'order'},
                     {data: 'customer', name: 'customer'},
                     {data: 'delivery_days', name: 'delivery_days'},

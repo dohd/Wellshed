@@ -95,7 +95,7 @@
                                         @foreach ($orders->schedules as $i => $item)
                                             <tr>
                                                 <td>{{ $i + 1 }}</td>
-                                                <td>{{ gen4tid('DS-',$item->id) }}</td>
+                                                <td>{{ gen4tid('DS-',$item->tid) }}</td>
                                                 <td>{{ $item->delivery_frequency->delivery_days ?? '' }}</td>
                                                 <td>{{ $item->delivery_date }}</td>
                                                 <td>{{ $item->status }}</td>
