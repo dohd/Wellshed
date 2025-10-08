@@ -24,7 +24,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="row no-gutters">
-                            <div class="col-4">
+                            {{-- <div class="col-4">
                                 <div class='form-group'>
                                     {{ Form::label('accounts_receivable', 'A/R Account',['class' => 'col-lg-12 control-label']) }}
                                     <div class='col-lg-12'>
@@ -38,7 +38,7 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
                             <div class="col-8">
                                 <div class='form-group'>
                                     {{ Form::label('company', 'Company Name / Client Name',['class' => 'col-lg-6 control-label']) }}

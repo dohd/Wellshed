@@ -127,10 +127,10 @@ class CustomerRepository extends BaseRepository
         $input['open_balance'] = numberClean($input['open_balance']);
         $input['open_balance_date'] = date_for_database($input['open_balance_date']);  
         $input['dob'] = date_for_database($input['dob']);  
-        if ($input['ar_account_id']) {
-            $account = Account::find($input['ar_account_id']);
-            if ($account) $input['currency_id'] = $account->currency_id;
-        }
+        // if ($input['ar_account_id']) {
+        //     $account = Account::find($input['ar_account_id']);
+        //     if ($account) $input['currency_id'] = $account->currency_id;
+        // }
         $customer = Customer::create($input);
 
         // create branches
@@ -223,10 +223,10 @@ class CustomerRepository extends BaseRepository
         DB::beginTransaction();
 
         // update customer
-        if ($input['ar_account_id']) {
-            $account = Account::find($input['ar_account_id']);
-            if ($account) $input['currency_id'] = $account->currency_id;
-        }
+        // if ($input['ar_account_id']) {
+        //     $account = Account::find($input['ar_account_id']);
+        //     if ($account) $input['currency_id'] = $account->currency_id;
+        // }
         $result = $customer->update($input);
 
         /**accounting */   

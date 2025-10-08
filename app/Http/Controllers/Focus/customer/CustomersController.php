@@ -74,7 +74,7 @@ class CustomersController extends Controller
     public function store(CreateCustomerRequest $request)
     {
         $request->validate([
-            'ar_account_id' => 'required',
+            // 'ar_account_id' => 'required',
             'company' => 'required',
             'password' => request('password') ? 'required_with:user_email | min:7' : '',
             'password_confirmation' => 'required_with:password | same:password'
@@ -119,7 +119,7 @@ class CustomersController extends Controller
     public function update(EditCustomerRequest $request, Customer $customer)
     {
         $request->validate([
-            'ar_account_id' => 'required',
+            // 'ar_account_id' => 'required',
             'company' => 'required',
             'password' => request('password') ? 'required_with:user_email | min:7' : '',
             'password_confirmation' => 'required_with:password | same:password'
