@@ -69,8 +69,6 @@
                 <div class="navbar-container content">
                     <div class="collapse navbar-collapse" id="navbar-mobile">
                         <ul class="nav navbar-nav mr-auto float-left">
-
-
                             <li class="nav-item">
                                 <a href="{{route('biller.index')}}" class="btn btn-blue-grey round mt_6 "
                                    title="{{trans('dashboard.dashboard')}}">&nbsp;<i class="ficon ft-home"></i></a></li>&nbsp;
@@ -173,6 +171,7 @@
             </div>
         </nav>
         <!-- END: Header-->
+        
         <div id="c_body"></div>
         <div>
             @yield('content')

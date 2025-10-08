@@ -233,12 +233,7 @@
                         </li>
                     @endauth
 
-                    @permission('pos')
-                    <li class="nav-item ">
-                        <a href="{{ route('biller.invoices.pos') }}" class="btn  btn-success round mt_6">
-                            <i class="ficon ft-shopping-cart"></i>{{ trans('pos.pos') }} </a>
-                    </li>
-                    @endauth
+                    
                     <li class="nav-item d-none d-md-block"><a class="nav-link nav-link-expand" href="#"><i
                                     class="ficon ft-maximize"></i></a></li>
                     <li class="dropdown">
@@ -334,6 +329,7 @@
     </div>
 </nav>
 <!-- END: Header-->
+
 <!-- BEGIN: Main Menu-->
 <div class="header-navbar navbar-expand-sm navbar navbar-horizontal navbar-fixed navbar-light navbar-without-dd-arrow navbar-shadow menu-border"
      role="navigation" data-menu="menu-wrapper">
@@ -341,10 +337,7 @@
     <div class="navbar-container main-menu-content" data-menu="menu-container">
         <ul class="nav navbar-nav" id="main-menu-navigation" data-menu="menu-navigation">
             <li class="dropdown nav-item">
-                <a 
-                    class="nav-link {{ strpos(Route::currentRouteName(), 'biller.dashboard') === 0 ? 'active' : '' }}"
-                    href="{{ route('biller.dashboard') }}"
-                >
+                <a href="{{ route('biller.dashboard') }}" class="nav-link {{ strpos(Route::currentRouteName(), 'biller.dashboard') === 0 ? 'active' : '' }}">
                     <i class="ft-home"></i><span>{{ trans('navs.frontend.dashboard') }}</span>
                 </a>                            
             </li>
@@ -403,27 +396,7 @@
                              </li>
                             </ul>
                         </li>
-                        @endauth
-                
-                        <!-- Client branch -->
-                        @permission('manage-branch')
-                        <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a
-                                    class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i
-                                        class="ft-users"></i></i> Branch / Site Management</a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('biller.branches.index') }}"
-                                       data-toggle="dropdown"><i class="ft-list"></i> Manage Branches / Sites
-                                    </a>
-                                </li>
-                                @permission('create-branch')
-                                <li><a class="dropdown-item" href="{{ route('biller.branches.create') }}"
-                                       data-toggle="dropdown"><i class="fa fa-plus-circle"></i>Create Branch / Site
-                                    </a>
-                                </li>
-                                @endauth
-                            </ul>
-                        </li>
-                        @endauth      
+                        @endauth   
                       
                         <!-- Customer orders -->
                         @permission('manage-branch')
@@ -503,7 +476,8 @@
                         @endif
                     </ul>
                 </li>
-            @endif       
+            @endif   
+
             {{-- inventory module --}}
             @if(access()->allow('stock'))
                 <li class="dropdown nav-item" data-menu="dropdown"><a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown"><i class="ft-layers"></i><span>Inventory</span></a>
@@ -610,8 +584,7 @@
                         @endauth
                     </ul>
                 </li>
-            @endif
-        
+            @endif        
         
             {{-- human resource module --}}
             @if (access()->allow('hrm'))
@@ -956,9 +929,10 @@
 
             {{-- data & reports module --}}
             @permission('reports-statements')
-            <li class="dropdown mega-dropdown nav-item" data-menu="megamenu"><a class="dropdown-toggle nav-link"
-                                                                                href="#" data-toggle="dropdown"><i
-                            class="icon-pie-chart"></i><span>{{ trans('features.reports') }}</span></a>
+            <li class="dropdown mega-dropdown nav-item" data-menu="megamenu">
+                <a class="dropdown-toggle nav-link" href="#" data-toggle="dropdown">
+                    <i class="icon-pie-chart"></i><span>{{ trans('features.reports') }}</span>
+                </a>                            
                 <ul class="mega-dropdown-menu dropdown-menu row">
                     {{-- statements --}}
                     <li class="col-md-3" data-mega-col="col-md-3">
