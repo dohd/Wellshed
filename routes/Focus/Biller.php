@@ -185,6 +185,11 @@ Route::group(['namespace' => 'department'], function () {
     //For Datatable
     Route::post('departments/get', 'DepartmentsTableController')->name('departments.get');
 });
+Route::group(['namespace' => 'target_zone'], function () {
+    Route::resource('target_zones', 'TargetZonesController');
+    //For Datatable
+    Route::post('target_zones/get', 'TargetZonesTableController')->name('target_zones.get');
+});
 Route::group(['namespace' => 'delivery'], function () {
     Route::resource('deliveries', 'DeliveriesController');
     //For Datatable
