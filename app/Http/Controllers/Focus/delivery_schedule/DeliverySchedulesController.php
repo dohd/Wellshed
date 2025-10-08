@@ -130,7 +130,7 @@ class DeliverySchedulesController extends Controller
     public function get_schedule_items(Request $request)
     {
         $delivery_schedule = DeliverySchedule::where('id',$request->delivery_schedule_id)->first();
-        $items = $delivery_schedule->items()->get();
+        $items = $delivery_schedule->items()->with('product')->get();
         return response()->json($items);
     }
 

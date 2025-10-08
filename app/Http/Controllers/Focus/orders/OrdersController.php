@@ -174,9 +174,9 @@ class OrdersController extends Controller
      * @param App\Models\department\Department $department
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(Orders $orders)
+    public function show($order_id)
     {
-
+        $orders = Orders::find($order_id);
         //returning with successfull message
         return new ViewResponse('focus.customer_orders.view', compact('orders'));
     }
