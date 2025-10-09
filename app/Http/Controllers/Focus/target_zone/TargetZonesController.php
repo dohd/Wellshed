@@ -101,12 +101,21 @@ class TargetZonesController extends Controller
      */
     public function update(Request $request, TargetZone $target_zone)
     {
+        // dd($request->all());
         //Input received from the request
-        $input = $request->except(['_token', 'ins']);
-        //Update the model using repository update method
-        $this->repository->update($target_zone, $input);
+        $data = $request->only(['name','description']);
+        $data_items = $request->only(['sub_zone_name','id']);
+        $data_items = modify_array($data_items);
+        try {
+            //Create the model using repository create method
+           //Update the model using repository update method
+        $this->repository->update($target_zone, compact('data','data_items'));
+        } catch (\Throwable $th) {
+            //throw $th;
+            return errorHandler('Error Creating Target Zone',$th);
+        }
         //return with successfull message
-        return new RedirectResponse(route('biller.target_zones.index'), ['flash_success' => trans('alerts.backend.target_zones.updated')]);
+        return new RedirectResponse(route('biller.target_zones.index'), ['flash_success' => 'Target Zone Updated Successfully!!']);
     }
 
     /**
@@ -120,7 +129,7 @@ class TargetZonesController extends Controller
         //Calling the delete method on repository
         $this->repository->delete($target_zone);
         //returning with successfull message
-        return new RedirectResponse(route('biller.target_zones.index'), ['flash_success' => trans('alerts.backend.target_zones.deleted')]);
+        return new RedirectResponse(route('biller.target_zones.index'), ['flash_success' => 'Target Zone Deleted Successfully!!']);
     }
 
     /**

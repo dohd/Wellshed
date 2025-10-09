@@ -120,7 +120,7 @@ class DeliverySchedulesController extends Controller
 
     public function get_schedules(Request $request)
     {
-        $delivery_schedules = DeliverySchedule::where('order_id',$request->order_id)->get();
+        $delivery_schedules = DeliverySchedule::where('order_id',$request->order_id)->where('delivery_date',date('Y-m-d'))->get();
         $delivery_schedules->map(function($v){
             $v->name = dateFormat($v->delivery_date).'-'.@$v->delivery_frequency->delivery_days;
             return $v;
@@ -131,6 +131,7 @@ class DeliverySchedulesController extends Controller
     {
         $delivery_schedule = DeliverySchedule::where('id',$request->delivery_schedule_id)->first();
         $items = $delivery_schedule->items()->with('product')->get();
+        
         return response()->json($items);
     }
 

@@ -67,13 +67,26 @@
                     'X-CSRF-TOKEN': "{{ csrf_token() }}"
                 }
             },
+            orderSelect: {
+                allowClear: true,
+                ajax: {
+                    url: "{{ route('biller.customer_orders.select') }}",
+                    dataType: 'json',
+                    type: 'POST',
+                    data: ({term}) => ({search: term, customer_id: $("#customer").val()}),
+                    processResults: data => {
+                        return { results: data.map(v => ({text: v.name, id: v.id})) }
+                    },
+                }
+            },
         };
         const Index = {
             init() {
                 $.ajaxSetup(config.ajax);
-                $('#order').select2({
+                $('#customer').select2({
                     allowClear: true
-                });
+                }).change(Index.customerChange);
+                $('#order').select2(config.orderSelect);
                 $('#delivery_schedule').select2({
                     allowClear: true
                 });
@@ -82,6 +95,12 @@
                 });
                 $('#order').change(Index.orderChange);
                 $('#delivery_schedule').change(Index.deliveryScheduleChange);
+            },
+            customerChange(){
+                var select = $('#order');
+                // Clear any existing options
+                select.empty();
+                $('#order').select2(config.orderSelect).change();
             },
             deliveryScheduleChange(){
                 let delivery_schedule_id = $(this).val();

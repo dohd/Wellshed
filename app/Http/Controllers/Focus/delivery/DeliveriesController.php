@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Models\customer\Customer;
 use App\Models\delivery\Delivery;
 use App\Models\delivery\DeliveryItem;
 use App\Models\hrm\Hrm;
@@ -52,9 +53,10 @@ class DeliveriesController extends Controller
      */
     public function create()
     {
+        $customers = Customer::all();
         $orders = Orders::whereIn('status',['confirmed','started'])->get();
         $users = Hrm::all();
-        return view('focus.deliveries.create', compact('orders','users'));
+        return view('focus.deliveries.create', compact('orders','users','customers'));
     }
 
     /**
@@ -67,13 +69,13 @@ class DeliveriesController extends Controller
     {
         // dd($request->all());
         //Input received from the request
-        $data = $request->only(['order_id','delivery_schedule_id','date','driver_id','description']);
+        $data = $request->only(['customer_id','order_id','delivery_schedule_id','date','driver_id','description']);
         $data_items = $request->only('product_id','planned_qty','delivered_qty','returned_qty');
         $data_items = modify_array($data_items);
         $data_items = array_filter($data_items, fn($v) => $v['product_id']);
         try {
             $this->store_data(compact('data','data_items'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $th) {dd($th);
             //throw $th;
             return errorHandler('Error Creating Delivery', $th);
         }
@@ -104,6 +106,12 @@ class DeliveriesController extends Controller
         DeliveryItem::insert($data_items);
         if ($result) {
             DB::commit();
+            $delivery_schedule = $result->delivery_schedule;
+            if($delivery_schedule->status == 'scheduled')
+            {
+                $delivery_schedule->status = 'delivered';
+                $delivery_schedule->update();
+            }
             return $result;
         }
     }
@@ -118,7 +126,8 @@ class DeliveriesController extends Controller
     {
         $orders = Orders::whereIn('status',['confirmed','started'])->get();
         $users = Hrm::all();
-        return view('focus.deliveries.edit', compact('delivery','orders','users'));
+        $customers = Customer::all();
+        return view('focus.deliveries.edit', compact('delivery','orders','users','customers'));
     }
 
     /**
@@ -130,10 +139,49 @@ class DeliveriesController extends Controller
      */
     public function update(Request $request, Delivery $delivery)
     {
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
+        $data = $request->only(['customer_id','order_id','delivery_schedule_id','date','driver_id','description']);
+        $data_items = $request->only('product_id','planned_qty','delivered_qty','returned_qty','id');
+        $data_items = modify_array($data_items);
+        $data_items = array_filter($data_items, fn($v) => $v['product_id']);
+        try {
+            $this->update_data($delivery, compact('data','data_items'));
+        } catch (\Throwable $th) {dd($th);
+            //throw $th;
+            return errorHandler('Error Updating Delivery', $th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.deliveries.index'), ['flash_success' => 'Delivery Frequency Updated Successfully!!']);
+    }
+
+    public function update_data($delivery, array $input)
+    {
+        DB::beginTransaction();
+        $data = $input['data'];
+        foreach ($data as $key => $val) {
+            if(in_array($key,['date']))
+                $data[$key] = date_for_database($val);
+        }
+        $delivery->update($data);
+        $data_items = $input['data_items'];
+        $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
+        $delivery->items()->whereNotIn('id', $item_ids)->delete();
+
+        // create or update items
+        foreach($data_items as $item) {
+            foreach ($item as $key => $val) {
+                if (in_array($key, ['product_price', 'product_subtotal', 'buy_price', 'estimate_qty']))
+                    $item[$key] = floatval(str_replace(',', '', $val));
+            }
+            $delivery_item = DeliveryItem::firstOrNew(['id' => $item['id']]);
+            $delivery_item->fill(array_replace($item, ['delivery_id' => $delivery['id'], 'ins' => $delivery['ins']]));
+            if (!$delivery_item->id) unset($delivery_item->id);
+            $delivery_item->save();
+        }
+
+        if($delivery){
+            DB::commit();
+            return true;
+        }
     }
 
     /**

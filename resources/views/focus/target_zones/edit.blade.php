@@ -57,3 +57,37 @@
         </div>
     </div>
 @endsection
+@section('extra-scripts')
+    {{ Html::script('focus/js/select2.min.js') }}
+    <script>
+        const config = {
+            ajax: {
+                headers: {
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                }
+            },
+        };
+
+
+        const Index = {
+            init() {
+                $.ajaxSetup(config.ajax);
+                let docRowId = $("#daysTbl tbody tr").length;
+                const docRow = $('#daysTbl tbody tr').html();
+                $('#daysTbl tbody tr:first').remove(); 
+                $('#addDoc').click(function() {
+                    docRowId++;
+                    let html = docRow.replace(/-0/g, '-'+docRowId);
+                    $('#daysTbl tbody').append('<tr>' + html + '</tr>');
+                });
+                // remove schedule row
+                $('#daysTbl').on('click', '.remove', function() {
+                    $(this).parents('tr').remove();
+                    docRowId--;
+                });
+            },
+        };
+
+        $(() => Index.init());
+    </script>
+@endsection

@@ -43,6 +43,7 @@ Route::group(['namespace' => 'customer_enrollment'], function () {
 });
 
 Route::group(['namespace' => 'orders'], function () {
+    Route::post('customer_orders/select', 'OrdersController@select')->name('customer_orders.select');
     Route::resource('customer_orders', 'OrdersController');
     //For Datatable
     Route::post('customer_orders/get', 'OrdersTableController')->name('customer_orders.get');
