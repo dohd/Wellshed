@@ -157,7 +157,7 @@
                 });
 
                 $('#itemsTbl tbody tr:first').remove(); 
-                $('#daysTbl tbody tr:first').remove(); 
+                // $('#daysTbl tbody tr:first').remove(); 
                 $(document).on('input change', '#itemsTbl .qty, #itemsTbl .rate, #itemsTbl .rowtax', function () {
                     Index.calculateAllTotals();
                 });
@@ -167,8 +167,9 @@
                     Index.calculateAllTotals();
                 });
 
-                let docRowId = 0;
+                let docRowId = $("#daysTbl tbody tr").length;
                 const docRow = $('#daysTbl tbody tr').html();
+                $('#daysTbl tbody tr:first').remove(); 
                 $('#addDoc').click(function() {
                     docRowId++;
                     let html = docRow.replace(/-0/g, '-'+docRowId);

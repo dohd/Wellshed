@@ -110,7 +110,7 @@
                                 </select>
                             </td>
                             <td>
-                                {{ Form::time('expected_time[]', null, ['class' => 'form-control', 'placeholder' => 'Expected Delivery Time']) }}
+                                {{ Form::time('expected_time[]', null, ['class' => 'form-control', 'placeholder' => 'Expected Delivery Time','id' => 'expected_time-0']) }}
                             </td>
                             <td>
                                 <button type="button" class="btn btn-outline-light btn-sm mt-1 remove">
@@ -120,13 +120,13 @@
                         </tr>
                         @isset($customer_order)
                             @if (count($customer_order->deliver_days) > 0)
-                                @foreach ($customer_order->deliver_days as $item)
+                                @foreach ($customer_order->deliver_days as $i => $item)
                                     <tr>
                                         @php
                                             $days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Sarturday','Sunday'];
                                         @endphp
                                         <td>
-                                            <select name="delivery_days[]" id="delivery_days" class="form-control">
+                                            <select name="delivery_days[]" id="delivery_days-{{ $i+1 }}" class="form-control">
                                                 <option value="">Select a day</option>
                                                 @foreach($days as $day)
                                                     <option value="{{ $day }}" {{ $item->delivery_days == $day ? 'selected' : '' }}>{{ $day }}</option>
@@ -134,7 +134,11 @@
                                             </select>
                                         </td>
                                         <td>
-                                            {{ Form::time('expected_time[]', $item->expected_time, ['class' => 'form-control', 'placeholder' => 'Expected Delivery Time']) }}
+                                            {{ Form::time('expected_time[]', $item->expected_time, [
+                                                'class' => 'form-control',
+                                                'placeholder' => 'Expected Delivery Time',
+                                                'id' => 'expected_time-' . ($i + 1)
+                                            ]) }}
                                         </td>
                                         <input type="hidden" name="d_id[]" value="{{ $item->id }}" id="">
                                         <td>

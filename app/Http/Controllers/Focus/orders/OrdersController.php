@@ -181,4 +181,22 @@ class OrdersController extends Controller
         return new ViewResponse('focus.customer_orders.view', compact('orders'));
     }
 
+    public function select(Request $request)
+    {
+        $q = $request->search;
+        $customer_id = $request->customer_id;
+
+        $orders = Orders::whereIn('status',['confirmed','started'])->where('customer_id', $customer_id)
+            ->where('description', 'LIKE', '%'.$q.'%')
+            ->whereHas('schedules', function($q){
+                $q->whereDate('delivery_date',date('Y-m-d'));
+            })
+            ->limit(6)->get();
+        $orders->map(function($v){
+            $v->name = gen4tid('ORD-',$v->tid). '-'.$v->description;
+        });
+            
+        return response()->json($orders);
+    }
+
 }

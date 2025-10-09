@@ -50,6 +50,7 @@ class OrdersRepository extends BaseRepository
             if(in_array($key,['total','tax','taxable','subtotal']))
                 $data[$key] = numberClean($val);
         }
+        $data['status'] = 'confirmed';
         $result = Orders::create($data);
 
         //Line items

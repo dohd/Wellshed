@@ -16,6 +16,7 @@ class CreateDeliveriesTable extends Migration
         Schema::create('deliveries', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('tid');
+            $table->unsignedBigInteger('customer_id');
             $table->unsignedBigInteger('order_id');
             $table->unsignedBigInteger('delivery_schedule_id');
             $table->longText('description')->nullable();

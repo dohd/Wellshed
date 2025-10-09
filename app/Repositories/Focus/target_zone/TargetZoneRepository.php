@@ -70,8 +70,25 @@ class TargetZoneRepository extends BaseRepository
      */
     public function update($target_zone, array $input)
     {
-    	if ($target_zone->update($input))
+    	DB::beginTransaction();
+        $data = $input['data'];
+        $result = $target_zone->update($data);
+
+        $data_items = $input['data_items'];
+        $item_ids = array_map(function ($v) { return $v['id']; }, $data_items);
+        $target_zone->items()->whereNotIn('id', $item_ids)->delete();
+
+        // create or update items
+        foreach($data_items as $item) {
+            $target_zone_item = TargetZoneItem::firstOrNew(['id' => $item['id']]);
+            $target_zone_item->fill(array_replace($item, ['target_zone_id' => $target_zone['id'], 'ins' => $target_zone['ins']]));
+            if (!$target_zone_item->id) unset($target_zone_item->id);
+            $target_zone_item->save();
+        }
+        if ($result) {
+            DB::commit();
             return true;
+        }
 
         throw new GeneralException(trans('exceptions.backend.target_zones.update_error'));
     }
@@ -84,6 +101,7 @@ class TargetZoneRepository extends BaseRepository
      */
     public function delete($target_zone)
     {
+        $target_zone->items()->delete();
         if ($target_zone->delete()) {
             return true;
         }

@@ -29,41 +29,22 @@
                                 <i class="fa fa-trash fa-lg text-danger"></i>
                             </button>
                         </td>
+                        <input type="hidden" name="id[]" id="id" value="0">
                     </tr>
-                    @isset($customer_order)
-                        @if (count($customer_order->deliver_days) > 0)
-                            @foreach ($customer_order->deliver_days as $item)
-                                <tr>
-                                    @php
-                                        $days = [
-                                            'Monday',
-                                            'Tuesday',
-                                            'Wednesday',
-                                            'Thursday',
-                                            'Friday',
-                                            'Sarturday',
-                                            'Sunday',
-                                        ];
-                                    @endphp
+                    @isset($target_zone)
+                        @if (count($target_zone->items) > 0)
+                            @foreach ($target_zone->items as $i => $item)
+                               <tr>
                                     <td>
-                                        <select name="delivery_days[]" id="delivery_days" class="form-control">
-                                            <option value="">Select a day</option>
-                                            @foreach ($days as $day)
-                                                <option value="{{ $day }}"
-                                                    {{ $item->delivery_days == $day ? 'selected' : '' }}>{{ $day }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                    <input type="text" value="{{ $item->sub_zone_name }}" name="sub_zone_name[]" id="sub_zone_name-{{ $i }}" class="form-control">
                                     </td>
-                                    <td>
-                                        {{ Form::time('expected_time[]', $item->expected_time, ['class' => 'form-control', 'placeholder' => 'Expected Delivery Time']) }}
-                                    </td>
-                                    <input type="hidden" name="d_id[]" value="{{ $item->id }}" id="">
+                                
                                     <td>
                                         <button type="button" class="btn btn-outline-light btn-sm mt-1 remove">
                                             <i class="fa fa-trash fa-lg text-danger"></i>
                                         </button>
                                     </td>
+                                    <input type="hidden" name="id[]" id="id" value="{{ $item->id }}">
                                 </tr>
                             @endforeach
                         @endif
