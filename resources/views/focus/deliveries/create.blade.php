@@ -73,13 +73,32 @@
                     url: "{{ route('biller.customer_orders.select') }}",
                     dataType: 'json',
                     type: 'POST',
-                    data: ({term}) => ({search: term, customer_id: $("#customer").val()}),
+                    data: ({
+                        term
+                    }) => ({
+                        search: term,
+                        customer_id: $("#customer").val()
+                    }),
                     processResults: data => {
-                        return { results: data.map(v => ({text: v.name, id: v.id})) }
+                        return {
+                            results: data.map(v => ({
+                                text: v.name,
+                                id: v.id,
+                                driver_id: v.driver_id
+                            }))
+                        }
                     },
-                }
+                },
+                templateSelection: formatOrderSelection
             },
         };
+        function formatOrderSelection(order) {
+            if (!order.id) return order.text;
+            // attach driver_id as a data attribute for later use
+            $('#order').attr('data-driver-id', order.driver_id || '');
+            return order.text;
+        }
+
         const Index = {
             init() {
                 $.ajaxSetup(config.ajax);
@@ -100,7 +119,7 @@
                 var select = $('#order');
                 // Clear any existing options
                 select.empty();
-                $('#order').select2(config.orderSelect).change();
+                $('#order').select2(config.orderSelect);
             },
             deliveryScheduleChange(){
                 let delivery_schedule_id = $(this).val();
@@ -113,13 +132,13 @@
                     },
                     success: function(data) {
                         console.log(data);
-                        data.forEach((v,i) => {
-                            $('#itemsTbl tbody').append(Index.productRow(v,i));
+                        data.forEach((v, i) => {
+                            $('#itemsTbl tbody').append(Index.productRow(v, i));
                         });
                     }
                 });
             },
-            productRow(v,i){
+            productRow(v, i) {
                 return `
                     <tr>
                         <td>
@@ -134,14 +153,25 @@
                                 placeholder="0.00" value="0"></td>
                         <td><input type="number" step="0.01" name="returned_qty[]" class="form-control returned_qty" id="returned_qty-0"
                                 placeholder="0.00" value="0"></td>
+                        <td><input type="number" step="0.01" name="remaining_qty[]" class="form-control remaining_qty" id="remaining_qty-0"
+                                placeholder="0.00" value="0" readonly></td>
                         
-                        <td><span class="amt">0</span></td>
+                        
+                        <input type="hidden" name="cost_of_bottle[]" class="cost_of_bottle" value="${v.cost_of_bottle}">
+                        <input type="hidden" name="cost_of_remaining[]" class="cost_of_remaining" value="0">
+                        <input type="hidden" name="cost_of_returned[]" class="cost_of_returned" value="0">
+                        <input type="hidden" name="amount[]" class="amount" value="0">
+                        <input type="hidden" name="rate[]" class="rate" value="${v.rate}">
+                        <input type="hidden" name="delivery_schedule_item_id[]" class="delivery_schedule_item_id" value="${v.delivery_schedule_item_id}">
                         <input type="hidden" name="id[]" value="0">
                     </tr>
                 `;
             },
             orderChange() {
                 let order_id = $(this).val();
+                let selectedData = $('#order').select2('data')[0];
+                $('#driver').val(selectedData.driver_id).trigger('change');
+
                 $.ajax({
                     url: "{{ route('biller.delivery_schedules.get_schedules') }}",
                     method: "POST",

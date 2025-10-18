@@ -21,11 +21,16 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Jobs\SendDeliveryNotificationJob;
 use App\Models\customer\Customer;
 use App\Models\delivery\Delivery;
 use App\Models\delivery\DeliveryItem;
 use App\Models\hrm\Hrm;
 use App\Models\orders\Orders;
+use App\Models\send_sms\SendSms;
+use App\Repositories\AdvantaSmsService;
+use App\Repositories\Focus\general\RosesmsRepository;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -70,7 +75,7 @@ class DeliveriesController extends Controller
         // dd($request->all());
         //Input received from the request
         $data = $request->only(['customer_id','order_id','delivery_schedule_id','date','driver_id','description']);
-        $data_items = $request->only('product_id','planned_qty','delivered_qty','returned_qty');
+        $data_items = $request->only('product_id','planned_qty','delivered_qty','returned_qty','remaining_qty','order_item_id','delivery_schedule_item_id');
         $data_items = modify_array($data_items);
         $data_items = array_filter($data_items, fn($v) => $v['product_id']);
         try {
@@ -107,10 +112,19 @@ class DeliveriesController extends Controller
         if ($result) {
             DB::commit();
             $delivery_schedule = $result->delivery_schedule;
-            if($delivery_schedule->status == 'scheduled')
+            foreach ($result->items as $item) {
+                $delivery_item = $item;
+                $delivery_schedule_item = $item->delivery_schedule_item;
+                $delivery_schedule_item->delivered_qty = $delivery_item->delivered_qty;
+                $delivery_schedule_item->returned_qty = $delivery_item->returned_qty;
+                $delivery_schedule_item->remaining_qty = $delivery_item->remaining_qty;
+                $delivery_schedule_item->update();
+            }
+            if($delivery_schedule->status == 'en_route')
             {
                 $delivery_schedule->status = 'delivered';
                 $delivery_schedule->update();
+                SendDeliveryNotificationJob::dispatch($result->id);
             }
             return $result;
         }
@@ -140,7 +154,7 @@ class DeliveriesController extends Controller
     public function update(Request $request, Delivery $delivery)
     {
         $data = $request->only(['customer_id','order_id','delivery_schedule_id','date','driver_id','description']);
-        $data_items = $request->only('product_id','planned_qty','delivered_qty','returned_qty','id');
+        $data_items = $request->only('product_id','planned_qty','delivered_qty','remaining_qty','returned_qty','id');
         $data_items = modify_array($data_items);
         $data_items = array_filter($data_items, fn($v) => $v['product_id']);
         try {
@@ -180,6 +194,14 @@ class DeliveriesController extends Controller
 
         if($delivery){
             DB::commit();
+            foreach ($delivery->items as $item) {
+                $delivery_item = $item;
+                $delivery_schedule_item = $item->delivery_schedule_item;
+                $delivery_schedule_item->delivered_qty = $delivery_item->delivered_qty;
+                $delivery_schedule_item->returned_qty = $delivery_item->returned_qty;
+                $delivery_schedule_item->remaining_qty = $delivery_item->remaining_qty;
+                $delivery_schedule_item->update();
+            }
             return true;
         }
     }
@@ -193,6 +215,15 @@ class DeliveriesController extends Controller
      */
     public function destroy(Delivery $delivery)
     {
+        try {
+            $delivery->delivery_schedule->status = 'en_route';
+            $delivery->delivery_schedule->update();
+            $delivery->items()->delete();
+            $delivery->delete();
+        } catch (\Throwable $th) {
+            //throw $th;
+            return errorHandler('Error Deleting Deliveries',$th);
+        }
         //returning with successfull message
         return new RedirectResponse(route('biller.deliveries.index'), ['flash_success' => 'Delivery Frequency Deleted Successfully!!']);
     }

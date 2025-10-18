@@ -1,11 +1,20 @@
 <?php
 
-namespace App\Models\target_zone;
+namespace App\Models\sms_log;
 
+use App\Models\ModelTrait;
+use App\Models\sms_log\Traits\SmsLogAttribute;
+use App\Models\sms_log\Traits\SmsLogRelationship;
 use Illuminate\Database\Eloquent\Model;
 
-class TargetZoneItem extends Model
+
+class SmsLog extends Model
 {
+    use ModelTrait,
+        // SmsLogAttribute,
+        SmsLogRelationship {
+        // SmsLogAttribute::getEditButtonAttribute insteadof ModelTrait;
+    }
 
     /**
      * NOTE : If you want to implement Soft Deletes in this model,
@@ -16,13 +25,15 @@ class TargetZoneItem extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'target_zone_items';
+    protected $table = 'sms_logs';
 
     /**
      * Mass Assignable fields of model
      * @var array
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'mobile', 'message', 'message_id', 'status', 'response'
+    ];
 
     /**
      * Default values for model fields
@@ -59,17 +70,6 @@ class TargetZoneItem extends Model
     protected static function boot()
     {
         parent::boot();
-
-        static::addGlobalScope('ins', function ($builder) {
-            if (isset(auth()->user()->ins)) {
-                $builder->where('ins', auth()->user()->ins);
-            }
-        });
-    }
-
-    public function target_zone()
-    {
-        return $this->belongsTo(TargetZone::class,'target_zone_id');
     }
 
 }

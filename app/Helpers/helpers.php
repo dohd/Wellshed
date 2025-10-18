@@ -652,7 +652,7 @@ function single_ton()
 }
 function business_alerts($input)
 {
-    $mailer = new \App\Repositories\Focus\general\RosemailerRepository();
+    $mailer = new \App\Repositories\Focus\general\RosemailerRepository(2);
     return $mailer->send($input['text'], $input);
 }
 function parse($template, $data, $return = FALSE)
@@ -1353,4 +1353,44 @@ function maskPasswordInMessage($message)
     }
 
     return $currentDate->format('d-m-Y');
+}
+
+if (!function_exists('normalize_phone_number')) {
+    /**
+     * Normalize Kenyan phone numbers to international format
+     *
+     * @param  string|null  $phone
+     * @return string|null
+     */
+    function normalize_phone_number($phone)
+    {
+        if (!$phone) {
+            return null;
+        }
+
+        // Remove all spaces, plus signs, and non-digits
+        $phone = preg_replace('/\D/', '', $phone);
+
+        // Convert starting with 07 or 01 → 2547 / 2541
+        if (preg_match('/^07\d{8}$/', $phone)) {
+            return '254' . substr($phone, 1);
+        }
+
+        if (preg_match('/^01\d{8}$/', $phone)) {
+            return '254' . substr($phone, 1);
+        }
+
+        // If already in 2547XXXXXXX or 2541XXXXXXX format, keep it
+        if (preg_match('/^254\d{9}$/', $phone)) {
+            return $phone;
+        }
+
+        // Optionally handle +254 format
+        if (preg_match('/^\+254\d{9}$/', $phone)) {
+            return substr($phone, 1); // remove '+'
+        }
+
+        // Return as-is if it doesn’t match any known pattern
+        return $phone;
+    }
 }

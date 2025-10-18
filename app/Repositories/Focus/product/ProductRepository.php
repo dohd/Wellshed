@@ -142,7 +142,7 @@ class ProductRepository extends BaseRepository
         $variations = [];
         $data_items = Arr::only($input, [
             'price', 'purchase_price','selling_price', 'qty', 'code', 'barcode', 'disrate', 'alert', 'expiry', 
-            'warehouse_id', 'variation_name', 'image','moq','image_description'
+            'warehouse_id', 'variation_name', 'image','moq','image_description','cost_of_bottle'
         ]);
         $data_items = modify_array($data_items);
         foreach ($data_items as $item) {
@@ -222,7 +222,7 @@ class ProductRepository extends BaseRepository
         // variations data
         $data_items = Arr::only($input, [
             'v_id', 'price', 'purchase_price','selling_price', 'qty', 'code', 'barcode', 'disrate', 'alert', 'expiry', 
-            'warehouse_id', 'variation_name', 'image','moq','image_description','existing_image'
+            'warehouse_id', 'variation_name', 'image','moq','image_description','existing_image','cost_of_bottle'
         ]);
         $data_items = modify_array($data_items);
 

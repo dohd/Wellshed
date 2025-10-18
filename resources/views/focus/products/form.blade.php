@@ -122,7 +122,7 @@
 <div id="main_product">
     <div class="product round pt-2">
         <div class="row no-gutters">
-            <div class="col-6">
+            <div class="col-4">
                 <div class="row no-gutters">
                     <div class="col-md-12">
                         <div class='form-group'>
@@ -132,6 +132,14 @@
                             </div>
                         </div>
                         <div class="old_id"><input type="hidden" name="v_id[]" value="{{@$product->standard['id']}}"><input type="hidden" name="pv_id" value="{{@$product->standard['id']}}"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class='form-group'>
+                    {{ Form::label( 'cost_of_bottle', 'Cost of Empty Bottle',['class' => 'col control-label']) }}
+                    <div class='col'>
+                        {{ Form::text('cost_of_bottle[]', @$product->standard['cost_of_bottle'] ,['class' => 'form-control box-size', 'placeholder' => '0.00']) }}
                     </div>
                 </div>
             </div>

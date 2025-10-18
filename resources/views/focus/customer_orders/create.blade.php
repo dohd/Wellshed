@@ -131,6 +131,9 @@
                 $('#driver').select2({
                     allowClear: true
                 });
+                $('#route').select2({
+                    allowClear: true
+                });
                 $("#branch").select2(config.branchSelect).change();
 
                 // init first row

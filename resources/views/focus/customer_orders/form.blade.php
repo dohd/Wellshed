@@ -67,7 +67,13 @@
         </div>
         <div class="col-4">
             <label for="route">Route</label>
-            <input type="text" value="{{ @$customer_order->route }}" name="route" id="route" class="form-control">
+            {{-- <input type="text" value="{{ @$customer_order->route }}" name="route" id="route" class="form-control"> --}}
+            <select name="route" id="route" class="form-control" data-placeholder="Search Route">
+                <option value="">Search Route</option>
+                @foreach ($locations as $location)
+                    <option value="{{ $location->id }}" {{ $location->id == @$customer_order->route ? 'selected' : '' }}>{{ $location->target_zone->name.' - '.$location->sub_zone_name }}</option>
+                @endforeach
+            </select>
         </div>
     </div>
     <div class='form-group row'>

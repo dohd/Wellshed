@@ -196,6 +196,7 @@ Route::group(['namespace' => 'delivery'], function () {
     Route::post('deliveries/get', 'DeliveriesTableController')->name('deliveries.get');
 });
 Route::group(['namespace' => 'delivery_schedule'], function () {
+    Route::post('delivery_schedules/update_status', 'DeliverySchedulesController@update_status')->name('delivery_schedules.update_status');
     Route::post('delivery_schedules/get_schedule_items', 'DeliverySchedulesController@get_schedule_items')->name('delivery_schedules.get_schedule_items');
     Route::post('delivery_schedules/get_schedules', 'DeliverySchedulesController@get_schedules')->name('delivery_schedules.get_schedules');
     Route::resource('delivery_schedules', 'DeliverySchedulesController');

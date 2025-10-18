@@ -26,6 +26,7 @@ use App\Models\additional\Additional;
 use App\Models\customer\Customer;
 use App\Models\hrm\Hrm;
 use App\Models\orders\Orders;
+use App\Models\target_zone\TargetZoneItem;
 use App\Repositories\Focus\orders\OrdersRepository;
 use Carbon\Carbon;
 
@@ -71,7 +72,8 @@ class OrdersController extends Controller
         $customers = Customer::all();
         $additionals = Additional::all();
         $users = Hrm::all();
-        return view('focus.customer_orders.create', compact('last_tid','customers','additionals','users'));
+        $locations = TargetZoneItem::with('target_zone')->get();
+        return view('focus.customer_orders.create', compact('last_tid','customers','additionals','users','locations'));
     }
 
     /**
@@ -118,7 +120,8 @@ class OrdersController extends Controller
         $customers = Customer::all();
         $additionals = Additional::all();
         $users = Hrm::all();
-        return view('focus.customer_orders.edit', compact('customer_order','last_tid','customers','additionals','users'));
+        $locations = TargetZoneItem::with('target_zone')->get();
+        return view('focus.customer_orders.edit', compact('customer_order','last_tid','customers','additionals','users','locations'));
     }
 
     /**

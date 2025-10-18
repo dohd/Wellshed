@@ -120,9 +120,9 @@ class DeliverySchedulesController extends Controller
 
     public function get_schedules(Request $request)
     {
-        $delivery_schedules = DeliverySchedule::where('order_id',$request->order_id)->where('delivery_date',date('Y-m-d'))->get();
+        $delivery_schedules = DeliverySchedule::where('order_id',$request->order_id)->where('status','en_route')->where('delivery_date',date('Y-m-d'))->get();
         $delivery_schedules->map(function($v){
-            $v->name = dateFormat($v->delivery_date).'-'.@$v->delivery_frequency->delivery_days;
+            $v->name = gen4tid('DS-',$v->tid).'-'.dateFormat($v->delivery_date).'-'.@$v->delivery_frequency->delivery_days;
             return $v;
         });
         return response()->json($delivery_schedules);
@@ -131,8 +131,34 @@ class DeliverySchedulesController extends Controller
     {
         $delivery_schedule = DeliverySchedule::where('id',$request->delivery_schedule_id)->first();
         $items = $delivery_schedule->items()->with('product')->get();
+        $items->map(function($v){
+            $v->rate = $v->order_item ? $v->order_item->rate : 0;
+            $v->itemtax = $v->order_item ? $v->order_item->itemtax : 0;
+            $v->delivery_schedule_item_id = $v->id;
+            $v->cost_of_bottle = $v->product ? $v->product->cost_of_bottle : 0;
+            return $v;
+        });
         
         return response()->json($items);
     }
+
+    public function update_status(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer',
+            'status' => 'required|string',
+        ]);
+
+        $schedule = DeliverySchedule::findOrFail($request->id);
+        if($request->status == 'en_route')
+        {
+            $schedule->dispatched_by = auth()->user()->id;
+        }
+        $schedule->status = $request->status;
+        $schedule->save();
+
+        return response()->json(['success' => true]);
+    }
+
 
 }
