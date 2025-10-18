@@ -73,7 +73,7 @@
                                             <p>Status</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{ $delivery_schedule->status }}</p>
+                                            <p>{{ str_replace('_','', ucfirst($delivery_schedule->status)) }}</p>
                                         </div>
                                     </div>
 
@@ -89,6 +89,7 @@
                                                 <th style="width: 10%;">Planned Qty</th>
                                                 <th style="width: 10%;">Delivered Qty</th>
                                                 <th style="width: 10%;">Returned Qty</th>
+                                                <th style="width: 10%;">Remaining Qty</th>
                                                 <th style="width: 10%;">Rate</th>
 
                                                 <th style="width: 10%;">Amount</th>
@@ -108,8 +109,9 @@
                                                     <td>
                                                         {{ $item->qty }}
                                                     </td>
-                                                    <td>0</td>
-                                                    <td>0</td>
+                                                    <td>{{ $item->delivered_qty }}</td>
+                                                    <td>{{ $item->returned_qty }}</td>
+                                                    <td>{{ $item->remaining_qty }}</td>
                                                     <td>
                                                         {{ numberFormat($item->rate) }}
                                                     </td>

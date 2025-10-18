@@ -75,7 +75,9 @@ class Hrm extends Model
         });
 
         static::addGlobalScope('ins', function ($builder) {
-            $builder->where('users.ins', auth()->user()->ins);
+            if (auth()->check() && auth()->user()->ins) {
+                $builder->where('users.ins', auth()->user()->ins);
+            }
         });
         static::addGlobalScope('status', function ($builder) {
             $builder->where('users.status', 1);

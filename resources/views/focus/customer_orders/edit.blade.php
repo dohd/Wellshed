@@ -140,6 +140,9 @@
                  $('#driver').select2({
                     allowClear: true
                 });
+                $('#route').select2({
+                    allowClear: true
+                });
 
                 // branch dropdown
                 $("#branch").select2(config.branchSelect);
