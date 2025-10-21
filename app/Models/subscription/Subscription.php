@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Models\customer;
+namespace App\Models\subscription;
 
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\customer\Traits\CustomerAttribute;
-use App\Models\customer\Traits\CustomerRelationship;
+use App\Models\subscription\Traits\CustomerAttribute;
+use App\Models\subscription\Traits\CustomerRelationship;
 
-class Customer extends Model
+class Subscription extends Model
 {
     use ModelTrait,
         CustomerAttribute,
@@ -17,7 +17,7 @@ class Customer extends Model
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'customers';
+    protected $table = 'subscriptions';
 
     /**
      * Mass Assignable fields of model
@@ -66,11 +66,10 @@ class Customer extends Model
         parent::boot();
 
         if (auth()->id()) {
-            static::creating(function ($model) {
-                $model->tid = Customer::max('tid')+1;
-                $model->ins = auth()->user()->ins;
-                $model->created_by = auth()->id();
-                return $model;
+            static::creating(function ($instance) {
+                $instance->ins = auth()->user()->ins;
+                $instance->created_by = auth()->user()->id;
+                return $instance;
             });
         }
 
@@ -79,7 +78,6 @@ class Customer extends Model
                 $builder->where('ins', auth()->user()->ins);
             }
         });
-        
     }
 
     // Override resolveRouteBinding to bypass global scope

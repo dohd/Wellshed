@@ -20,6 +20,7 @@ use App\Models\recentCustomer\RecentCustomerSms;
 use App\Models\tenant\Tenant;
 use App\Models\tenant_package\TenantPackage;
 use App\Models\transaction\Transaction;
+use App\Models\subscription\Subscription;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -27,6 +28,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 trait CustomerRelationship
 {
+    public function subscriptions() {
+        return $this->hasMany(Subscription::class);
+    }
+
     public function jobValuations() {
         return $this->hasMany(JobValuation::class);
     }

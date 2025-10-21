@@ -24,12 +24,13 @@
                     <table id="customerTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th>NO#</th>
+                                <th>CODE#</th>
                                 <th>CUSTOMER NAME</th>
                                 <th>COMPANY</th>
                                 <th>EMAIL</th>
                                 <th>PHONE NO.</th>
-                                <th>RECEIVABLES</th>
+                                <th>BALANCE</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -72,7 +73,7 @@
             },
             columns: [
                 {data: 'DT_Row_Index',name: 'id'},
-                ...['name', 'company', 'email', 'phone', 'balance'].map(v => ({name: v, data: v}))
+                ...['tid', 'name', 'company', 'email', 'phone', 'balance'].map(v => ({name: v, data: v}))
             ],
             ordering: false,
             searchDelay: 500,

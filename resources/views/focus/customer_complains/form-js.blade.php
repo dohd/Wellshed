@@ -1,6 +1,6 @@
 {{ Html::script('focus/js/select2.min.js') }}
 <script>
-     tinymce.init({
+    tinymce.init({
         selector: '.tinyinput',
         menubar: 'file edit view format table tools',
         plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',

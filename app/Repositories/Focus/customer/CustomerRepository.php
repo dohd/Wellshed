@@ -62,13 +62,10 @@ class CustomerRepository extends BaseRepository
      */
     public function getForDataTable()
     {
-        $q = $this->query()->withoutGlobalScopes(['currency_id']);
-        $customer_id = auth()->user()->customer_id;
-        $q->when(!auth()->user()->business->is_main && $customer_id, fn($q) => $q->where('id', $customer_id)); 
-
+        $q = $this->query();
         $q->orderByRaw("CASE WHEN LOWER(name) = LOWER(?) THEN 1 ELSE 2 END", ['Walk-In'])->orderByRaw('LOWER(name) ASC');
 
-        return $q->get(['id','name','company','email', 'phone', 'currency_id', 'address','picture','active','created_at']);
+        return $q->get(['id', 'tid', 'name','company','email', 'phone', 'currency_id', 'address','picture','active','created_at']);
     }
 
     /**

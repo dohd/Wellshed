@@ -120,7 +120,7 @@
                                             <td><span class="ml-2 font-weight-bold">Total Accounts Receivable</span></td>
                                             <td class="font-weight-bold">{{ numberFormat($receivableSum) }}</td>
                                         </tr>
-                                        <!-- Other Current Assets Section-->
+                                        <!-- Other Current Assets Section -->
                                         <tr><td colspan="2"><span class="ml-1" style="cursor:pointer;" role="button" data-toggle="collapse" data-target="#otherCurrentAssetRow">&#9660;Other Current Assets</span></td></tr>
                                         @foreach ($accountTypeDetails->where('system_rel', 'current_asset') as $detail)
                                             <tr class="collapse multi-collapse show" id="otherCurrentAssetRow">

@@ -42,17 +42,30 @@ class CustomersTableController extends Controller
         if (request('is_statement')) return $this->invoke_statement();
             
         $core = $this->customer->getForDataTable();
+
+        // foreach ($core as $key => $customer) {
+        //     $customer->update(['tid' => $key+1]);
+        // }
+
         return Datatables::of($core)
             ->escapeColumns(['id'])
             ->addIndexColumn()
+            ->addColumn('tid', function($customer) {
+                return gen4tid('CRM-', $customer->tid);
+            })
+            ->editColumn('name', function($customer) {
+                $customerName = $customer->name; 
+                return '<a class="font-weight-bold" href="' . route('biller.customers.show', $customer) . '">' . $customerName . '</a>';
+            })
             ->addColumn('company', function ($customer) {
-                $customer_name = $customer->company? $customer->company :  $customer->name;                
-                $currencyCode = @$customer->currency->code;
-                $tid = 'CRM-' . $customer->id;
-                return '<a class="font-weight-bold" href="' . route('biller.customers.show', $customer) . '">' . "{$tid} | {$customer_name} ({$currencyCode})" . '</a>';
+                $company = $customer->company;                
+                return '<a class="font-weight-bold" href="' . route('biller.customers.show', $customer) . '">' . $company . '</a>';
             })
             ->addColumn('balance', function ($customer) {
                 return;
+            })
+            ->addColumn('actions', function ($customer) {
+                $customer->action_buttons;
             })
             ->make(true);
     }

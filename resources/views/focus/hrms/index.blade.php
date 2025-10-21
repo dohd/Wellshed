@@ -1,12 +1,11 @@
 @extends ('core.layouts.app')
-
-@section ('title', trans('labels.backend.hrms.management'))
+@section ('title', 'User Managment')
 
 @section('content')
 <div class="content-wrapper">
     <div class="content-header row mb-2">
         <div class="content-header-left col-md-6 col-12">
-            <h4 class="content-header-title mb-0">{{ $title }}</h4>
+            <h4 class="content-header-title mb-0">User Managment</h4>
         </div>
         <div class="content-header-right col-md-6 col-12">
             <div class="media width-250 float-right">
@@ -46,24 +45,20 @@
                                     width="100%">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                         <th>Employee No.</th>
-                                        <th>Name</th>
-                                        <th>Department</th>
-                                        <th>{{ trans('hrms.role') }}</th>
-                                        <th>{{ trans('hrms.email') }}</th>
-                                        <th>{{ trans('hrms.picture') }}</th>
-                                        @if($flag)
-                                            <th>{{ trans('hrms.status') }}</th>
-                                            <th> D.O.B </th>
-                                            <th>{{ trans('labels.general.actions') }}</th>
-                                        @endif
+                                        <th>NO#</th>
+                                        <th>NAME</th>
+                                        <th>ROLE</th>
+                                        <th>EMAIL</th>
+                                        <th>STATUS</th>
+                                        <th>CUSTOMER</th>
+                                        <th>ACTIONS</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td colspan="8" class="text-center text-success font-large-1"><i
-                                                    class="fa fa-spinner spinner"></i></td>
+                                        <td colspan="8" class="text-center text-success font-large-1">
+                                            <i class="fa fa-spinner spinner"></i>
+                                        </td>                                                    
                                     </tr>
                                 </tbody>
                             </table>
@@ -80,43 +75,28 @@
 {{-- For DataTables --}}
 {{ Html::script(mix('js/dataTable.js')) }}
 {{ Html::script('focus/js/select2.min.js') }}
-
 <script>
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': "{{ csrf_token() }}"
         }
     });
-
     setTimeout(() => draw_data(), "{{ config('master.delay') }}");
-
     const employeeStatusFilter = $('#employeeStatus');
-
     employeeStatusFilter.select2({ allowClear: true });
-
     $('.filter').change(() => {
-
         console.table({
             employeeStatusFilter: employeeStatusFilter.val(),
         });
-
         $('#hrms-table').DataTable().destroy();
         draw_data();
     })
-
     const clearFilters = $('#clearFilters');
-
-
     clearFilters.click(() => {
-
         employeeStatusFilter.val(1).trigger('change');
-
         $('#hrms-table').DataTable().destroy();
         draw_data();
     })
-
-
-
     $(document).on('click', ".user_active", function (e) {
         var cid = $(this).attr('data-cid');
         var active = $(this).attr('data-active');
@@ -127,21 +107,16 @@
             $(this).addClass('checked');
             $(this).attr('data-active', 1);
         }
-
         $.ajax({
             url: '{{ route("biller.hrms.active") }}',
             type: 'post',
             data: {'cid': cid, 'active': active}
         });
     });
-
-
     function draw_data() {
-
         console.table({
             employeeStatusFilter: employeeStatusFilter.val(),
         });
-
         $('#hrms-table').dataTable({
             processing: true,
             serverSide: true,
@@ -150,7 +125,6 @@
             ajax: {
                 url: '{{ route("biller.hrms.get") }}',
                 type: 'post',
-
                 data: {
                     @if(request('rel_type')>0)
                     rel_type:{{request('rel_type')}},
@@ -161,19 +135,12 @@
             },
             columns: [
                 {data: 'DT_Row_Index', name: 'id'},
-                {data: 'tid', name: 'tid'},
                 {data: 'name', name: 'name'},
-                {data: 'department', name: 'department'},
                 {data: 'role', name: 'role'},
                 {data: 'email', name: 'email'},
-                {data: 'picture', name: 'picture'},
-                    @if($flag)
-                {
-                    data: 'active', name: 'active'
-                },
-                {data: 'dob', name: 'dob'},
+                {data: 'active', name: 'active'},
+                {data: 'customer', name: 'customer'},                    
                 {data: 'actions', name: 'actions', searchable: false, sortable: false}
-                @endif
             ],
             order: [[0, "desc"]],
             searchDelay: 500,
