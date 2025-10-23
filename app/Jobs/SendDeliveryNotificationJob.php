@@ -69,7 +69,7 @@ class SendDeliveryNotificationJob implements ShouldQueue
             // Normalize phone numbers (you can replace with normalize_phone_number helper)
             $customer_phone = normalize_phone_number(optional($delivery->customer)->phone);
             $driver_phone   = normalize_phone_number(optional(optional($delivery->driver)->meta)->primary_contact);
-            $manager_phone  = normalize_phone_number(optional(optional($delivery->delivery_schedule)->dispatched_by_meta)->phone);
+            $manager_phone  = normalize_phone_number(optional(optional($delivery->delivery_schedule)->store_manager)->meta->primary_contact);
 
             Log::info('📞 Normalized phone numbers', [
                 'customer_phone' => $customer_phone,

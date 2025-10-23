@@ -6,6 +6,7 @@ use App\Models\Company\ConfigMeta;
 use App\Models\Company\EmailSetting;
 use DB;
 use App\Exceptions\GeneralException;
+use App\Models\Company\Company;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
@@ -39,25 +40,35 @@ class RosemailerRepository extends BaseRepository
     }
 
 
-    public function send($data, $input, $view='focus.mailable.bill',$output = '')
+    public function send($data, $input, $view = 'focus.mailable.bill', $output = '')
     {
         try {
-            Mail::send($view, array('title'=>config('core.cname'),'body' => $data), function ($message) use ($input) {
+            // Fetch company info for tenant
+            $insId = auth()->user()->ins ?? 2;
+            $company = Company::where('id', $insId)->first();
+
+            Mail::send($view, [
+                'title' => config('core.cname'),
+                'body' => $data,
+                'company' => $company, // pass to view
+            ], function ($message) use ($input) {
                 $message->to($input['mail_to']);
                 $message->subject($input['subject']);
                 if (isset($input['statement']) && !empty($input['statement'])) {
-                    $message->attachData($input['statement'], $input['name'].'.pdf', [
+                    $message->attachData($input['statement'], $input['name'] . '.pdf', [
                         'mime' => 'application/pdf',
                     ]);
                 }
             });
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return json_encode(array('status' => 'Error', 'message' => trans('general.email_error')));
+            \Log::error($e->getMessage());
+            return json_encode(['status' => 'Error', 'message' => trans('general.email_error')]);
         }
-        if (!$output) $output = array('status' => 'Success', 'message' => trans('general.email_sent'));
+
+        if (!$output) $output = ['status' => 'Success', 'message' => trans('general.email_sent')];
         return json_encode($output);
     }
+
 
     public function send_group($data, $input,$view='focus.mailable.bill', $output = '')
     {

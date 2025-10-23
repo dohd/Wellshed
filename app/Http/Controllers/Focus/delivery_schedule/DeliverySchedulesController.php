@@ -21,9 +21,13 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Jobs\SendDeliveryStatusEmail;
+use App\Jobs\SendEnRouteNotificationJob;
+use App\Jobs\SendStatusEmailJob;
+use App\Models\Company\Company;
+use App\Models\Company\RecipientSetting;
 use App\Models\delivery_schedule\DeliverySchedule;
 use App\Models\delivery_schedule\DeliveryScheduleItem;
-
 /**
  * DeliverySchedulesController
  */
@@ -150,12 +154,25 @@ class DeliverySchedulesController extends Controller
         ]);
 
         $schedule = DeliverySchedule::findOrFail($request->id);
-        if($request->status == 'en_route')
-        {
+
+        if ($request->status === 'en_route') {
             $schedule->dispatched_by = auth()->user()->id;
         }
+
         $schedule->status = $request->status;
         $schedule->save();
+
+        // ✅ Dispatch the job only when en_route
+        $recipt_setting = RecipientSetting::where('ins',auth()->user()->ins)->where('type','dispatch_notification')->first();
+        if ($request->status === 'en_route') {
+            if($recipt_setting->email == 'yes'){
+                SendDeliveryStatusEmail::dispatch($schedule, $schedule->ins);
+            }
+            if($recipt_setting->sms == 'yes')
+            {
+                dispatch(new SendEnRouteNotificationJob($schedule->id));
+            }
+        }
 
         return response()->json(['success' => true]);
     }

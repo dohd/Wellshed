@@ -21,7 +21,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
+use App\Jobs\SendDeliveryEmailJob;
 use App\Jobs\SendDeliveryNotificationJob;
+use App\Models\Company\RecipientSetting;
 use App\Models\customer\Customer;
 use App\Models\delivery\Delivery;
 use App\Models\delivery\DeliveryItem;
@@ -119,12 +121,6 @@ class DeliveriesController extends Controller
                 $delivery_schedule_item->returned_qty = $delivery_item->returned_qty;
                 $delivery_schedule_item->remaining_qty = $delivery_item->remaining_qty;
                 $delivery_schedule_item->update();
-            }
-            if($delivery_schedule->status == 'en_route')
-            {
-                $delivery_schedule->status = 'delivered';
-                $delivery_schedule->update();
-                SendDeliveryNotificationJob::dispatch($result->id);
             }
             return $result;
         }
@@ -239,5 +235,35 @@ class DeliveriesController extends Controller
     {
         return new ViewResponse('focus.deliveries.view', compact('delivery'));
     }
+
+    public function change_status(Request $request)
+    {
+        $request->validate([
+            'delivery_id' => 'required|exists:deliveries,id',
+            'status' => 'required|string',
+        ]);
+
+        $delivery = Delivery::find($request->delivery_id);
+        $delivery->update(['status' => $request->status]);
+        $recipt_setting = RecipientSetting::where('ins',auth()->user()->ins)->where('type','dispatch_notification')->first();
+        if($delivery->status == 'delivered')
+        {
+            $delivery_schedule = $delivery->delivery_schedule;
+            $delivery_schedule->status = 'delivered';
+            $delivery_schedule->update();
+            if($recipt_setting->email == 'yes'){
+                SendDeliveryEmailJob::dispatch($delivery->id, auth()->user()->ins);
+            }
+            if($recipt_setting->sms == 'yes'){
+                SendDeliveryNotificationJob::dispatch($delivery->id);
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Delivery status updated successfully.',
+        ]);
+    }
+
 
 }

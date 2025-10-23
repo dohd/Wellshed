@@ -191,6 +191,7 @@ Route::group(['namespace' => 'target_zone'], function () {
     Route::post('target_zones/get', 'TargetZonesTableController')->name('target_zones.get');
 });
 Route::group(['namespace' => 'delivery'], function () {
+    Route::post('deliveries/change_status', 'DeliveriesController@change_status')->name('deliveries.change_status');
     Route::resource('deliveries', 'DeliveriesController');
     //For Datatable
     Route::post('deliveries/get', 'DeliveriesTableController')->name('deliveries.get');

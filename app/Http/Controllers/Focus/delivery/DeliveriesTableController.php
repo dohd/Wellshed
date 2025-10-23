@@ -55,11 +55,24 @@ class DeliveriesTableController extends Controller
             ->addColumn('date', function ($delivery) {
                 return dateFormat($delivery->date);
             })
+            ->addColumn('status', function ($delivery) {
+                return ucfirst($delivery->status);
+            })
             ->addColumn('created_at', function ($delivery) {
                 return Carbon::parse($delivery->created_at)->toDateString();
             })
             ->addColumn('actions', function ($delivery) {
-                return $delivery->action_buttons;
+                $actions = '
+                    <a href="#" 
+                    class="btn btn-secondary round change-status-btn" 
+                    data-id="'.$delivery->id.'" 
+                    title="Change Status">
+                        <i class="fa fa-gear" aria-hidden="true"></i>
+                    </a>
+                ';
+
+
+                return $actions.$delivery->action_buttons;
             })
             ->make(true);
     }

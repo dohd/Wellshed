@@ -57,7 +57,7 @@
                                             <p>Delivery Date</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{ dateFormat($delivery->delivery_date) }}</p>
+                                            <p>{{ dateFormat($delivery->date) }}</p>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -65,7 +65,7 @@
                                             <p>Expected Delivery Time</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{ timeFormat($delivery->delivery_time) }}</p>
+                                            <p>{{ timeFormat($delivery->delivery_schedule->delivery_time) }}</p>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -73,7 +73,7 @@
                                             <p>Status</p>
                                         </div>
                                         <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
-                                            <p>{{ $delivery->status }}</p>
+                                            <p>{{ ucfirst($delivery->status) }}</p>
                                         </div>
                                     </div>
 
@@ -85,11 +85,10 @@
                                             <tr>
                                                 <th style="width: 45%;">Product</th>
                                                 
-                                                <th style="width: 20%;">Quantity</th>
-                                                <th style="width: 10%;">Rate</th>
+                                                <th style="width: 20%;">Planned Qty</th>
+                                                <th style="width: 10%;">Returned Qty</th>
                                        
-                                                <th style="width: 15%;">Amount</th>
-                                                <th style="width: 10%;">Action</th>
+                                                <th style="width: 15%;">Remaining Qty</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -101,18 +100,13 @@
                                                         </td>
                                                         
                                                         <td>
-                                                            {{ $item->qty }}
+                                                            {{ $item->planned_qty }}
                                                         </td>
                                                         <td>
-                                                            {{ numberFormat($item->rate) }}
+                                                            {{ numberFormat($item->returned_qty) }}
                                                         </td>
                         
-                                                        <td><span class="amt">{{ numberFormat($item->amount) }}</span></td>
-                                                        <td>
-                                                            <button type="button" class="btn btn-outline-light btn-sm mt-1 remove_doc">
-                                                                <i class="fa fa-trash fa-lg text-danger"></i>
-                                                            </button>
-                                                        </td>
+                                                        <td><span class="amt">{{ numberFormat($item->remaining_qty) }}</span></td>
                                                     </tr>
                                                 @endforeach
                                             @endif

@@ -22,27 +22,8 @@
                                     <label for="type">Type of Task</label>
                                     <select name="type" id="type" class="form-control">
                                         <option value="">---select type of task---</option>
-                                        <option value="project_percentage">Quote Vs. Actual Expense (%)</option>
-                                        <option value="project_amount">Actual Expense vs. Budget (Amount)</option>
-                                        <option value="daily_metrics">8pm Daily Report</option>
-                                        <option value="budget_limit">QT/PI Budget Limit (%)</option>
-                                        <option value="technician_report">Technician Report</option>
-                                        <option value="birthdays">Birthday Notification</option>
-                                        <option value="kpi_report">KPI Summary Report</option>
-                                        <option value="document">Document Tracker Expiry</option>
-                                        <option value="milestone_expense">Milestone Expenses (%) vs Milestone Work Done (%)</option>
-                                        <option value="unapproved_quote">Notify Customer on Unapproved QT/PI</option>
-                                        <option value="lpo_notification">LPO Creation Notification</option>
-                                        <option value="tender_notification">Tender Notification</option>
-                                        <option value="project_completion">Project Completion Notification</option>
-                                        <option value="dlp_notification">DLP Notification</option>
-                                        <option value="ticket_notification">Ticket Notification</option>
-                                        <option value="mr_notification">Material Requisition Notification</option>
-                                        <option value="leave_notification">Leave Application Notification</option>
-                                        @if (auth()->user()->ins == 2)
-                                            
-                                        <option value="tenant_subscription">Package Subcription</option>
-                                        @endif
+                                        <option value="dispatch_notification">Dispatch Notification</option>
+                                        
                                     </select>
                                 </div>
                                 <div class="col-3">
@@ -141,23 +122,8 @@
                                                 }
                                             }
                                             $types = [
-                                                'project_percentage'     => 'Quote Vs. Actual Expense (%)',
-                                                'project_amount'         => 'Actual Expense vs. Budget (Amount)',
-                                                'budget_limit'           => 'QT/PI Budget Limit (%)',
-                                                'technician_report'      => 'Technician Report',
-                                                'tenant_subscription'    => 'Package Subscription',
-                                                'birthdays'              => 'Birthday Notification',
-                                                'kpi_report'             => 'KPI Summary Report',
-                                                'document'               => 'Document Tracker Expiry',
-                                                'milestone_expense'      => 'Milestone Expenses (%) vs Milestone Work Done (%)',
-                                                'unapproved_quote'       => 'Notify Customer on Unapproved QT/PI',
-                                                'lpo_notification'       => 'LPO Creation Notification',
-                                                'tender_notification'    => 'Tender Notification',
-                                                'project_completion'     => 'Project Completion Notification',
-                                                'dlp_notification'       => 'DLP Notification',
-                                                'ticket_notification'    => 'Ticket Notification',
-                                                'mr_notification'        => 'Material Requisition Notification',
-                                                'leave_notification'     => 'Leave Application Notification',
+                                                'dispatch_notification'     => 'Dispatch Notification',
+                                                
                                             ];
 
                                             $type = $types[$item->type] ?? '8pm Daily Report';
@@ -248,10 +214,7 @@
                     $('#editEmail').val(email);
                     $('#editSms').val(sms);
                     const specificTypes = [
-                        'daily_metrics', 'technician_report', 'kpi_report', 'document',
-                        'tender_notification', 'project_completion', 'dlp_notification',
-                        'ticket_notification', 'birthdays', 'unapproved_quote', 'lpo_notification',
-                        'mr_notification','leave_notification'
+                        'dispatch_notification'
                     ];
 
                     if (specificTypes.includes(type)) {
@@ -313,10 +276,7 @@
                 $('#type').change(function () {
                     const type = $(this).val();
                     const userTypes = [
-                        'daily_metrics', 'technician_report', 'kpi_report', 'document',
-                        'tender_notification', 'project_completion', 'dlp_notification',
-                        'ticket_notification', 'birthdays', 'unapproved_quote', 'lpo_notification',
-                        'mr_notification','leave_notification'
+                        'dispatch_notification'
                     ];
 
                     if (userTypes.includes(type)) {
