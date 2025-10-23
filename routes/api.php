@@ -102,7 +102,3 @@ Route::post('dbm_json_report', [DailyBusinessMetricController::class, 'dbmJsonRe
 Route::post('mpesa_payment/stkpush', [StkPushsController::class, 'stkPush']);       // initiate
 Route::post('mpesa_payment/callback', [StkPushsController::class, 'callback']);     // callback from Safaricom
 Route::get('mpesa_payment/status/{checkoutRequestID}', [StkPushsController::class, 'status']); // optional status probe
-
-Route::get('mpesa_payment/token', function (\App\Repositories\MpesaAuthService $auth) {
-    return response()->json(['token' => $auth->getAccessToken()]);
-});
