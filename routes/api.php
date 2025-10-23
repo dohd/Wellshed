@@ -9,6 +9,7 @@ use App\Http\Controllers\Focus\invoice_payment\InvoicePaymentsController;
 use App\Http\Controllers\Focus\labour_allocation\LabourAllocationsController;
 use App\Http\Controllers\Focus\lead\AgentLeadsController;
 use App\Http\Controllers\Focus\lead\MediaBlocksController;
+use App\Http\Controllers\Focus\mpesa_payment\StkPushsController;
 use App\Http\Controllers\Focus\omniconvo\OmniController;
 use App\Http\Controllers\Focus\promotions\ClientFeedbackController;
 use App\Http\Controllers\Focus\promotions\PromoCodeReservationController;
@@ -97,3 +98,11 @@ Route::prefix('daily-report')->group(function () {
     // Route::get('/csv', [DailyBusinessMetricController::class, 'dailyReportCsv']);   // New CSV endpoint
 });
 Route::post('dbm_json_report', [DailyBusinessMetricController::class, 'dbmJsonReport'])->name('dbm_json_report');
+//Mpesa
+Route::post('mpesa_payment/stkpush', [StkPushsController::class, 'stkPush']);       // initiate
+Route::post('mpesa_payment/callback', [StkPushsController::class, 'callback']);     // callback from Safaricom
+Route::get('mpesa_payment/status/{checkoutRequestID}', [StkPushsController::class, 'status']); // optional status probe
+
+Route::get('mpesa_payment/token', function (\App\Repositories\MpesaAuthService $auth) {
+    return response()->json(['token' => $auth->getAccessToken()]);
+});

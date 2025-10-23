@@ -185,6 +185,13 @@ Route::group(['namespace' => 'department'], function () {
     //For Datatable
     Route::post('departments/get', 'DepartmentsTableController')->name('departments.get');
 });
+
+Route::group(['namespace' => 'mpesa_config'], function () {
+    Route::post('mpesa_configs/get', 'MpesaConfigsController@get')->name('mpesa_configs.get');
+    Route::resource('mpesa_configs', 'MpesaConfigsController');
+    //For Datatable
+});
+
 Route::group(['namespace' => 'target_zone'], function () {
     Route::resource('target_zones', 'TargetZonesController');
     //For Datatable

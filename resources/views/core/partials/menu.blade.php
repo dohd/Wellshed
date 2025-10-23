@@ -137,6 +137,10 @@
                                                                 class="ft-activity"></i> Sms and Email Notification Recipient
                                                     </a></li>
                                                 <li><a class="dropdown-item"
+                                                       href="{{ route('biller.mpesa_configs.index') }}"><i
+                                                                class="ft-activity"></i> Mpesa Configs
+                                                    </a></li>
+                                                <li><a class="dropdown-item"
                                                        href="{{ route('biller.settings.notification_email') }}"><i
                                                                 class="ft-activity"></i> {{ trans('meta.notification_email') }}
                                                     </a></li>
