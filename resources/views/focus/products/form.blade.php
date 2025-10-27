@@ -122,7 +122,7 @@
 <div id="main_product">
     <div class="product round pt-2">
         <div class="row no-gutters">
-            <div class="col-4">
+            <div class="col-6">
                 <div class="row no-gutters">
                     <div class="col-md-12">
                         <div class='form-group'>
@@ -135,14 +135,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-2">
-                <div class='form-group'>
-                    {{ Form::label( 'cost_of_bottle', 'Cost of Empty Bottle',['class' => 'col control-label']) }}
-                    <div class='col'>
-                        {{ Form::text('cost_of_bottle[]', @$product->standard['cost_of_bottle'] ,['class' => 'form-control box-size', 'placeholder' => '0.00']) }}
-                    </div>
-                </div>
-            </div>
+            
             <div class="col-6">
                 <div class="row no-gutters">
                     <div class="col-md-4">
@@ -241,6 +234,34 @@
                     </div>
                 </div>
             </div>    
+        </div>
+
+        <div class="row no-gutters">
+            <div class="col-2">
+                <div class='form-group'>
+                    {{ Form::label( 'type', 'Type',['class' => 'col control-label']) }}
+                    <div class='col'>
+                        <select name="type[]" id="type" class="form-control">
+                            <option value="">--select type--</option>
+                            <option value="full" {{ @$product->standard['type'] == 'full' ? 'selected' : '' }}>Full</option>
+                            <option value="empty" {{ @$product->standard['type'] == 'empty' ? 'selected' : '' }}>Empty</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class='form-group'>
+                    {{ Form::label( 'ref', 'Search Related Item',['class' => 'col control-label']) }}
+                    <div class='col'>
+                        <select name="ref_id[]" id="ref" class="form-control">
+                            <option value="">--select ref--</option>
+                            @foreach ($products as $item)
+                                <option value="{{ $item->id }}" {{ $item->id == @$product->standard['ref_id'] ? 'selected' : '' }}>{{ $item->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="row">

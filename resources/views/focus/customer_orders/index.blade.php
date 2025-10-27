@@ -40,6 +40,7 @@
                                             <th>Order No.</th>
                                             <th>Customer</th>
                                             <th>Order Type</th>
+                                            <th>Status</th>
                                             <th>Total</th>
                                             <th>{{ trans('labels.general.actions') }}</th>
                                         </tr>
@@ -98,6 +99,7 @@
                     {data: 'tid', name: 'tid'},
                     {data: 'customer', name: 'customer'},
                     {data: 'order_type', name: 'order_type'},
+                    {data: 'status', name: 'status'},
                     {data: 'total', name: 'total'},
                     {data: 'actions', name: 'actions', searchable: false, sortable: false}
                 ],

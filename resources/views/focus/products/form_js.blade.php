@@ -10,7 +10,7 @@
     const Form = {
         init() {
             $('.datepicker').datepicker(config.datepicker);
-            $('#unit, #compound_unit, #product_cat, #asset_account, #exp_account').select2({allowClear: true});
+            $('#unit, #compound_unit, #product_cat, #asset_account, #exp_account, #ref').select2({allowClear: true});
 
             $('#name').keyup(() => {
                 $('.var-name:first').val($('#name').val())

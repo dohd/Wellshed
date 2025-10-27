@@ -11,38 +11,13 @@ use Illuminate\Support\Facades\DB;
 
 class CreateDeliverySchedule extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'create:delivery_schedule';
+    protected $description = 'Automatically create delivery schedules based on order frequency and type';
 
-    /**
-     * The console Creating Delivery Schedule.
-     *
-     * @var string
-     */
-    protected $description = 'Creating Delivery Schedule';
-
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
     public function handle()
     {
         $today = Carbon::today();
+
         $orders = Orders::whereIn('status', ['confirmed', 'started'])
             ->with(['deliver_days', 'items'])
             ->get();
@@ -51,58 +26,89 @@ class CreateDeliverySchedule extends Command
 
         try {
             foreach ($orders as $order) {
-                // Ensure we have valid date range
                 $startDate = Carbon::parse($order->start_month)->startOfDay();
                 $endDate = Carbon::parse($order->end_month)->endOfDay();
 
-                // Loop through each day within the order period
-                for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
-                    $dayName = $date->format('l'); // e.g. Monday
+                // Skip orders entirely in the past
+                if ($endDate->lt($today)) {
+                    continue;
+                }
 
-                    // Get delivery frequencies for that weekday
-                    $deliveries = $order->deliver_days->where('delivery_days', $dayName);
+                $isRecurring = strtolower($order->order_type) === 'recurring';
 
-                    foreach ($deliveries as $freq) {
-                        // Avoid duplicates — only create if not already scheduled
-                        $exists = DeliverySchedule::where('order_id', $order->id)
-                            ->where('delivery_frequency_id', $freq->id)
-                            ->whereDate('delivery_date', $date->toDateString())
-                            ->exists();
+                foreach ($order->deliver_days as $freq) {
+                    $frequency = strtolower($freq->frequency); // e.g. weekly, monthly
+                    $dayName = $freq->delivery_days; // e.g. Monday, Friday
+                    $expectedTime = $freq->expected_time;
 
-                        if ($exists) {
-                            continue;
+                    if ($isRecurring) {
+                        // Start from the first matching weekday on/after startDate or today (whichever is later)
+                        $startFrom = $startDate->copy()->lt($today) ? $today->copy() : $startDate->copy();
+                        $date = $this->getNextOrSameWeekday($startFrom, $dayName);
+
+                        while ($date->lte($endDate)) {
+                            // Safety: skip any past date
+                            if ($date->lt($today)) {
+                                // advance according to frequency then continue
+                                switch ($frequency) {
+                                    case 'daily':
+                                        $date->addDay();
+                                        break;
+                                    case 'weekly':
+                                        $date->addWeek();
+                                        break;
+                                    case 'bi-weekly':
+                                    case 'biweekly':
+                                        $date->addWeeks(2);
+                                        break;
+                                    case 'monthly':
+                                        // jump to next month then find first matching weekday
+                                        $nextMonth = $date->copy()->addMonth()->startOfMonth();
+                                        $date = $this->getNextOrSameWeekday($nextMonth, $dayName);
+                                        break;
+                                    default:
+                                        $date->addWeek();
+                                        break;
+                                }
+                                continue;
+                            }
+
+                            $this->createScheduleIfNotExists($order, $freq, $date);
+
+                            // Advance according to frequency
+                            switch ($frequency) {
+                                case 'daily':
+                                    $date->addDay();
+                                    break;
+
+                                case 'weekly':
+                                    $date->addWeek();
+                                    break;
+
+                                case 'bi-weekly':
+                                case 'biweekly':
+                                    $date->addWeeks(2);
+                                    break;
+
+                                case 'monthly':
+                                    // go to the first matching weekday in the next month
+                                    $nextMonth = $date->copy()->addMonth()->startOfMonth();
+                                    $date = $this->getNextOrSameWeekday($nextMonth, $dayName);
+                                    break;
+
+                                default:
+                                    $date->addWeek();
+                                    break;
+                            }
                         }
 
-                        // ✅ Create delivery schedule
-                        $schedule = DeliverySchedule::create([
-                            'tid' => DeliverySchedule::max('tid')+1,
-                            'order_id' => $order->id,
-                            'delivery_date' => $date->toDateString(),
-                            'delivery_time' => $freq->expected_time,
-                            'delivery_frequency_id' => $freq->id,
-                            'status' => 'scheduled',
-                            'ins' => $order->ins,
-                            'user_id' => $order->user_id,
-                        ]);
+                    } else {
+                        // ONE-TIME orders: schedule once on the next matching weekday (>= start or today)
+                        $startFrom = $startDate->copy()->lt($today) ? $today->copy() : $startDate->copy();
+                        $targetDate = $this->getNextOrSameWeekday($startFrom, $dayName);
 
-                        // Prepare delivery schedule items
-                        $items = $order->items->map(function ($item) use ($schedule) {
-                            return [
-                                'delivery_schedule_id' => $schedule->id,
-                                'order_item_id' => $item->id,
-                                'product_id' => $item->product_id,
-                                'qty' => $item->qty,
-                                'rate' => $item->rate,
-                                'amount' => $item->amount,
-                                'ins' => $schedule->ins,
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ];
-                        })->toArray();
-
-                        // Bulk insert items
-                        if (!empty($items)) {
-                            DeliveryScheduleItem::insert($items);
+                        if ($targetDate->lte($endDate)) {
+                            $this->createScheduleIfNotExists($order, $freq, $targetDate);
                         }
                     }
                 }
@@ -114,5 +120,71 @@ class CreateDeliverySchedule extends Command
             \Log::error('Error scheduling deliveries: ' . $e->getMessage());
             throw $e;
         }
+    }
+
+    /**
+     * Create schedule safely if not already existing
+     */
+    private function createScheduleIfNotExists($order, $freq, Carbon $date)
+    {
+        // Ensure we only create for today or future
+        if ($date->lt(Carbon::today())) {
+            return;
+        }
+
+        $exists = DeliverySchedule::where('order_id', $order->id)
+            ->where('delivery_frequency_id', $freq->id)
+            ->whereDate('delivery_date', $date->toDateString())
+            ->exists();
+
+        if ($exists) return;
+
+        $schedule = DeliverySchedule::create([
+            'tid' => (DeliverySchedule::max('tid') ?? 0) + 1,
+            'order_id' => $order->id,
+            'customer_id' => $order->customer_id,
+            'delivery_date' => $date->toDateString(),
+            'delivery_time' => $freq->expected_time,
+            'delivery_frequency_id' => $freq->id,
+            'status' => 'scheduled',
+            'ins' => $order->ins,
+            'user_id' => $order->user_id,
+        ]);
+
+        $items = $order->items->map(function ($item) use ($schedule) {
+            return [
+                'delivery_schedule_id' => $schedule->id,
+                'order_item_id' => $item->id,
+                'product_id' => $item->product_id,
+                'qty' => $item->qty,
+                'rate' => $item->rate,
+                'amount' => $item->amount,
+                'ins' => $schedule->ins,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        })->toArray();
+
+        if (!empty($items)) {
+            DeliveryScheduleItem::insert($items);
+        }
+    }
+
+    /**
+     * Return the first date on or after $start that matches $dayName (e.g., "Monday").
+     */
+    private function getNextOrSameWeekday(Carbon $start, string $dayName): Carbon
+    {
+        $dayName = ucfirst(strtolower($dayName));
+        $date = $start->copy();
+
+        // Loop up to 14 times as a safety guard (should break far sooner)
+        $attempts = 0;
+        while ($date->format('l') !== $dayName && $attempts < 14) {
+            $date->addDay();
+            $attempts++;
+        }
+
+        return $date;
     }
 }

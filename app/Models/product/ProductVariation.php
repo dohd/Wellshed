@@ -20,7 +20,7 @@ class ProductVariation extends Model
         'code', 'price', 'purchase_price', 'disrate', 'qty',
         'alert', 'image','image_description', 'barcode', 'expiry',
         'moq','fifo_cost',  'asset_account_id', 'exp_account_id',
-        'slug_id','cost_of_bottle'
+        'slug_id','type','ref_id'
     ];
 
     /**

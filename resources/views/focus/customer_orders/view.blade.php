@@ -67,6 +67,14 @@
                                             <p>{{ numberFormat($orders['total']) }}</p>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                            <p>Status</p>
+                                        </div>
+                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                            <p>{{ ucfirst($orders['status']) }}</p>
+                                        </div>
+                                    </div>
 
 
                                 </div>

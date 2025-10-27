@@ -118,6 +118,7 @@
                             <td>
                                 {{ Form::time('expected_time[]', null, ['class' => 'form-control', 'placeholder' => 'Expected Delivery Time','id' => 'expected_time-0']) }}
                             </td>
+                            <input type="hidden" name="d_id[]" value="0" id="">
                             <td>
                                 <button type="button" class="btn btn-outline-light btn-sm mt-1 remove">
                                     <i class="fa fa-trash fa-lg text-danger"></i>

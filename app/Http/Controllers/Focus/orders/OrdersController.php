@@ -29,6 +29,7 @@ use App\Models\orders\Orders;
 use App\Models\target_zone\TargetZoneItem;
 use App\Repositories\Focus\orders\OrdersRepository;
 use Carbon\Carbon;
+use Illuminate\Validation\ValidationException;
 
 /**
  * OrdersController
@@ -145,6 +146,9 @@ class OrdersController extends Controller
         $data_items = modify_array($data_items);
         $days = $request->only(['delivery_days','expected_time','d_id']);
         $days = modify_array($days);
+        if($data['order_type'] == 'recurring'){
+            if(empty($days)) throw ValidationException::withMessages(['Delivery Days are not selected']);
+        }
         try {
             //Update the model using repository update method
             $this->repository->update($order, compact('data','data_items','days'));
@@ -190,10 +194,24 @@ class OrdersController extends Controller
         $customer_id = $request->customer_id;
 
         $orders = Orders::whereIn('status',['confirmed','started'])->where('customer_id', $customer_id)
-            ->where('description', 'LIKE', '%'.$q.'%')
+            // ->where('description', 'LIKE', '%'.$q.'%')
             ->whereHas('schedules', function($q){
                 $q->whereDate('delivery_date',date('Y-m-d'));
             })
+            ->limit(6)->get();
+        $orders->map(function($v){
+            $v->name = gen4tid('ORD-',$v->tid). '-'.$v->description;
+        });
+            
+        return response()->json($orders);
+    }
+    public function search(Request $request)
+    {
+        $q = $request->search;
+        $customer_id = $request->customer_id;
+
+        $orders = Orders::whereIn('status',['confirmed','started','completed'])->where('customer_id', $customer_id)
+            // ->where('description', 'LIKE', '%'.$q.'%')
             ->limit(6)->get();
         $orders->map(function($v){
             $v->name = gen4tid('ORD-',$v->tid). '-'.$v->description;

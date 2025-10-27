@@ -26,8 +26,17 @@ use App\Jobs\SendEnRouteNotificationJob;
 use App\Jobs\SendStatusEmailJob;
 use App\Models\Company\Company;
 use App\Models\Company\RecipientSetting;
+use App\Models\customer\Customer;
 use App\Models\delivery_schedule\DeliverySchedule;
 use App\Models\delivery_schedule\DeliveryScheduleItem;
+use App\Models\orders\Orders;
+use App\Models\product\Product;
+use App\Models\product\ProductVariation;
+use App\Models\stock_transaction\StockTransaction;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Mpdf\Mpdf;
+
 /**
  * DeliverySchedulesController
  */
@@ -53,7 +62,8 @@ class DeliverySchedulesController extends Controller
      */
     public function create()
     {
-        return view('focus.delivery_schedules.create');
+        $customers = Customer::all();
+        return view('focus.delivery_schedules.create', compact('customers'));
     }
 
     /**
@@ -67,6 +77,43 @@ class DeliverySchedulesController extends Controller
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
+        // dd($input);
+        try {
+            DB::beginTransaction();
+            $order = Orders::find($input['order_id']);
+            $schedule = DeliverySchedule::create([
+                'tid' => (DeliverySchedule::max('tid') ?? 0) + 1,
+                'customer_id' => $order->customer_id ?? '',
+                'order_id' => $order->id,
+                'delivery_date' => $input['delivery_date'],
+                'delivery_time' => '',
+                'delivery_frequency_id' => '',
+                'status' => 'scheduled',
+                'ins' => $order->ins,
+                'user_id' => auth()->user()->id,
+            ]);
+
+            $items = $order->items->map(function ($item) use ($schedule) {
+                return [
+                    'delivery_schedule_id' => $schedule->id,
+                    'order_item_id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'qty' => $item->qty,
+                    'rate' => $item->rate,
+                    'amount' => $item->amount,
+                    'ins' => $schedule->ins,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            })->toArray();
+
+            if (!empty($items)) {
+                DeliveryScheduleItem::insert($items);
+            }
+            DB::commit();
+        } catch (\Throwable $th) {
+            return errorHandler('Error Creating Delivery Schedule',$th);
+        }
         //return with successfull message
         return new RedirectResponse(route('biller.delivery_schedules.index'), ['flash_success' => 'Delivery Frequency Created Successfully!!']);
     }
@@ -79,7 +126,8 @@ class DeliverySchedulesController extends Controller
      */
     public function edit(DeliverySchedule $delivery_schedule)
     {
-        return view('focus.delivery_schedules.edit', compact('delivery_schedule'));
+        $customers = Customer::all();
+        return view('focus.delivery_schedules.edit', compact('delivery_schedule','customers'));
     }
 
     /**
@@ -89,10 +137,13 @@ class DeliverySchedulesController extends Controller
      * @param App\Models\delivery_schedule\delivery_schedule $delivery_schedule
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function update(Request $request, DeliverySchedule $delivery)
+    public function update(Request $request, DeliverySchedule $delivery_schedule)
     {
         //Input received from the request
         $input = $request->except(['_token', 'ins']);
+        $input['delivery_date'] = date_for_database($input['delivery_date']);
+        $delivery_schedule->update($input);
+        // dd($input, $delivery_schedule);
         //return with successfull message
         return new RedirectResponse(route('biller.delivery_schedules.index'), ['flash_success' => 'Delivery Frequency Updated Successfully!!']);
     }
@@ -153,29 +204,125 @@ class DeliverySchedulesController extends Controller
             'status' => 'required|string',
         ]);
 
-        $schedule = DeliverySchedule::findOrFail($request->id);
+        $schedule = DeliverySchedule::with('items.product')->findOrFail($request->id);
 
-        if ($request->status === 'en_route') {
-            $schedule->dispatched_by = auth()->user()->id;
+        $previousStatus = $schedule->status;
+        $newStatus = $request->status;
+
+        // Update fields based on status
+        if ($newStatus === 'en_route') {
+            $schedule->dispatched_by = auth()->id();
         }
 
-        $schedule->status = $request->status;
+        $schedule->status = $newStatus;
         $schedule->save();
 
-        // ✅ Dispatch the job only when en_route
-        $recipt_setting = RecipientSetting::where('ins',auth()->user()->ins)->where('type','dispatch_notification')->first();
-        if ($request->status === 'en_route') {
-            if($recipt_setting->email == 'yes'){
-                SendDeliveryStatusEmail::dispatch($schedule, $schedule->ins);
+        // Get recipient settings only when required
+        $recipt_setting = RecipientSetting::where('ins', auth()->user()->ins)
+            ->where('type', 'dispatch_notification')
+            ->first();
+
+        /**
+         * ✅ Handle stock reduction only if:
+         * - New status is en_route
+         * - Previous status was NOT already en_route (avoid double deduction)
+         */
+        if ($newStatus === 'en_route' && $previousStatus !== 'en_route') {
+
+            foreach ($schedule->items as $item) {
+                if ($item->product) {
+
+                    $item->product->decrement('qty', $item->qty);
+
+                    StockTransaction::create([
+                        'stock_item_id' => $item->product_id,
+                        'date' => now()->format('Y-m-d'),
+                        'qty' => -$item->qty,
+                        'price' => $item->product->purchase_price ?? 0,
+                        'type' => 'sale',
+                        'tid' => $schedule->tid,
+                    ]);
+                }
             }
-            if($recipt_setting->sms == 'yes')
-            {
-                dispatch(new SendEnRouteNotificationJob($schedule->id));
+
+            // Notifications only sent once
+            if ($recipt_setting) {
+                if ($recipt_setting->email === 'yes') {
+                    SendDeliveryStatusEmail::dispatch($schedule, $schedule->ins);
+                }
+
+                if ($recipt_setting->sms === 'yes') {
+                    dispatch(new SendEnRouteNotificationJob($schedule->id));
+                }
             }
         }
 
         return response()->json(['success' => true]);
     }
 
+
+    public function daily_delivery_report()
+    {
+        return view('focus.delivery_schedules.daily_delivery_report');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $start_date = $request->start_date ?? Carbon::today()->toDateString();
+        $end_date = $request->end_date ?? Carbon::today()->toDateString();
+
+        $report = DeliverySchedule::with(['order.customer', 'delivery_frequency', 'items.product'])
+            ->whereBetween('delivery_date', [date_for_database($start_date), date_for_database($end_date)])
+            ->get();
+        $company = Company::find(auth()->user()->ins);
+
+        $html = view('focus.delivery_schedules.daily_delivery_pdf', compact('report', 'start_date','end_date', 'company'))->render();
+
+        // PDF settings
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+        ]);
+
+        $mpdf->SetTitle('Daily Delivery Report - ' . date('d-m-Y'));
+        $mpdf->WriteHTML($html);
+
+        return response($mpdf->Output('', 'i'), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="daily-delivery-report-' . date('d-m-Y') . '.pdf"');
+    }
+
+    public function product_movement_report()
+    {
+        $products = ProductVariation::all();
+        return view('focus.delivery_schedules.product_movement_report',compact('products'));
+    }
+
+    public function product_movement_pdf(Request $request)
+    {
+        $start_date = $request->start_date ?? Carbon::today()->toDateString();
+        $end_date = $request->end_date ?? Carbon::today()->toDateString();
+        $product_id = $request->product_id;
+        $schedule_items = DeliveryScheduleItem::where('product_id',$product_id)
+                ->whereHas('schedule', function($q) use($start_date, $end_date){
+                    $q->whereIn('status',['en_route','delivered'])->whereBetween('delivery_date',[date_for_database($start_date), date_for_database($end_date)]);
+                })->get();
+        $company = Company::find(auth()->user()->ins);
+
+        $html = view('focus.delivery_schedules.product_movement_pdf', compact('schedule_items', 'start_date','end_date', 'company'))->render();
+
+        // PDF settings
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+        ]);
+
+        $mpdf->SetTitle('Daily Delivery Report - ' . date('d-m-Y'));
+        $mpdf->WriteHTML($html);
+
+        return response($mpdf->Output('', 'i'), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="daily-delivery-report-' . date('d-m-Y') . '.pdf"');
+    }
 
 }

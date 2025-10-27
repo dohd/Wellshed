@@ -6,6 +6,7 @@ use App\Models\customer\Customer;
 use App\Models\delivery_frequency\DeliveryFreq;
 use App\Models\delivery_schedule\DeliverySchedule;
 use App\Models\orders\OrdersItem;
+use App\Models\target_zone\TargetZoneItem;
 
 /**
  * Class OrdersRelationship
@@ -29,5 +30,10 @@ trait OrdersRelationship
     public function schedules()
     {
         return $this->hasMany(DeliverySchedule::class, 'order_id');
+    }
+
+    public function location()
+    {
+        return $this->belongsTo(TargetZoneItem::class,'route');
     }
 }

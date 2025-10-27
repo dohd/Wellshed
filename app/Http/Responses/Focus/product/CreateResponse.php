@@ -3,6 +3,7 @@
 namespace App\Http\Responses\Focus\product;
 
 use App\Models\account\Account;
+use App\Models\product\ProductVariation;
 use App\Models\productcategory\Productcategory;
 use App\Models\productvariable\Productvariable;
 use App\Models\warehouse\Warehouse;
@@ -28,7 +29,8 @@ class CreateResponse implements Responsable
             ->whereDoesntHave('accountType', fn($q) => $q->where('system', 'bank'))
             ->get(['id', 'number', 'holder', 'account_type', 'parent_id'])
             ->filter(fn($v) => !$v->has_sub_accounts);
-            
-        return view('focus.products.create', compact('accounts', 'product_categories', 'productvariables', 'warehouses'));
+        $products = ProductVariation::where('type','full')->get();
+
+        return view('focus.products.create', compact('accounts', 'product_categories', 'productvariables', 'warehouses','products'));
     }
 }

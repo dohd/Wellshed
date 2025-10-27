@@ -58,3 +58,49 @@
         </div>
     </div>
 @endsection
+@section('extra-scripts')
+{{ Html::script('focus/js/select2.min.js') }}
+    <script>
+       const config = {
+        ajax: {
+                headers: {
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                }
+            },
+            orderSelect: {
+                allowClear: true,
+                ajax: {
+                    url: "{{ route('biller.customer_orders.search') }}",
+                    dataType: 'json',
+                    type: 'POST',
+                    data: ({
+                        term
+                    }) => ({
+                        search: term,
+                        customer_id: $("#customer").val()
+                    }),
+                    processResults: data => {
+                        return {
+                            results: data.map(v => ({
+                                text: v.name,
+                                id: v.id,
+                            }))
+                        }
+                    },
+                }
+            },
+       };
+       const Index = {
+            init(){
+                $.ajaxSetup(config.ajax);
+                $('#customer').select2({allowClear:true});
+                $('#order').select2(config.orderSelect);
+                $('#customer').change(this.customerChange);
+            },
+            customerChange(){
+                $('#order').val('').change();
+            },
+       };
+       $(()=>Index.init()); 
+    </script>
+@endsection

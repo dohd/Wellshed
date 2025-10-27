@@ -185,6 +185,16 @@ Route::group(['namespace' => 'department'], function () {
     //For Datatable
     Route::post('departments/get', 'DepartmentsTableController')->name('departments.get');
 });
+Route::group(['namespace' => 'customer_page'], function () {
+    Route::post('customer_pages/submit_order', 'CustomerPagesController@submit_order')->name('customer_pages.submit_order');
+    Route::get('customer_pages/home', 'CustomerPagesController@home')->name('customer_pages.home');
+    Route::get('customer_pages/orders', 'CustomerPagesController@orders')->name('customer_pages.orders');
+    Route::get('customer_pages/track', 'CustomerPagesController@track')->name('customer_pages.track');
+    Route::get('customer_pages/profile', 'CustomerPagesController@profile')->name('customer_pages.profile');
+    Route::get('customer_pages/delivery', 'CustomerPagesController@delivery')->name('customer_pages.delivery');
+    Route::get('customer_pages/review', 'CustomerPagesController@review')->name('customer_pages.review');
+    Route::get('customer_pages/thank_you', 'CustomerPagesController@thank_you')->name('customer_pages.thank_you');
+});
 
 Route::group(['namespace' => 'mpesa_config'], function () {
     Route::post('mpesa_configs/get', 'MpesaConfigsController@get')->name('mpesa_configs.get');
@@ -204,6 +214,10 @@ Route::group(['namespace' => 'delivery'], function () {
     Route::post('deliveries/get', 'DeliveriesTableController')->name('deliveries.get');
 });
 Route::group(['namespace' => 'delivery_schedule'], function () {
+    Route::post('delivery_schedules/product_movement_pdf', 'DeliverySchedulesController@product_movement_pdf')->name('delivery_schedules.product_movement_pdf');
+    Route::post('delivery_schedules/exportPdf', 'DeliverySchedulesController@exportPdf')->name('delivery_schedules.exportPdf');
+    Route::get('delivery_schedules/product_movement_report', 'DeliverySchedulesController@product_movement_report')->name('delivery_schedules.product_movement_report');
+    Route::get('delivery_schedules/daily_delivery_report', 'DeliverySchedulesController@daily_delivery_report')->name('delivery_schedules.daily_delivery_report');
     Route::post('delivery_schedules/update_status', 'DeliverySchedulesController@update_status')->name('delivery_schedules.update_status');
     Route::post('delivery_schedules/get_schedule_items', 'DeliverySchedulesController@get_schedule_items')->name('delivery_schedules.get_schedule_items');
     Route::post('delivery_schedules/get_schedules', 'DeliverySchedulesController@get_schedules')->name('delivery_schedules.get_schedules');

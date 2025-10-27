@@ -2,6 +2,7 @@
 
 namespace App\Models\delivery_schedule\Traits;
 
+use App\Models\delivery\Delivery;
 use App\Models\delivery_frequency\DeliveryFreq;
 use App\Models\delivery_schedule\DeliveryScheduleItem;
 use App\Models\hrm\Hrm;
@@ -26,5 +27,9 @@ trait DeliveryScheduleRelationship
     public function store_manager()
     {
         return $this->belongsTo(Hrm::class, 'dispatched_by');
+    }
+    public function delivery()
+    {
+        return $this->belongsTo(Delivery::class, 'delivery_schedule_id');
     }
 }

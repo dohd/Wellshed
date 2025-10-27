@@ -448,6 +448,14 @@
                                    data-toggle="dropdown"><i class="ft-list"></i> Manage Delivery Schedule
                                 </a>
                             </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.delivery_schedules.daily_delivery_report') }}"
+                                   data-toggle="dropdown"><i class="ft-list"></i> Daily Delivery Report
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('biller.delivery_schedules.product_movement_report') }}"
+                                   data-toggle="dropdown"><i class="ft-list"></i> Product Movement Report
+                                </a>
+                            </li>
                             @permission('create-branch*')
                             <li><a class="dropdown-item" href="{{ route('biller.delivery_schedules.create') }}"
                                    data-toggle="dropdown"><i class="fa fa-plus-circle"></i>Create Delivery Schedule

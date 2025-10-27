@@ -2,6 +2,7 @@
 
 namespace App\Models\delivery_schedule\Traits;
 
+use App\Models\delivery_schedule\DeliverySchedule;
 use App\Models\items\OrderItem;
 use App\Models\orders\OrdersItem;
 use App\Models\product\ProductVariation;
@@ -18,5 +19,9 @@ trait DeliveryScheduleItemRelationship
     public function order_item()
     {
         return $this->belongsTo(OrdersItem::class,'order_item_id');
+    }
+    public function schedule()
+    {
+        return $this->belongsTo(DeliverySchedule::class, 'delivery_schedule_id');
     }
 }

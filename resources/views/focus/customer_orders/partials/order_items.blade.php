@@ -81,7 +81,7 @@
                             <td>
                                 <select class="form-control rowtax" name="itemtax[]" id="rowtax-{{ $index }}">
                                     @foreach ($additionals as $tax)
-                                        <option value="{{ (int) $tax->value }}" {{ $tax->is_default ? 'selected' : '' }}>
+                                        <option value="{{ (int) $tax->value }}" {{ $tax->value == $item->itemtax ? 'selected' : '' }}>
                                             {{ $tax->name }}
                                         </option>
                                     @endforeach

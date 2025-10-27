@@ -3,6 +3,7 @@
 namespace App\Http\Responses\Focus\product;
 
 use App\Models\account\Account;
+use App\Models\product\ProductVariation;
 use App\Models\productcategory\Productcategory;
 use App\Models\productvariable\Productvariable;
 use App\Models\warehouse\Warehouse;
@@ -43,8 +44,9 @@ class EditResponse implements Responsable
             ->whereDoesntHave('accountType', fn($q) => $q->where('system', 'bank'))
             ->get(['id', 'number', 'holder', 'account_type', 'parent_id'])
             ->filter(fn($v) => !$v->has_sub_accounts);
+        $products = ProductVariation::where('type','full')->get();
 
-        return view('focus.products.edit', compact('accounts', 'product_categories', 'productvariables', 'warehouses', 'compound_unit_ids'))
+        return view('focus.products.edit', compact('accounts', 'product_categories', 'productvariables', 'warehouses', 'compound_unit_ids','products'))
             ->with(['product' => $this->product]);
     }
 }

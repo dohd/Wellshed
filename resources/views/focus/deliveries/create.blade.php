@@ -112,10 +112,60 @@
                 $('#driver').select2({
                     allowClear: true
                 });
+                $('#itemsTbl').on('change', '.returned_qty', Index.returnQtyChange)
                 $('#order').change(Index.orderChange);
                 $('#delivery_schedule').change(Index.deliveryScheduleChange);
             },
-            customerChange(){
+            returnQtyChange() {
+                const el = $(this);
+                const row = el.closest('tr');
+
+                // Safely parse numeric values
+                const planned_qty = accounting.unformat(row.find('.planned_qty').val()) || 0;
+                const delivered_qty = accounting.unformat(row.find('.delivered_qty').val()) || 0;
+                const returned_qty = accounting.unformat(row.find('.returned_qty').val()) || 0;
+                const cost_of_bottle = accounting.unformat(row.find('.cost_of_bottle').val()) || 0;
+                const rate = accounting.unformat(row.find('.rate').val()) || 0;
+                const itemtax = accounting.unformat(row.find('.itemtax').val()) || 0; // e.g. 0 (no tax) or 16
+
+                // Calculate bottle costs
+                const cost_of_returned = returned_qty * cost_of_bottle;
+                let remaining_qty = 0;
+                let cost_of_remaining = 0;
+
+                if (planned_qty > returned_qty) {
+                    remaining_qty = planned_qty - returned_qty;
+                    cost_of_remaining = remaining_qty * cost_of_bottle;
+                }
+
+                // Calculate total amount
+                // If itemtax is 0 → no tax; if >0 → add that percentage
+                let amount = rate * delivered_qty;
+                if (itemtax > 0) {
+                    amount = amount * (1 + itemtax / 100);
+                }
+
+                // Update UI fields
+                row.find('.remaining_qty').val(remaining_qty);
+                row.find('.cost_of_remaining').val(cost_of_remaining);
+                row.find('.cost_of_returned').val(cost_of_returned);
+                row.find('.amount').val(amount);
+
+                console.log({
+                    planned_qty,
+                    delivered_qty,
+                    returned_qty,
+                    remaining_qty,
+                    cost_of_returned,
+                    cost_of_remaining,
+                    rate,
+                    amount,
+                    itemtax
+                });
+            },
+
+
+            customerChange() {
                 var select = $('#order');
                 // Clear any existing options
                 select.empty();
