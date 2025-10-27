@@ -14,7 +14,7 @@ class AddTypeToProductVariationsTable extends Migration
     public function up()
     {
         Schema::table('product_variations', function (Blueprint $table) {
-            $table->dropColumn('cost_of_bottle');
+            // $table->dropColumn('cost_of_bottle');
             $table->enum('type',['empty','full'])->default('full');
             $table->unsignedBigInteger('ref_id')->nullable();
         });
