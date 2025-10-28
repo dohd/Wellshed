@@ -144,6 +144,10 @@
             href="{{ route('biller.customer_pages.profile') }}">
             <i class="bi bi-person"></i><span>Profile</span>
         </a>
+        <a class="nav-pill" href="{{ route('biller.logout') }}"><i class="ft-power"></i>
+         <i class="bi bi-box-arrow-right"></i><span>Logout</span>
+        </a>
+
     </div>
 </div>
 @endsection
