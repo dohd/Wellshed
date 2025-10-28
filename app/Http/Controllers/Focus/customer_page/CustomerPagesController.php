@@ -63,7 +63,7 @@ class CustomerPagesController extends Controller
     public function my_orders()
     {
         $customer = Customer::where('id', auth()->user()->customer_id)->first();
-        $orders = Orders::where('customer_id', $customer->id)->get();
+        $orders = Orders::where('customer_id', $customer->id)->latest()->get();
         return view('focus.pages.my_orders', compact('orders'));
     }
 

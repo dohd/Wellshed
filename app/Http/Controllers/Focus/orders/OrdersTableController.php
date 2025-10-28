@@ -61,6 +61,26 @@ class OrdersTableController extends Controller
             ->addColumn('tid', function ($orders) {
                 return gen4tid('ORD-',$orders->tid);
             })
+            ->addColumn('status', function ($orders) {
+                $status = strtolower($orders->status);
+                $color = 'dark'; // default
+
+                if ($status === 'draft') {
+                    $color = 'secondary';
+                } elseif ($status === 'confirmed') {
+                    $color = 'primary';
+                } elseif ($status === 'started') {
+                    $color = 'info';
+                } elseif ($status === 'completed') {
+                    $color = 'success';
+                } elseif ($status === 'cancelled') {
+                    $color = 'danger';
+                }
+
+                return '<span class="round badge bg-' . $color . ' text-uppercase px-1 py-1">' 
+                    . ucfirst($status) .
+                    '</span>';
+            })
             ->addColumn('created_at', function ($orders) {
                 return Carbon::parse($orders->created_at)->toDateString();
             })
