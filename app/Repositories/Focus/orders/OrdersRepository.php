@@ -49,6 +49,8 @@ class OrdersRepository extends BaseRepository
         foreach ($data as $key => $val) {
             if(in_array($key,['total','tax','taxable','subtotal']))
                 $data[$key] = numberClean($val);
+            if(in_array($key,['start_month','end_month']))
+                $data[$key] = date_for_database($val);
         }
         $data['status'] = 'confirmed';
         $result = Orders::create($data);
@@ -98,6 +100,8 @@ class OrdersRepository extends BaseRepository
         foreach ($data as $key => $val) {
             if(in_array($key,['total','tax','taxable','subtotal']))
                 $data[$key] = numberClean($val);
+            if(in_array($key,['start_month','end_month']))
+                $data[$key] = date_for_database($val);
         }
         if($order->status == 'draft'){
             $data['status'] = 'confirmed';

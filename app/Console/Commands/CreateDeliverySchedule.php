@@ -122,9 +122,6 @@ class CreateDeliverySchedule extends Command
         }
     }
 
-    /**
-     * Create schedule safely if not already existing
-     */
     private function createScheduleIfNotExists($order, $freq, Carbon $date)
     {
         // Ensure we only create for today or future
@@ -170,15 +167,11 @@ class CreateDeliverySchedule extends Command
         }
     }
 
-    /**
-     * Return the first date on or after $start that matches $dayName (e.g., "Monday").
-     */
     private function getNextOrSameWeekday(Carbon $start, string $dayName): Carbon
     {
         $dayName = ucfirst(strtolower($dayName));
         $date = $start->copy();
 
-        // Loop up to 14 times as a safety guard (should break far sooner)
         $attempts = 0;
         while ($date->format('l') !== $dayName && $attempts < 14) {
             $date->addDay();

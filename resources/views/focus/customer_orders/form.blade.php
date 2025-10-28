@@ -78,12 +78,12 @@
     </div>
     <div class='form-group row'>
         <div class='col-lg-4'>
-            {{ Form::label('start_month', 'Start (Period From)', ['class' => 'control-label']) }}
-            {{ Form::month('start_month',@$customer_order->start_month, ['class' => 'form-control', 'placeholder' => 'Start (Period From)']) }}
+            {{ Form::label('start_month', 'Start Date (Period From)', ['class' => 'control-label']) }}
+            {{ Form::date('start_month',@$customer_order->start_month, ['class' => 'form-control', 'placeholder' => 'Start (Period From)']) }}
         </div>
         <div class='col-lg-4'>
-            {{ Form::label('end_month', 'End (Period To)', ['class' => 'control-label']) }}
-            {{ Form::month('end_month', @$customer_order->end_month, ['class' => 'form-control', 'placeholder' => 'End (Period To)']) }}
+            {{ Form::label('end_month', 'End Date (Period To)', ['class' => 'control-label']) }}
+            {{ Form::date('end_month', @$customer_order->end_month, ['class' => 'form-control', 'placeholder' => 'End (Period To)']) }}
         </div>
         {{-- <div class='col-lg-4'>
             {{ Form::label('expected_time', 'Expected Delivery Time', ['class' => 'control-label']) }}
