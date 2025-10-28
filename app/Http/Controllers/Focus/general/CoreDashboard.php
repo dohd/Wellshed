@@ -154,7 +154,7 @@ class CoreDashboard extends Controller
 
         // Enable customer login
         $customer = Customer::where('id', auth()->user()->customer_id)->first();
-        // if ($customer) return (new CustomerPagesController)->home();
+        if ($customer) return (new CustomerPagesController)->home();
         
         return view('focus.dashboard.index', compact(
             'data', 'projects', 'keyMetrics', 'dailySalesExpensesData', 'labourAllocationData', 'sevenDayLabourHours', 'sevenDaySalesExpenses',
