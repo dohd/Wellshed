@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 @section('title', 'Create | User Managment')
-@include('tinymce.scripts')
+{{-- @include('tinymce.scripts') --}}
 
 @section('content')
 <div class="content-wrapper">

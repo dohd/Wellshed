@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Focus\general;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Focus\customer\CustomersController;
+use App\Http\Controllers\Focus\customer_page\CustomerPagesController;
 use App\Http\Controllers\Focus\employeeDailyLog\EmployeeDailyLogController;
 use App\Http\Controllers\Focus\labour_allocation\LabourAllocationsController;
 use App\Http\Controllers\Focus\lead\AgentLeadsController;
@@ -16,6 +17,7 @@ use App\Models\Access\User\User;
 use App\Models\branch\Branch;
 use App\Models\currency\Currency;
 use App\Models\customer\Customer;
+use App\Models\delivery_schedule\DeliverySchedule;
 use App\Models\department\Department;
 use App\Models\financialYear\FinancialYear;
 use App\Models\hrm\Hrm;
@@ -25,6 +27,7 @@ use App\Models\lead\Lead;
 use App\Models\lead\LeadSource;
 use App\Models\lead\OmniChat;
 use App\Models\misc\Misc;
+use App\Models\orders\Orders;
 use App\Models\product\ProductVariation;
 use App\Models\project\Project;
 use App\Models\purchase\Purchase;
@@ -149,6 +152,10 @@ class CoreDashboard extends Controller
         })
         ->exists();
 
+        // Enable customer login
+        $customer = Customer::where('id', auth()->user()->customer_id)->first();
+        // if ($customer) return (new CustomerPagesController)->home();
+        
         return view('focus.dashboard.index', compact(
             'data', 'projects', 'keyMetrics', 'dailySalesExpensesData', 'labourAllocationData', 'sevenDayLabourHours', 'sevenDaySalesExpenses',
             'newCustomersMetrics', 'newAgentLeadsMetrics', 'projectStatusMetrics', 'departments', 'productCategoriesMetrics', 'edlMetrics',

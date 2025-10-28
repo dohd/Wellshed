@@ -29,36 +29,30 @@
                     </div>                    
                 </div>
                 
-                <div class="row">
-                    <div class='form-group col-md-4'>
-                        {{ Form::label( 'primary_contact', 'Personal Contact (MPESA)', ['class' => 'col-lg-12 control-label']) }}
-                        <div class='col-lg-12'>
-                            {{ Form::text('primary_contact', null, ['class' => 'form-control round', 'placeholder' => trans('hrms.phone').'*','required'=>'required']) }}
-                        </div>
-                    </div>
-                    <div class='form-group col-md-4'>
-                        {{ Form::label( 'alternative_contact', 'Alternative Contact', ['class' => 'col-lg-12 control-label']) }}
-                        <div class='col-lg-12'>
-                            {{ Form::text('alternative_contact', null, ['class' => 'form-control round', 'placeholder' => 'Alternative Contact *','required'=>'required']) }}
-                        </div>
-                    </div>                    
+                <div class="row">                    
                     <div class='form-group col-md-4'>
                         {{ Form::label( 'secondary_contact', 'Office Contact',['class' => 'col-lg-12 control-label']) }}
                         <div class='col-lg-12'>
                             {{ Form::text('secondary_contact', null, ['class' => 'form-control round', 'placeholder' => trans('hrms.phone')]) }}
                         </div>
                     </div>
+                    <div class='form-group col-md-4'>
+                        {{ Form::label( 'primary_contact', 'Personal Contact (MPESA)', ['class' => 'col-lg-12 control-label']) }}
+                        <div class='col-lg-12'>
+                            {{ Form::text('primary_contact', null, ['class' => 'form-control round', 'placeholder' => trans('hrms.phone').'*','required'=>'required']) }}
+                        </div>
+                    </div>
                 </div>
 
                 <div class="row">
                     <div class='form-group col-md-6'>
-                        {{ Form::label( 'email', 'Personal Email',['class' => 'col-lg-6 control-label']) }}
+                        {{ Form::label( 'email', ' Official/Business Email ',['class' => 'col-lg-6 control-label']) }}
                         <div class='col-lg-12'>
                             {{ Form::text('email', null, ['class' => 'form-control round', 'placeholder' => trans('hrms.email').'*','required'=>'required']) }}
                         </div>
                     </div>
                     <div class='form-group col-md-6'>
-                        {{ Form::label( 'personal_email', ' Official/Business Email ',['class' => 'col-lg-6 control-label']) }}
+                        {{ Form::label( 'personal_email', 'Personal Email',['class' => 'col-lg-6 control-label']) }}
                         <div class='col-lg-12'>
                             {{ Form::text('personal_email', null, ['class' => 'form-control round', 'placeholder' => trans('hrms.email').'*']) }}
                         </div>

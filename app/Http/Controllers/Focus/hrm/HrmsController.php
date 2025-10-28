@@ -104,80 +104,39 @@ class HrmsController extends Controller
      */
     public function store(ManageHrmRequest $request)
     {
-        $validated = $request->validate([
-            'id_number' => ['required', 'numeric', 'digits_between:6,12'],
-            'first_name' => ['required', 'string'],
-            'last_name' => ['required', 'string'],
-            'dob' => ['required', 'date'],
-            'primary_contact' => ['required', 'regex:/^[\d\s\-()+]+$/', 'min:10', 'max:15'],
-            'secondary_contact' => ['required', 'regex:/^[\d\s\-()+]+$/', 'min:10', 'max:15'],
-            'gender' => ['required', 'string'],
-            'marital_status' => ['required', 'string'],
-            'email' => ['required', 'email'],
-            'personal_email' => ['required', 'email'],
-            'home_county' => ['required', 'string'],
-            'home_address' => ['required', 'string'],
-            'residential_address' => ['required', 'string'],
-            'kin_name' => ['required', 'string'],
-            'kin_contact' => ['required', 'string'],
-            'kin_relationship' => ['required', 'string'],
-            'highest_education_level' => ['required', 'string'],
-            'institution' => ['required', 'string'],
-            'award' => ['required', 'string'],
-//            'department_id' => ['required', 'string'],
-            'employement_date' => ['required', 'date'],
-            'previous_employer' => ['required', 'string'],
-            // 'entry_time' => ['required', 'string'],
-            // 'exit_time' => ['required', 'string'],
-            'commission' => ['nullable', 'string'],
-            'bank_name' => ['required', 'string'],
-            'account_name' => ['required', 'string'],
-            'account_number' => ['required', 'string'],
-            'branch' => ['required', 'string'],
-            'nssf' => ['nullable', 'string'],
-            'nhif' => ['nullable', 'string'],
-            'blood_group' => ['nullable', 'string'],
-            'is_cronical' => ['nullable', 'string'],
-            'specify' => ['nullable', 'string'],
-        ]);
-
-        // if (strlen($request['kra_pin']) != 11)
-        //     throw ValidationException::withMessages(['KRA PIN should contain 11 characters']);
-        // if (!in_array($request['kra_pin'][0], ['P', 'A']))
-        //     throw ValidationException::withMessages(['First character of KRA PIN must be letter "P" or "A"']);
-        // $pattern = "/^[0-9]+$/i";
-        // if (!preg_match($pattern, substr($request['kra_pin'],1,9)))
-        //     throw ValidationException::withMessages(['Characters between 2nd and 10th letters must be numbers']);
-        // $letter_pattern = "/^[a-zA-Z]+$/i";
-        // if (!preg_match($letter_pattern, $request['kra_pin'][-1]))
-        //     throw ValidationException::withMessages(['Last character of KRA PIN must be a letter!']);
-
-        $taxid = $request['kra_pin'];
-        $taxid_length = strlen($taxid);
-
-        if ($taxid_length == 10) {
-            // Check if tax ID contains exactly 10 digits
-            if (!preg_match("/^[0-9]{10}$/", $taxid)) {
-                throw ValidationException::withMessages(['Tax Pin must be a 10-digit number']);
-            }
-        } elseif ($taxid_length == 11) {
-            // Check if tax ID follows the "P123456789A" or "A123456789P" format
-            if (!preg_match("/^[PA][0-9]{9}[A-Z]$/i", $taxid)) {
-                throw ValidationException::withMessages([
-                    'Tax Pin should be 10 digits or follow the format: "P123456789A" or "A123456789P"'
-                ]);
-            }
-        } else {
-            // Invalid length
-            throw ValidationException::withMessages(['Customer Tax Pin should contain either 10 digits or follow the format: "P123456789A" or "A123456789P"']);
-        }
-
-
-        $latestEmployeeNo = HrmMeta::latest()->first()->employee_no;
-        $empYear =  (new DateTime('now'))->format('y');
-        $employeeID =substr($latestEmployeeNo, 0, -2);
-
-        $request['employee_no'] = intval($employeeID) + 1 . $empYear;
+        // $validated = $request->validate([
+        //     'id_number' => ['required', 'numeric', 'digits_between:6,12'],
+        //     'first_name' => ['required', 'string'],
+        //     'last_name' => ['required', 'string'],
+        //     'dob' => ['required', 'date'],
+        //     'primary_contact' => ['required', 'regex:/^[\d\s\-()+]+$/', 'min:10', 'max:15'],
+        //     'secondary_contact' => ['required', 'regex:/^[\d\s\-()+]+$/', 'min:10', 'max:15'],
+        //     'gender' => ['required', 'string'],
+        //     'marital_status' => ['required', 'string'],
+        //     'email' => ['required', 'email'],
+        //     'personal_email' => ['required', 'email'],
+        //     'home_county' => ['required', 'string'],
+        //     'home_address' => ['required', 'string'],
+        //     'residential_address' => ['required', 'string'],
+        //     'kin_name' => ['required', 'string'],
+        //     'kin_contact' => ['required', 'string'],
+        //     'kin_relationship' => ['required', 'string'],
+        //     'highest_education_level' => ['required', 'string'],
+        //     'institution' => ['required', 'string'],
+        //     'award' => ['required', 'string'],
+        //     'employement_date' => ['required', 'date'],
+        //     'previous_employer' => ['required', 'string'],
+        //     'commission' => ['nullable', 'string'],
+        //     'bank_name' => ['required', 'string'],
+        //     'account_name' => ['required', 'string'],
+        //     'account_number' => ['required', 'string'],
+        //     'branch' => ['required', 'string'],
+        //     'nssf' => ['nullable', 'string'],
+        //     'nhif' => ['nullable', 'string'],
+        //     'blood_group' => ['nullable', 'string'],
+        //     'is_cronical' => ['nullable', 'string'],
+        //     'specify' => ['nullable', 'string'],
+        // ]);
 
         $input['employee'] = $request->only(['first_name', 'last_name', 'email', 'picture', 'signature','cv','personal_email', 'role', 'status', 'login_access']);
         $input['meta'] = $request->except(['_token', '_method', 'first_name', 'last_name', 'email', 'picture', 'signature','cv','personal_email', 'role', 'permission', 'check_all', 'status', 'login_access']);
@@ -205,7 +164,7 @@ class HrmsController extends Controller
             return errorHandler("Error: '" . $e->getMessage() . " | on File: " . $e->getFile() . "  | & Line: " . $e->getLine());
         }
 
-        return new RedirectResponse(route('biller.hrms.index'), ['flash_success' => trans('alerts.backend.hrms.created')]);
+        return new RedirectResponse(route('biller.hrms.index'), ['flash_success' => 'User Created Successfully']);
     }
 
     /**
@@ -235,63 +194,37 @@ class HrmsController extends Controller
 
         $hrm = Hrm::withoutGlobalScopes()->where('ins', Auth::user()->ins)->where('id', $id)->first();
 
-        $validated = $request->validate([
-            'id_number' => ['required', 'numeric', 'digits_between:6,12'],
-            'first_name' => ['required', 'string'],
-            'last_name' => ['required', 'string'],
-            'dob' => ['required', 'date'],
-            'primary_contact' => ['required', 'regex:/^[\d\s\-()+]+$/', 'min:10', 'max:15'],
-            'secondary_contact' => ['required', 'regex:/^[\d\s\-()+]+$/', 'min:10', 'max:15'],
-            'gender' => ['required', 'string'],
-            'marital_status' => ['required', 'string'],
-            'email' => ['required', 'email'],
-            'personal_email' => ['required', 'email'],
-            'home_county' => ['required', 'string'],
-            'home_address' => ['required', 'string'],
-            'residential_address' => ['required', 'string'],
-            'kin_name' => ['required', 'string'],
-            'kin_contact' => ['required', 'string'],
-            'kin_relationship' => ['required', 'string'],
-            'highest_education_level' => ['required', 'string'],
-            'institution' => ['required', 'string'],
-            'award' => ['required', 'string'],
-//            'department_id' => ['required', 'string'],
-            'employement_date' => ['required', 'date'],
-            'previous_employer' => ['required', 'string'],
-//            'entry_time' => ['required', 'string'],
-//            'exit_time' => ['required', 'string'],
-            'commission' => ['nullable', 'string'],
-            'bank_name' => ['required', 'string'],
-            'account_name' => ['required', 'string'],
-            'account_number' => ['required', 'string'],
-            'branch' => ['required', 'string'],
-            'nssf' => ['nullable', 'string'],
-            'nhif' => ['nullable', 'string'],
-            'blood_group' => ['nullable', 'string'],
-            'is_cronical' => ['nullable', 'string'],
-            'specify' => ['nullable', 'string'],
-        ]);
-
-        $taxid = $request['kra_pin'];
-        $taxid_length = strlen($taxid);
-
-        if ($taxid_length == 10) {
-            // Check if tax ID contains exactly 10 digits
-            if (!preg_match("/^[0-9]{10}$/", $taxid)) {
-                throw ValidationException::withMessages(['Tax Pin must be a 10-digit number']);
-            }
-        } elseif ($taxid_length == 11) {
-            // Check if tax ID follows the "P123456789A" or "A123456789P" format
-            if (!preg_match("/^[PA][0-9]{9}[A-Z]$/i", $taxid)) {
-                throw ValidationException::withMessages([
-                    'Tax Pin should be 10 digits or follow the format: "P123456789A" or "A123456789P"'
-                ]);
-            }
-        } else {
-            // Invalid length
-            throw ValidationException::withMessages(['Customer Tax Pin should contain either 10 digits or follow the format: "P123456789A" or "A123456789P"']);
-        }
-
+        // $validated = $request->validate([
+        //     'id_number' => ['required', 'numeric', 'digits_between:6,12'],
+        //     'first_name' => ['required', 'string'],
+        //     'last_name' => ['required', 'string'],
+        //     'dob' => ['required', 'date'],
+        //     'primary_contact' => ['required', 'regex:/^[\d\s\-()+]+$/', 'min:10', 'max:15'],
+        //     'secondary_contact' => ['required', 'regex:/^[\d\s\-()+]+$/', 'min:10', 'max:15'],
+        //     'gender' => ['required', 'string'],
+        //     'marital_status' => ['required', 'string'],
+        //     'email' => ['required', 'email'],
+        //     'personal_email' => ['required', 'email'],
+        //     'home_county' => ['required', 'string'],
+        //     'home_address' => ['required', 'string'],
+        //     'residential_address' => ['required', 'string'],
+        //     'kin_name' => ['required', 'string'],
+        //     'kin_contact' => ['required', 'string'],
+        //     'kin_relationship' => ['required', 'string'],
+        //     'highest_education_level' => ['required', 'string'],
+        //     'institution' => ['required', 'string'],
+        //     'award' => ['required', 'string'],
+        //     'commission' => ['nullable', 'string'],
+        //     'bank_name' => ['required', 'string'],
+        //     'account_name' => ['required', 'string'],
+        //     'account_number' => ['required', 'string'],
+        //     'branch' => ['required', 'string'],
+        //     'nssf' => ['nullable', 'string'],
+        //     'nhif' => ['nullable', 'string'],
+        //     'blood_group' => ['nullable', 'string'],
+        //     'is_cronical' => ['nullable', 'string'],
+        //     'specify' => ['nullable', 'string'],
+        // ]);
 
         $input['employee'] = $request->only(['first_name', 'last_name', 'email', 'picture', 'signature','cv','personal_email', 'role', 'status', 'login_access']);
         $input['meta'] = $request->except(['_token', '_method', 'first_name', 'last_name', 'email', 'picture', 'signature','cv','personal_email', 'role', 'permission', 'check_all', 'status', 'login_access']);
@@ -317,8 +250,7 @@ class HrmsController extends Controller
             return errorHandler("Error: '" . $e->getMessage() . " | on File: " . $e->getFile() . "  | & Line: " . $e->getLine());
         }
 
-
-        return new RedirectResponse(route('biller.hrms.index'), ['flash_success' => trans('alerts.backend.hrms.updated')]);
+        return new RedirectResponse(route('biller.hrms.index'), ['flash_success' => 'User Updated Successfully']);
     }
 
     /**
@@ -338,7 +270,7 @@ class HrmsController extends Controller
             return errorHandler('Error Deleting Employee', $th);
         }
 
-        return new RedirectResponse(route('biller.hrms.index'), ['flash_success' => trans('alerts.backend.hrms.deleted')]);
+        return new RedirectResponse(route('biller.hrms.index'), ['flash_success' => 'User Deleted Successfully']);
     }
 
     /**

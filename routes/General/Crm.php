@@ -5,6 +5,9 @@ Route::group(['namespace' => 'Crm', 'prefix' => 'crm', 'as' => 'crm.'], function
     Route::get('', 'CustomerLogin@showLoginForm')->name('login');
     Route::post('login', 'CustomerLogin@login')->name('login.post');
     Route::get('logout', 'CustomerLogin@logout')->name('logout');
+    Route::get('register', 'CustomerLogin@register')->name('register');
+    Route::post('register', 'CustomerLogin@register')->name('register.post');
+
     Route::get('password/reset', 'ForgotPasswordController@showLinkRequestForm')->name('password.enter_email');
     Route::post('password/email', 'ForgotPasswordController@sendResetLinkEmail')->name('password.email');
     Route::get('password/reset/{token}', 'ResetPasswordController@showResetForm')->name('password.reset.form');
@@ -27,6 +30,4 @@ Route::group(['namespace' => 'Crm', 'prefix' => 'crm', 'as' => 'crm.'], function
         Route::post('user/profile', 'CustomerHome@update_profile')->name('user.update');
         Route::get('user/wallet', 'CustomerHome@wallet')->name('user.wallet');
     });
-
-
 });

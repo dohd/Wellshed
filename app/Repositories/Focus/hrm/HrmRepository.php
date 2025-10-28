@@ -120,9 +120,12 @@ class HrmRepository extends BaseRepository
         $role_id = $input['employee']['role'];
         $role = Role::find($role_id);
         if ($role && $role->status == 1) {
+            $password = $input['employee']['email'] ?? @$input['employee']['personal_email'];
+            if (!$password) $password = $input['meta']['secondary_contact'] ?? @$input['meta']['primary_contact'];
+
             // create hrm
             $username = random_username();
-            $password = random_password();
+            // $password = random_password();
             $input['employee'] = array_replace($input['employee'], [
                 'username' => $username,
                 'password' => $password, //(new DateTime('now'))->format('y') . '-' . 'Pa$$w0rd!',
@@ -130,16 +133,14 @@ class HrmRepository extends BaseRepository
                 'confirmed' => 1,
             ]);
             unset($input['employee']['role']);
+            // dd($input['employee'], $input);
             $hrm = Hrm::create($input['employee']);
 
             // create hrm meta
             $input['meta'] = array_replace($input['meta'], [
-                'dob' => date_for_database($input['meta']['dob']),
-                'employement_date' => date_for_database($input['meta']['employement_date']),
-                'employment_end_date' => date_for_database($input['meta']['employment_end_date']),
                 'user_id' => $hrm->id,
             ]);
-            if (!$input['meta']['is_cronical']) $input['meta']['specify'] = 'none';
+            unset($input['meta']['alternative_contact']);
             $hrm->meta()->create($input['meta']);
 
             // create user role and permissions
@@ -234,7 +235,6 @@ class HrmRepository extends BaseRepository
      */
     public function update(Hrm $hrm, array $input)
     {
-        // dd($input);
         foreach ($input as $key => $val) {
             if ($key == 'employee') {
                 if (isset($val['picture'])) {
@@ -269,9 +269,6 @@ class HrmRepository extends BaseRepository
                     }
                     $input[$key]['id_back'] = $this->uploadPicture($val['id_back'], $this->file_sign_path);
                 }
-                $input[$key]['dob'] = date_for_database($val['dob']);
-                $input[$key]['employement_date'] = date_for_database($val['employement_date']);
-                $input[$key]['employment_end_date'] = date_for_database($val['employment_end_date']);
             }
         }
 
@@ -281,11 +278,14 @@ class HrmRepository extends BaseRepository
         $role = Role::find($role_id);
         if ($role && $role->status == 1) {
             unset($input['employee']['role']);
+
             // update hrm
             $hrm->update($input['employee']);
             $hrm->meta()->update($input['meta']);
             $hrm->roleUser()->update(compact('role_id'));
             $hrm->permissions()->detach();
+
+            // update permissions
             if (@$input['permission']) {
                 $hrm->permissions()->attach($input['permission']);
                 // add tenant-management permissions

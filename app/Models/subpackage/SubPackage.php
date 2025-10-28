@@ -68,10 +68,9 @@ class SubPackage extends Model
                 $model->ins = auth()->user()->ins;
                 return $model;
             });
+            static::addGlobalScope('ins', function ($builder) {
+                $builder->where('ins', auth()->user()->ins);
+            });
         }
-
-        static::addGlobalScope('ins', function ($builder) {
-            $builder->where('ins', auth()->user()->ins);
-        });
     }
 }

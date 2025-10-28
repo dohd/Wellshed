@@ -17,6 +17,7 @@ class CustomerPagesController extends Controller
 {
     public function home()
     {
+        // dd(auth()->user()->toArray());
         $customer = Customer::where('id', auth()->user()->customer_id)->first();
         $order = Orders::where('customer_id', $customer->id)->whereIn('status', ['confirmed', 'started'])->first();
         $prev_schedules = DeliverySchedule::where('customer_id', $customer->id)->where('status', 'delivered')->take(5)->get();

@@ -81,7 +81,7 @@
                             </div>
                             <div class="card-footer">
                                 <div>
-                                    <a href="{{route('crm.login')}}" class="card-link">{{trans('meta.customer_login')}}</a>
+                                    <a href="{{ route('crm.register') }}" class="card-link">Customer Registration</a>
                                 </div>
                             </div>
                         </div>

@@ -21,6 +21,8 @@ use App\Http\Responses\RedirectResponse;
 use App\Models\Company\ConfigMeta;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\subpackage\SubPackage;
+use App\Models\target_zone\TargetZone;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 
@@ -58,9 +60,17 @@ class CustomerLogin extends Controller
     }
 
     protected function authenticated(Request $request, $user)
+    {}
+
+    public function register(Request $request )
     {
+        if ($request->isMethod('get')) {
+            $subpackages = SubPackage::all();
+            $targetzones = TargetZone::all();
+            return view('crm.register', compact('subpackages', 'targetzones'));
+        }
 
-
+        return redirect(route('login'))->with(['flash_success' => 'Registration Successful']);
     }
 
     // login from for customer
