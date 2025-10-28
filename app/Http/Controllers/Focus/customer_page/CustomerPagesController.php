@@ -95,8 +95,8 @@ class CustomerPagesController extends Controller
                 'frequency'    => $customer['order_type'] === 'recurring'
                     ? ($customer['frequency'] ?? null)
                     : null,
-                'start_month'  => $customer['start_month'] ?? null,
-                'end_month'    => $customer['end_month'] ?? null,
+                'start_month'  => date_for_database($customer['start_month']) ?? null,
+                'end_month'    => date_for_database($customer['end_month']) ?? null,
                 'subtotal'     => $payload['total'],
                 'total'        => $payload['total'],
             ]);

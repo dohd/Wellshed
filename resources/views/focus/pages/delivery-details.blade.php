@@ -37,12 +37,12 @@
                 {{ Form::date('delivery_date', null, ['class' => 'form-control', 'id' => 'delivery_date', 'placeholder' => 'Expected Delivery Date']) }}
             </div>
             <div class='mb-3'>
-                {{ Form::label('start_month', 'Start (Period From)', ['class' => 'control-label']) }}
-                {{ Form::month('start_month', null, ['class' => 'form-control', 'id' => 'start_month', 'placeholder' => 'Start (Period From)']) }}
+                {{ Form::label('start_month', 'Start Date (Period From)', ['class' => 'control-label']) }}
+                {{ Form::date('start_month', null, ['class' => 'form-control', 'id' => 'start_month', 'placeholder' => 'Start (Period From)']) }}
             </div>
             <div class='mb-3'>
-                {{ Form::label('end_month', 'End (Period To)', ['class' => 'control-label']) }}
-                {{ Form::month('end_month', null, ['class' => 'form-control', 'id' => 'end_month', 'placeholder' => 'End (Period To)']) }}
+                {{ Form::label('end_month', 'End Date (Period To)', ['class' => 'control-label']) }}
+                {{ Form::date('end_month', null, ['class' => 'form-control', 'id' => 'end_month', 'placeholder' => 'End (Period To)']) }}
             </div>
 
             <div class="d-flex justify-content-between mt-4">
