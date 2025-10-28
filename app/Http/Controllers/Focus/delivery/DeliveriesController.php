@@ -27,6 +27,7 @@ use App\Models\Company\RecipientSetting;
 use App\Models\customer\Customer;
 use App\Models\delivery\Delivery;
 use App\Models\delivery\DeliveryItem;
+use App\Models\delivery_schedule\DeliverySchedule;
 use App\Models\hrm\Hrm;
 use App\Models\orders\Orders;
 use App\Models\send_sms\SendSms;
@@ -258,6 +259,24 @@ class DeliveriesController extends Controller
                 SendDeliveryNotificationJob::dispatch($delivery->id);
             }
         }
+        //schedules count
+        $all_schedules = DeliverySchedule::whereIn('status',['delivered','scheduled','en_route'])->where('order_id',$delivery->order_id)->count();
+        //deliveries
+        $deliveries = Delivery::where('status','delivered')->where('order_id',$delivery->order_id)->count();
+        if($all_schedules == $deliveries){
+            $order = $delivery->order;
+            if($order){
+                $order->status = 'completed';
+                $order->update();
+            }
+        }elseif ($deliveries > 0 && $deliveries < $all_schedules) {
+            $order = $delivery->order;
+            if($order){
+                $order->status = 'started';
+                $order->update();
+            }
+        }
+
 
         return response()->json([
             'status' => 'success',

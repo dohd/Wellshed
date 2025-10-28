@@ -4,7 +4,7 @@
 <style>
     .home-wrapper {
         padding: 1.2rem 1rem;
-        padding-bottom: 5rem !important; /* 👈 Prevent overlap with bottom nav */
+        padding-bottom: 5rem !important;
     }
 
     .title {
@@ -25,13 +25,44 @@
         background: #0069d9;
     }
 
+    .section-header {
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin-top: 1.6rem;
+        margin-bottom: .4rem;
+    }
+
+    /* Feature Cards */
+    .feature-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1rem;
+        border: 1px solid #e8e8e8;
+        display: flex;
+        align-items: center;
+        gap: .9rem;
+        margin-bottom: .5rem;
+        cursor: pointer;
+        transition: .25s;
+    }
+
+    .feature-card:hover {
+        background: #f7f9ff;
+        border-color: #007bff;
+    }
+
+    .feature-card i {
+        font-size: 1.5rem;
+        color: #007bff;
+    }
+
     .list-group-item {
         border-radius: 10px !important;
         margin-bottom: 6px;
         border: 1px solid #e8e8e8;
     }
 
-    /* ✅ Fixed Bottom Nav across devices */
+    /* Fixed Bottom Nav */
     .footer-nav {
         position: fixed;
         bottom: 0;
@@ -63,7 +94,6 @@
         font-weight: 600;
     }
 
-    /* ✅ Larger Screen Enhancements */
     @media (min-width: 768px) {
         .title {
             font-size: 2rem;
@@ -83,18 +113,34 @@
 <div class="row g-3 g-xl-4 home-wrapper">
     <section class="col-12">
         <div class="glass-card pane h-100">
-            <h2 class="title lh-sm">
-                Hi {{ $customer->name }},<br>Need a refill?
-            </h2>
+            <h2 class="title lh-sm">Hi {{ $customer->name }},<br>Need a refill?</h2>
 
             <button class="btn btn-lg cta-btn w-100 mt-3"
                 onclick="window.location.href='{{ route('biller.customer_pages.orders') }}'">
                 Order Now
             </button>
 
+            {{-- ✅ Quick Actions (New) --}}
+            <div class="section-header mt-4">Quick Actions</div>
+
+            <div class="feature-card" onclick="window.location.href='{{ route('biller.customer_pages.payments') }}'">
+                <i class="bi bi-wallet2"></i>
+                <span>Payments</span>
+            </div>
+
+            <div class="feature-card" onclick="window.location.href='{{ route('biller.customer_pages.subscriptions') }}'">
+                <i class="bi bi-repeat"></i>
+                <span>Subscriptions</span>
+            </div>
+
+            <div class="feature-card" onclick="window.location.href='{{ route('biller.customer_pages.my_orders') }}'">
+                <i class="bi bi-book"></i>
+                <span>My Orders</span>
+            </div>
+
             @if ($incoming_schedules->count())
             <div class="mt-4">
-                <h5>Incoming Delivery</h5>
+                <div class="section-header">Incoming Delivery</div>
                 <ul class="list-group small">
                     @foreach ($incoming_schedules as $sch)
                         <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -109,7 +155,7 @@
 
             @if ($prev_schedules->count())
             <div class="mt-4">
-                <h5>Recent Deliveries</h5>
+                <div class="section-header">Recent Deliveries</div>
                 <ul class="list-group small">
                     @foreach ($prev_schedules as $sch)
                         <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -127,27 +173,24 @@
     </section>
 </div>
 
-{{-- ✅ Bottom Nav --}}
+{{-- ✅ Bottom Nav (unchanged) --}}
 <div class="footer-nav">
     <div class="d-flex justify-content-around">
         <a class="nav-pill {{ request()->routeIs('biller.customer_pages.home') ? 'active' : '' }}"
             href="{{ route('biller.customer_pages.home') }}">
             <i class="bi bi-house"></i><span>Home</span>
         </a>
-
         <a class="nav-pill {{ request()->routeIs('biller.customer_pages.orders') ? 'active' : '' }}"
             href="{{ route('biller.customer_pages.orders') }}">
             <i class="bi bi-receipt"></i><span>Orders</span>
         </a>
-
         <a class="nav-pill {{ request()->routeIs('biller.customer_pages.profile') ? 'active' : '' }}"
             href="{{ route('biller.customer_pages.profile') }}">
             <i class="bi bi-person"></i><span>Profile</span>
         </a>
-        <a class="nav-pill" href="{{ route('biller.logout') }}"><i class="ft-power"></i>
-         <i class="bi bi-box-arrow-right"></i><span>Logout</span>
+        <a class="nav-pill" href="{{ route('biller.logout') }}">
+            <i class="bi bi-box-arrow-right"></i><span>Logout</span>
         </a>
-
     </div>
 </div>
 @endsection

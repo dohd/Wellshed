@@ -35,7 +35,8 @@ class CustomerPagesController extends Controller
     }
     public function profile()
     {
-        return view('focus.pages.profile');
+        $customer = Customer::where('id', auth()->user()->customer_id)->first();
+        return view('focus.pages.profile', compact('customer'));
     }
     public function delivery()
     {
@@ -49,6 +50,21 @@ class CustomerPagesController extends Controller
     public function thank_you()
     {
         return view('focus.pages.thank-you');
+    }
+
+    public function payments()
+    {
+        return view('focus.pages.payments');
+    }
+    public function subscriptions()
+    {
+        return view('focus.pages.subscriptions');
+    }
+    public function my_orders()
+    {
+        $customer = Customer::where('id', auth()->user()->customer_id)->first();
+        $orders = Orders::where('customer_id', $customer->id)->get();
+        return view('focus.pages.my_orders', compact('orders'));
     }
 
     public function submit_order(Request $request)

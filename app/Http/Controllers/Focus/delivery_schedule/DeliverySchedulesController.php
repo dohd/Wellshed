@@ -199,6 +199,7 @@ class DeliverySchedulesController extends Controller
 
     public function update_status(Request $request)
     {
+        DB::beginTransaction();
         $request->validate([
             'id' => 'required|integer',
             'status' => 'required|string',
@@ -232,13 +233,13 @@ class DeliverySchedulesController extends Controller
             foreach ($schedule->items as $item) {
                 if ($item->product) {
 
-                    $item->product->decrement('qty', $item->qty);
+                    // $item->product->decrement('qty', $item->qty);
 
                     StockTransaction::create([
                         'stock_item_id' => $item->product_id,
                         'date' => now()->format('Y-m-d'),
                         'qty' => -$item->qty,
-                        'price' => $item->product->purchase_price ?? 0,
+                        'price' => $item->product->price ?? 0,
                         'type' => 'sale',
                         'tid' => $schedule->tid,
                     ]);
@@ -255,8 +256,13 @@ class DeliverySchedulesController extends Controller
                     dispatch(new SendEnRouteNotificationJob($schedule->id));
                 }
             }
+        }elseif(($newStatus === 'cancelled' || $newStatus === 'failed') && $previousStatus === 'en_route')
+        {
+            StockTransaction::where('tid', $schedule->tid)
+            ->where('type', 'sale')
+            ->delete();
         }
-
+        DB::commit();
         return response()->json(['success' => true]);
     }
 

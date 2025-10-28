@@ -186,6 +186,9 @@ Route::group(['namespace' => 'department'], function () {
     Route::post('departments/get', 'DepartmentsTableController')->name('departments.get');
 });
 Route::group(['namespace' => 'customer_page'], function () {
+    Route::get('customer_pages/subscriptions', 'CustomerPagesController@subscriptions')->name('customer_pages.subscriptions');
+    Route::get('customer_pages/my_orders', 'CustomerPagesController@my_orders')->name('customer_pages.my_orders');
+    Route::get('customer_pages/payments', 'CustomerPagesController@payments')->name('customer_pages.payments');
     Route::post('customer_pages/submit_order', 'CustomerPagesController@submit_order')->name('customer_pages.submit_order');
     Route::get('customer_pages/home', 'CustomerPagesController@home')->name('customer_pages.home');
     Route::get('customer_pages/orders', 'CustomerPagesController@orders')->name('customer_pages.orders');
