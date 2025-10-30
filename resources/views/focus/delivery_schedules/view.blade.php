@@ -76,6 +76,14 @@
                                             <p>{{ str_replace('_','', ucfirst($delivery_schedule->status)) }}</p>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-3 border-blue-grey border-lighten-5  p-1">
+                                            <p>Remarks</p>
+                                        </div>
+                                        <div class="col border-blue-grey border-lighten-5  p-1 font-weight-bold">
+                                            <p>{{ $delivery_schedule->status_note }}</p>
+                                        </div>
+                                    </div>
 
 
                                 </div>

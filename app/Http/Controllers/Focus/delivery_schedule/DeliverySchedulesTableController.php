@@ -20,6 +20,7 @@ namespace App\Http\Controllers\Focus\delivery_schedule;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use App\Models\delivery_schedule\DeliverySchedule;
+use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 /**
  * Class DeliverySchedulesTableController.
@@ -33,40 +34,114 @@ class DeliverySchedulesTableController extends Controller
      *
      * @return mixed
      */
-    public function __invoke()
+    public function __invoke(Request $request)
     {
-        //
-        $core = DeliverySchedule::all();
-        return Datatables::of($core)
-            ->escapeColumns(['id'])
-            ->addIndexColumn()
-            ->addColumn('tid', function ($delivery_schedule) {
-                 return gen4tid('DS-',$delivery_schedule->tid);
+        // Build base query with relationships for filtering/columns
+        $query = DeliverySchedule::query()
+            ->with([
+                'order:id,tid,customer_id',
+                'order.customer:id,company',
+                'delivery_frequency:id,delivery_days',
+            ]);
+
+        // -------------------- Filters --------------------
+
+        // Delivery date filter: exact or range (start_date / end_date)
+        if ($request->filled('delivery_date')) {
+            $date = $this->safeDate($request->input('delivery_date'));
+            if ($date) {
+                $query->whereDate('delivery_date', $date->toDateString());
+            }
+        } elseif ($request->filled('start_date') || $request->filled('end_date')) {
+            $start = $this->safeDate($request->input('start_date'));
+            $end   = $this->safeDate($request->input('end_date'));
+
+            if ($start && $end) {
+                $query->whereBetween('delivery_date', [$start->toDateString(), $end->toDateString()]);
+            } elseif ($start) {
+                $query->whereDate('delivery_date', '>=', $start->toDateString());
+            } elseif ($end) {
+                $query->whereDate('delivery_date', '<=', $end->toDateString());
+            }
+        }
+
+        // Order No filter (supports "ORD-123" or "123")
+        if ($request->filled('order_no')) {
+            $needle = trim($request->input('order_no'));
+            $digits = preg_replace('/\D+/', '', $needle); // extract numeric portion
+
+            $query->whereHas('order', function ($oq) use ($needle, $digits) {
+                $oq->where(function ($w) use ($needle, $digits) {
+                    if ($digits !== '') {
+                        $w->orWhere('tid', 'like', "%{$digits}%");
+                    }
+                    $w->orWhere('tid', 'like', "%{$needle}%");
+                });
+            });
+        }
+
+        // Customer filter (company name)
+        if ($request->filled('customer')) {
+            $cust = trim($request->input('customer'));
+            $query->whereHas('order.customer', function ($cq) use ($cust) {
+                $cq->where('id', $cust);
+            });
+        }
+
+        // Delivery Days filter (e.g., "Mon,Wed,Fri", "Daily")
+        if ($request->filled('delivery_days')) {
+            $days = trim($request->input('delivery_days'));
+            $query->whereHas('delivery_frequency', function ($fq) use ($days) {
+                $fq->where('delivery_days', 'like', "%{$days}%");
+            });
+        }
+
+        // -------------------- DataTables --------------------
+        $startFrom = (int) $request->input('start', 0); // for manual index alias
+        $counter = $startFrom;
+
+        return DataTables::of($query)
+            // If your frontend expects 'DT_Row_Index', add a manual index column.
+            ->addColumn('DT_Row_Index', function () use (&$counter) {
+                $counter++;
+                return $counter;
             })
-            ->addColumn('order', function ($delivery_schedule) {
-                 return $delivery_schedule->order ? gen4tid('ORD-',$delivery_schedule->order->tid) : '';
+            ->addColumn('tid', function ($ds) {
+                // DS-<tid>
+                return gen4tid('DS-', $ds->tid);
             })
-            ->addColumn('customer', function ($delivery_schedule) {
-                return optional(optional($delivery_schedule->order)->customer)->company ?? '';
+            ->addColumn('order', function ($ds) {
+                // ORD-<tid> if order exists
+                return $ds->order ? gen4tid('ORD-', $ds->order->tid) : '';
             })
-            ->addColumn('delivery_days', function ($delivery_schedule) {
-                return $delivery_schedule->delivery_frequency ? $delivery_schedule->delivery_frequency->delivery_days :'';
+            ->addColumn('customer', function ($ds) {
+                return optional(optional($ds->order)->customer)->company ?? '';
             })
-            ->addColumn('delivery_date', function ($delivery_schedule) {
-                return dateFormat($delivery_schedule->delivery_date);
+            ->addColumn('delivery_days', function ($ds) {
+                return $ds->delivery_frequency ? $ds->delivery_frequency->delivery_days : '';
             })
-            ->addColumn('delivery_time', function ($delivery_schedule) {
-                return timeFormat($delivery_schedule->delivery_time);
+            ->addColumn('delivery_date', function ($ds) {
+                return dateFormat($ds->delivery_date);
             })
-            ->addColumn('status', function ($delivery_schedule) {
-                return ucfirst($delivery_schedule->status);
+            ->addColumn('status', function ($ds) {
+                return ucfirst((string) $ds->status);
             })
-            ->addColumn('created_at', function ($delivery_schedule) {
-                return Carbon::parse($delivery_schedule->created_at)->toDateString();
+            ->addColumn('actions', function ($ds) {
+                // use your accessor / presenter
+                return $ds->action_buttons;
             })
-            ->addColumn('actions', function ($delivery_schedule) {
-                return $delivery_schedule->action_buttons;
-            })
+            ->rawColumns(['actions'])
             ->make(true);
     }
+
+    protected function safeDate($value): ?Carbon
+    {
+        if (!$value) return null;
+        try {
+            return Carbon::parse($value);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
 }

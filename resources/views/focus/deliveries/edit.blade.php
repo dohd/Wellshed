@@ -78,7 +78,47 @@
                     },
                 }
             },
+            itemSelect2: {
+                allowClear: true,
+                ajax: {
+                    url: "{{ route('biller.products.search') }}",
+                    dataType: 'json',
+                    delay: 250,
+                    type: 'POST',
+                    data: ({
+                        keyword
+                    }) => ({
+                        keyword,
+                    }),
+                    processResults: response => {
+                        return {
+                            results: (response || []).map(v => {
+                                const selling_price = accounting.unformat(v.price);
+                                const purchase_price = accounting.unformat(v.purchase_price);
+                                const available_qty = accounting.unformat(v.qty);
+
+                                return {
+                                    id: v.id,
+                                    text: `${v.name}`,
+                                    selling_price,
+                                    purchase_price,
+                                    available_qty,
+                                };
+                            })
+                        }
+                    },
+                }
+            },
         };
+
+        function initItemSelect2($scope) {
+            $scope.find('select.product_id')
+                .not('.select2-hidden-accessible')
+                .select2(Object.assign({}, config.itemSelect2, {
+                    dropdownParent: $('body'),
+                    width: '100%'
+                }));
+        }
         const Edit = {
             init() {
                 $.ajaxSetup(config.ajax);
@@ -94,6 +134,12 @@
                 });
                 $('#order').change(Edit.orderChange);
                 $('#delivery_schedule').change(Edit.deliveryScheduleChange);
+                // add new row from template
+                $('#addRow').click(function() {
+                    let $newRow = $($('#rowTemplate').html()); // clone template row
+                    $('#itemsTbl tbody').append($newRow);
+                    initItemSelect2($newRow);
+                });
             },
             customerChange(){
                 var select = $('#order');

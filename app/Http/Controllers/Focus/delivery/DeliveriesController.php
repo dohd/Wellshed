@@ -118,6 +118,7 @@ class DeliveriesController extends Controller
             foreach ($result->items as $item) {
                 $delivery_item = $item;
                 $delivery_schedule_item = $item->delivery_schedule_item;
+                if(!$delivery_schedule_item) continue;
                 $delivery_schedule_item->delivered_qty = $delivery_item->delivered_qty;
                 $delivery_schedule_item->returned_qty = $delivery_item->returned_qty;
                 $delivery_schedule_item->remaining_qty = $delivery_item->remaining_qty;
@@ -194,6 +195,7 @@ class DeliveriesController extends Controller
             foreach ($delivery->items as $item) {
                 $delivery_item = $item;
                 $delivery_schedule_item = $item->delivery_schedule_item;
+                if(!$delivery_schedule_item) continue;
                 $delivery_schedule_item->delivered_qty = $delivery_item->delivered_qty;
                 $delivery_schedule_item->returned_qty = $delivery_item->returned_qty;
                 $delivery_schedule_item->remaining_qty = $delivery_item->remaining_qty;
@@ -242,10 +244,11 @@ class DeliveriesController extends Controller
         $request->validate([
             'delivery_id' => 'required|exists:deliveries,id',
             'status' => 'required|string',
+            'status_note' => 'nullable|string',
         ]);
 
         $delivery = Delivery::find($request->delivery_id);
-        $delivery->update(['status' => $request->status]);
+        $delivery->update(['status' => $request->status,'status_note' => $request->status_note]);
         $recipt_setting = RecipientSetting::where('ins',auth()->user()->ins)->where('type','dispatch_notification')->first();
         if($delivery->status == 'delivered')
         {

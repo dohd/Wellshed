@@ -87,6 +87,10 @@
                             <option value="cancelled">Cancelled</option>
                         </select>
                     </div>
+                    <div class="form-group mb-3">
+                        <label for="status_note" class="form-label">Remarks</label>
+                        <textarea name="status_note" id="status_note" cols="30" rows="10" class="form-control"></textarea>
+                    </div>
                 </div>
 
                 <div class="modal-footer">

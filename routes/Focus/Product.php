@@ -70,6 +70,7 @@ Route::group(['namespace' => 'purchaseorder'], function () {
 });
 
 Route::group(['namespace' => 'product'], function () {
+    Route::post('products/search', 'ProductsController@search')->name('products.search');
     Route::post('products/get_categories', 'ProductsController@get_categories')->name('products.get_categories');
     Route::get('products/show_product_inventory', 'ProductsController@show_product_inventory')->name('products.show_product_inventory');
     Route::get('products/get_products', 'ProductsController@getProducts')->name('products.getProducts');

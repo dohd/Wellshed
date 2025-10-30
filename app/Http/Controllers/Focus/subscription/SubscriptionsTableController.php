@@ -18,7 +18,7 @@ class SubscriptionsTableController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $customers = Customer::whereHas('subscriptions')->get();
+        $customers = Customer::whereHas('subscriptions',fn($q) => $q->where('status','active'))->get();
 
         return DataTables::of($customers)
             ->escapeColumns(['id'])
@@ -33,7 +33,8 @@ class SubscriptionsTableController extends Controller
                 return $model->company;
             })
             ->addColumn('package', function ($model) {
-                return @$model->package->name;
+                $subscription = $model->subscriptions()->first();
+                return @$subscription->package->name;
             })
             ->editColumn('start_date', function ($model) {
                 return Carbon::parse($model->start_date)->format('d M Y H:i');

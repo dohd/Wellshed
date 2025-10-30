@@ -1047,4 +1047,48 @@ class ProductsController extends Controller
         }
         return response()->json($product_categories);
     }
+
+    public function search(){
+        // fetch inventory products
+        $productvariations = ProductVariation::whereHas('product', function ($q) {
+            $q->where('name', 'LIKE', '%' . request('keyword') . '%');
+        })
+        ->where('type','empty')
+        ->with([
+            'warehouse:id,title',
+            'product',
+            'product.unit'
+        ])
+        ->limit(6)
+        ->get()
+        ->unique('name');
+    
+        $products = [];
+        foreach ($productvariations as $row) {
+            // Modify name if stock_type is service
+            $name = $row->name;
+            if (isset($row->product) && $row->product->stock_type === 'service') {
+                $name = 'SRVC - ' . $name;
+            }
+        
+            $product = array_intersect_key(
+                $row->toArray(),
+                array_flip(['id', 'product_id', 'code', 'qty', 'image', 'purchase_price', 'price', 'alert'])
+            );
+        
+            $products[] = array_merge($product, [
+                'name' => $name,
+                'purchase_price' => latestPurchaseCost($row->id) ?: $row->purchase_price,
+                'product_des' => @$row->product->product_des ?? '',
+                'units' => @$row->product->units ?? '',
+                'uom' => @$row->product->unit->code ?? '',
+                'uom_id' => @$row->product->unit->id ?? '',
+                'warehouse' => $row->warehouse ? $row->warehouse->toArray() : '',
+                'product' => @$row->product ?? '',
+            ]);
+        }
+    
+
+        return response()->json($products);
+    }
 }

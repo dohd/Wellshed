@@ -51,7 +51,9 @@ class DeliverySchedulesController extends Controller
      */
     public function index()
     {
-        return new ViewResponse('focus.delivery_schedules.index');
+        $orders = Orders::get();
+        $customers = Customer::all();
+        return new ViewResponse('focus.delivery_schedules.index', compact('orders','customers'));
     }
 
     /**
@@ -203,6 +205,7 @@ class DeliverySchedulesController extends Controller
         $request->validate([
             'id' => 'required|integer',
             'status' => 'required|string',
+            'status_note' => 'nullable|string',
         ]);
 
         $schedule = DeliverySchedule::with('items.product')->findOrFail($request->id);
@@ -216,6 +219,7 @@ class DeliverySchedulesController extends Controller
         }
 
         $schedule->status = $newStatus;
+        $schedule->status_note = $request->status_note;
         $schedule->save();
 
         // Get recipient settings only when required
