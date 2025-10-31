@@ -100,7 +100,7 @@ class CustomerLogin extends Controller
 
         try {
             DB::beginTransaction();
-            $ins = Company::first(['id'])->id;
+            $ins = Company::where('id', 2)->first(['id'])->id;
 
             // create customer
             $customer = Customer::create([
