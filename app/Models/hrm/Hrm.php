@@ -67,23 +67,13 @@ class Hrm extends Model
     protected static function boot()
     {
         parent::boot();
-        static::creating(function ($instance) {
-            $instance->fill([
-                'tid' => Hrm::getTid() + 1,
-            ]);
-            return $instance;
-        });
 
-        static::addGlobalScope('ins', function ($builder) {
-            if (auth()->check() && auth()->user()->ins) {
-                $builder->where('users.ins', auth()->user()->ins);
-            }
-        });
-        static::addGlobalScope('status', function ($builder) {
-            $builder->where('users.status', 1);
-        });
-
-        // static::addGlobalScope(new ActiveUserScope);
+        if (auth()->id()) {
+            static::creating(function ($model) {
+                $model->tid = Hrm::max('tid')+1;
+                return $model;
+            });            
+        }
     }
     /**
      * Set password attribute.

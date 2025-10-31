@@ -16,7 +16,7 @@ class CreateSubscriptionsTable extends Migration
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedInteger('customer_id');
-            $table->unsignedInteger('subscription_package_id');
+            $table->unsignedInteger('sub_package_id');
             $table->timestamp('start_date')->nullable();
             $table->timestamp('end_date')->nullable();
             $table->decimal('balance', 16,2)->default(0);
@@ -24,7 +24,8 @@ class CreateSubscriptionsTable extends Migration
 
             $table->unsignedInteger('is_disabled')->nullable();
             $table->unsignedBigInteger('created_by')->nullable();
-            $table->unsignedBigInteger('ins');
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('ins')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();
         });

@@ -21,8 +21,14 @@ use App\Http\Responses\RedirectResponse;
 use App\Models\Company\ConfigMeta;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Company\Company;
+use App\Models\customer\Customer;
+use App\Models\hrm\Hrm;
 use App\Models\subpackage\SubPackage;
+use App\Models\subscription\Subscription;
+use App\Models\target_zone\CustomerZoneItem;
 use App\Models\target_zone\TargetZone;
+use DB;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 
@@ -59,15 +65,90 @@ class CustomerLogin extends Controller
         return Auth::guard('crm');
     }
 
-    protected function authenticated(Request $request, $user)
-    {}
-
+    protected function authenticated(Request $request, $user) {}
+    
+    /**
+     * Customer Self Registration
+     * */
     public function register(Request $request )
     {
         if ($request->isMethod('get')) {
             $subpackages = SubPackage::all();
-            $targetzones = TargetZone::all();
+            $targetzones = TargetZone::with('items')->get();
             return view('crm.register', compact('subpackages', 'targetzones'));
+        }
+        // dd($request->all());
+        $request->validate([
+            'sub_package_id' => 'required',
+            'segment' => 'required',
+            'company' => 'required_if:segment,office',
+            'first_name' => 'required_if:segment,household',
+            'last_name' => 'required_if:segment,household',
+            'email' => 'required_without:phone_no',
+            'phone_no' => 'required_without:email',
+            'password' => 'required',
+            'target_zone_id' => 'required',
+            'target_zone_item_id' => ['required', 'array', 'min:1'],
+        ], [
+            'sub_package_id' => 'package is required',
+            'target_zone_id' => 'delivery zone is required',
+            'target_zone_item_id' => 'location is required',
+        ]);
+
+        $input = $request->all();
+        $input['full_name'] = $input['first_name']? "{$input['first_name']} {$input['last_name']}" : '';
+
+        try {
+            DB::beginTransaction();
+            $ins = Company::first(['id'])->id;
+
+            // create customer
+            $customer = Customer::create([
+                'tid' => Customer::max('tid')+1,
+                'segment' => $input['segment'],
+                'company' => $input['company'],
+                'name' => $input['company'] ?? $input['full_name'],
+                'email' => $input['email'],
+                'phone' => $input['phone_no'],
+                'ins' => $ins,
+            ]);    
+
+            // create user
+            $user = Hrm::create([
+                'tid' => Hrm::max('tid')+1,
+                'first_name' => $input['first_name'] ?? $input['company'],
+                'last_name' => $input['last_name'],
+                'username' => $input['company'] ?? $input['full_name'],
+                'email' => $input['email'],
+                'password' => $input['password'],
+                'login_access' => 1,
+                'status' => 1,
+                'confirmed' => 1,
+                'customer_id' => $customer->id,
+                'ins' => $ins,
+            ]);
+
+            // create subscription
+            $subscr = Subscription::create([
+                'customer_id' => $customer->id,
+                'sub_package_id' => $input['sub_package_id'],
+                'start_date' => now(),
+                'end_date' => date('Y-m-d H:i:s', strtotime('+1 month')),
+                'ins' => $ins,
+            ]);
+
+            // create zone items
+            foreach ($input['target_zone_item_id'] as $id) {
+                $customerZoneItems[] = CustomerZoneItem::create([
+                    'target_zone_item_id' => $id,
+                    'target_zone_id' => $input['target_zone_id'],
+                    'customer_id' => $customer->id,
+                ]);
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            return errorHandler('Registration Error: Please contact admin', $e);            
         }
 
         return redirect(route('login'))->with(['flash_success' => 'Registration Successful']);
@@ -76,12 +157,10 @@ class CustomerLogin extends Controller
     // login from for customer
     public function showLoginForm()
     {
-
         if (Auth::guard('crm')->check()) {
-
             return new RedirectResponse(route('crm.invoices.index'), ['']);
-
         }
+
         return view('crm.login');
     }
 

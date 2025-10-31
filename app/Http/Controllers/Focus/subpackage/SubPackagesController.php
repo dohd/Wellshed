@@ -40,14 +40,13 @@ class SubPackagesController extends Controller
         $request->validate([
             'name' => 'required',
             'price' => 'required',
-            'duration' => 'required',
         ]);
         $data = $request->except(['_token']);
 
         try {
             $data['price'] = numberClean($data['price']);
             $subpackage = SubPackage::create($data);
-
+            
             return redirect(route('biller.subpackages.index'))->with(['flash_success' => 'Package Created Successfully']);
         } catch (Exception $e) {
             return errorHandler('Error Creating Package', $e);
@@ -88,7 +87,6 @@ class SubPackagesController extends Controller
         $request->validate([
             'name' => 'required',
             'price' => 'required',
-            'duration' => 'required',
         ]);
         $data = $request->except(['_token', '_method']);
 

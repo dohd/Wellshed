@@ -68,24 +68,21 @@ class Customer extends Model
         if (auth()->id()) {
             static::creating(function ($model) {
                 $model->tid = Customer::max('tid')+1;
-                $model->ins = auth()->user()->ins;
                 $model->created_by = auth()->id();
                 return $model;
             });
-        }
 
-        static::addGlobalScope('ins', function ($builder) {
-            if (isset(auth()->user()->ins)) {
-                $builder->where('ins', auth()->user()->ins);
-            }
-        });
-        
+            static::updating(function ($model) {
+                $model->updated_by = auth()->id();
+                return $model;
+            });
+        }        
     }
 
     // Override resolveRouteBinding to bypass global scope
     public function resolveRouteBinding($value, $field = null)
     {
-        return $this->withoutGlobalScopes(['currency_id'])->where($field ?? 'id', $value)->firstOrFail();
+        // return $this->withoutGlobalScopes(['currency_id'])->where($field ?? 'id', $value)->firstOrFail();
     }
 
     /**
