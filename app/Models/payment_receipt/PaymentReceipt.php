@@ -5,11 +5,11 @@ namespace App\Models\payment_receipt;
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\payment_receipt\Traits\BranchAttribute;
-use App\Models\payment_receipt\Traits\BranchRelationship;
+use App\Models\payment_receipt\Traits\PaymentReceiptRelationship;
 
 class PaymentReceipt extends Model
 {
-    use ModelTrait, BranchAttribute, BranchRelationship;
+    use ModelTrait, BranchAttribute, PaymentReceiptRelationship;
 
     /**
      * The database table used by the model.

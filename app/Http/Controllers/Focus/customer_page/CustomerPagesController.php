@@ -8,6 +8,7 @@ use App\Models\delivery_schedule\DeliverySchedule;
 use App\Models\delivery_schedule\DeliveryScheduleItem;
 use App\Models\orders\Orders;
 use App\Models\orders\OrdersItem;
+use App\Models\payment_receipt\PaymentReceipt;
 use App\Models\product\ProductVariation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -55,8 +56,11 @@ class CustomerPagesController extends Controller
 
     public function payments()
     {
-        return view('focus.pages.payments');
+        $balance = PaymentReceipt::selectRaw('SUM(debit-credit) total')->value('total');
+        $receipts = PaymentReceipt::get();
+        return view('focus.pages.payments', compact('balance', 'receipts'));
     }
+    
     public function subscriptions()
     {
         return view('focus.pages.subscriptions');
