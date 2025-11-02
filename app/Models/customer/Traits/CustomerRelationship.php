@@ -13,6 +13,8 @@ use App\Models\invoice_payment\InvoicePayment;
 use App\Models\job_valuation\JobValuation;
 use App\Models\lead\Lead;
 use App\Models\manualjournal\Journal;
+use App\Models\orders\Orders;
+use App\Models\payment_receipt\PaymentReceipt;
 use App\Models\project\Project;
 use App\Models\quote\Quote;
 use App\Models\recentCustomer\RecentCustomerEmail;
@@ -28,6 +30,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 trait CustomerRelationship
 {
+    public function charges() {
+        return $this->hasMany(PaymentReceipt::class)->where('entry_type', 'debit');
+    }
+
+    public function orders() {
+        return $this->hasMany(Orders::class);
+    }
+
     public function subscriptions() {
         return $this->hasMany(Subscription::class);
     }

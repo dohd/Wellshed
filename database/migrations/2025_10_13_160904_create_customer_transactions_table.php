@@ -22,11 +22,14 @@ class CreateCustomerTransactionsTable extends Migration
             $table->string('reference')->nullable();
             $table->string('notes')->nullable();
             $table->enum('payment_mode', ['cash', 'mobile-money', 'cheque', 'bank-transfer'])->nullable();
+            $table->unsignedBigInteger('order_id');
 
-            $table->unsignedBigInteger('user_id')->nullable();
             $table->unsignedBigInteger('ins');
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

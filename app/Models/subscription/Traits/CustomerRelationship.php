@@ -9,7 +9,7 @@ use App\Models\subpackage\SubPackage;
  */
 trait CustomerRelationship
 {
-    public function package(){
+    public function package() {
         return $this->belongsTo(SubPackage::class, 'sub_package_id');
     }
 }

@@ -49,3 +49,9 @@ Route::group(['namespace' => 'orders'], function () {
     //For Datatable
     Route::post('customer_orders/get', 'OrdersTableController')->name('customer_orders.get');
 });
+
+Route::group(['namespace' => 'payment_receipt'], function () {
+    Route::resource('payment_receipts', 'PaymentReceiptsController');
+    //For Datatable
+    Route::post('payment_receipts/get', 'PaymentReceiptsTableController')->name('payment_receipts.get');
+});
