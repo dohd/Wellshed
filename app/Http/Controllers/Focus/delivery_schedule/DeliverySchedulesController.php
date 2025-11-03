@@ -76,13 +76,14 @@ class DeliverySchedulesController extends Controller
      */
     public function store(Request $request)
     {
-        //Input received from the request
         $input = $request->except(['_token', 'ins']);
         $input['ins'] = auth()->user()->ins;
-        // dd($input);
+
         try {
             DB::beginTransaction();
+
             $order = Orders::find($input['order_id']);
+
             $schedule = DeliverySchedule::create([
                 'tid' => (DeliverySchedule::max('tid') ?? 0) + 1,
                 'customer_id' => $order->customer_id ?? '',
@@ -95,14 +96,15 @@ class DeliverySchedulesController extends Controller
                 'user_id' => auth()->user()->id,
             ]);
 
-            $items = $order->items->map(function ($item) use ($schedule) {
+            // Use items from the request instead of order->items
+            $items = collect($input['items'])->map(function ($item) use ($schedule) {
                 return [
                     'delivery_schedule_id' => $schedule->id,
-                    'order_item_id' => $item->id,
-                    'product_id' => $item->product_id,
-                    'qty' => $item->qty,
-                    'rate' => $item->rate,
-                    'amount' => $item->amount,
+                    'order_item_id' => $item['order_item_id'], // assuming this refers to the order_item_id
+                    'product_id' => $item['product_id'], // or change this if you have product_id elsewhere
+                    'qty' => $item['qty'],
+                    'rate' => $item['rate'],
+                    'amount' => $item['amount'],
                     'ins' => $schedule->ins,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -112,13 +114,18 @@ class DeliverySchedulesController extends Controller
             if (!empty($items)) {
                 DeliveryScheduleItem::insert($items);
             }
+
             DB::commit();
         } catch (\Throwable $th) {
-            return errorHandler('Error Creating Delivery Schedule',$th);
+            return errorHandler('Error Creating Delivery Schedule', $th);
         }
-        //return with successfull message
-        return new RedirectResponse(route('biller.delivery_schedules.index'), ['flash_success' => 'Delivery Frequency Created Successfully!!']);
+
+        return new RedirectResponse(
+            route('biller.delivery_schedules.index'),
+            ['flash_success' => 'Delivery Frequency Created Successfully!!']
+        );
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -141,14 +148,39 @@ class DeliverySchedulesController extends Controller
      */
     public function update(Request $request, DeliverySchedule $delivery_schedule)
     {
-        //Input received from the request
-        $input = $request->except(['_token', 'ins']);
-        $input['delivery_date'] = date_for_database($input['delivery_date']);
-        $delivery_schedule->update($input);
-        // dd($input, $delivery_schedule);
-        //return with successfull message
-        return new RedirectResponse(route('biller.delivery_schedules.index'), ['flash_success' => 'Delivery Frequency Updated Successfully!!']);
+        // Validate (optional, but recommended)
+        
+        $request->validate([
+            'delivery_date' => 'required|date',
+            'items.*.id' => 'required|exists:delivery_schedule_items,id',
+            'items.*.qty' => 'required|numeric|min:0',
+            'items.*.rate' => 'required|numeric|min:0',
+            // 'items.*.amount' => 'required|numeric|min:0',
+        ]);
+        // Format delivery date for database
+        $delivery_schedule->update([
+            'delivery_date' => date_for_database($request->delivery_date),
+            'remarks' => $request->remarks,
+        ]);
+
+        // Loop through each item and update it
+        foreach ($request->items as $itemData) {
+            $item = $delivery_schedule->items()->find($itemData['id']);
+
+            if ($item) {
+                $item->update([
+                    'qty' => numberClean($itemData['qty']),
+                    'rate' => numberClean($itemData['rate']),
+                    'amount' => numberClean($itemData['amount']),
+                ]);
+            }
+        }
+
+        return redirect()
+            ->route('biller.delivery_schedules.index')
+            ->with('flash_success', 'Delivery Schedule Updated Successfully!');
     }
+
 
     /**
      * Remove the specified resource from storage.

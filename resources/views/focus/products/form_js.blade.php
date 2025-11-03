@@ -17,10 +17,20 @@
             });
             $('#unit').change(Form.unitChange);
             $('#itemType').change(Form.changeItemType).change();
-
+            $('#type').change(Form.typeChange).change();
             const events = [".add_more", ".add_serial", ".v_delete", ".v_delete_temp", ".v_delete_serial"];
             const handlers = [Form.addMore, Form.addSerial, Form.delVariableProduct, Form.delProduct, Form.delSerial];
             events.forEach((v,i) => $(document).on('click', v, handlers[i]));
+        },
+
+        typeChange(){
+            let type = $('#type').val();
+            if(type == 'empty'){
+                $('#ref').prop('disabled',false);
+            }else if(type == 'full'){
+                $('#ref').prop('disabled',true);
+
+            }
         },
 
         changeItemType() {

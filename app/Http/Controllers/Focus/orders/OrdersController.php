@@ -220,4 +220,16 @@ class OrdersController extends Controller
         return response()->json($orders);
     }
 
+    public function order_items(Request $request)
+    {
+        $order = Orders::where('id', $request->order_id)->first();
+        $items = $order->items()->get();
+        $items->map(function($v){
+            $v->product_name = $v->product ? $v->product->name : '';
+            $v->product_code = $v->product ? $v->product->code : '';
+            return $v;
+        });
+        return response()->json($items);
+    }
+
 }
