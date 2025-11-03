@@ -61,6 +61,10 @@ class StockTransaction extends Model
     protected static function boot()
     {
         parent::boot();
+
+        static::addGlobalScope('deleted_at', function ($builder) {
+            $builder->whereNull('deleted_at');
+        });
     }
 
 }
