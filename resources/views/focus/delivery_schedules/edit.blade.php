@@ -100,9 +100,35 @@
                     $('#customer').attr('disabled',true)
                     $('#order').attr('disabled',true)
                 }
+                $('#itemsTbl').on('change','.qty',Index.calculateLineTotals)
             },
             customerChange(){
                 $('#order').select2(config.orderSelect);
+            },
+            calculateLineTotals() {
+                const el = $(this);
+                let $row = el.parents('tr:first');
+                let qty = parseFloat($row.find('.qty').val()) || 0;
+                let rate = parseFloat($row.find('.rate').val()) || 0;
+                let vat = parseFloat($row.find('.rowtax').val()) || 0;
+                // Subtotal per row (before VAT)
+                let subtotal = qty * rate;
+                
+                // VAT amount per row
+                let vatAmount = subtotal * (vat / 100);
+                
+                // Line total
+                let lineTotal = subtotal + vatAmount;
+
+                // Update row
+                $row.find('.amt').val(lineTotal.toFixed(2));
+                $row.find('.amount').val(lineTotal.toFixed(2));
+
+                return {
+                    subtotal,
+                    vatAmount,
+                    lineTotal
+                };
             },
        };
        $(()=>Index.init()); 

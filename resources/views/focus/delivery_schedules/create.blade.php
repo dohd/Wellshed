@@ -96,10 +96,90 @@
                 $('#customer').select2({allowClear:true});
                 $('#order').select2(config.orderSelect);
                 $('#customer').change(this.customerChange);
+                $('#order').change(this.orderChange);
+                $('#itemsTbl').on('change','.qty',Index.calculateLineTotals)
             },
             customerChange(){
                 $('#order').val('').change();
             },
+            orderChange(){
+                let order_id = $(this).val();
+                $.ajax({
+                    url: "{{ route('biller.customer_orders.order_items') }}",
+                    method: "POST",
+                    data: {
+                        order_id,
+                    },
+                    success: function(data){
+                        data.forEach((v, i) => {
+                            $('#itemsTbl tbody').append(Index.productRow(v, i));
+                        });
+                    }
+                });
+            },
+            calculateLineTotals() {
+                const el = $(this);
+                let $row = el.parents('tr:first');
+                let qty = parseFloat($row.find('.qty').val()) || 0;
+                let rate = parseFloat($row.find('.rate').val()) || 0;
+                let vat = parseFloat($row.find('.rowtax').val()) || 0;
+                // Subtotal per row (before VAT)
+                let subtotal = qty * rate;
+                
+                // VAT amount per row
+                let vatAmount = subtotal * (vat / 100);
+                
+                // Line total
+                let lineTotal = subtotal + vatAmount;
+
+                // Update row
+                $row.find('.amt').val(lineTotal.toFixed(2));
+                $row.find('.amount').val(lineTotal.toFixed(2));
+
+                return {
+                    subtotal,
+                    vatAmount,
+                    lineTotal
+                };
+            },
+
+            productRow(v,i){
+                return `
+                    <tr>
+                        <td>${i+1}</td>
+
+                        <td>
+                            <input type="text" name="items[${i+1}][product_code]" class="form-control"
+                                value="${v.product_code}" readonly>
+                        </td>
+
+                        <td>
+                            <input type="text" name="items[${i+1}][product_name]" class="form-control"
+                                value="${v.product_name}" readonly>
+                        </td>
+
+                        <td>
+                            <input type="number" name="items[${i+1}][qty]" class="form-control text-end qty"
+                                value="${accounting.unformat(v.qty)}">
+                        </td>
+
+
+                        <td>
+                            <input type="text" name="items[${i+1}][rate]"
+                                class="form-control text-end rate" value="${accounting.unformat(v.rate)}" readonly>
+                        </td>
+
+                        <td>
+                            <input type="text" name="items[${i+1}][amount]"
+                                class="form-control text-end amt" value="${accounting.unformat(v.amount)}" readonly>
+                            <input type="hidden" value="${v.itemtax}" class="rowtax">
+                            <input type="hidden" name="items[${i+1}][order_item_id]" value="${v.id}">
+                            <input type="hidden" name="items[${i+1}][product_id]" value="${v.product_id}">
+                            <input type="hidden" name="items[${i+1}][id]" value="${v.id}">
+                        </td>
+                    </tr>
+                `;
+            }
        };
        $(()=>Index.init()); 
     </script>

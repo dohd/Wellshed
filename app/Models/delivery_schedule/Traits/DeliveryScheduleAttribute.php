@@ -19,7 +19,7 @@ trait DeliveryScheduleAttribute
     {
         return '
          '.$this->getViewButtonAttribute("manage-department", "biller.delivery_schedules.show").'
-                '.$this->getEditButtonAttribute("edit-department*", "biller.delivery_schedules.edit").'
+                '.$this->getEditButtonAttribute("edit-department", "biller.delivery_schedules.edit").'
                 '.$this->getDeleteButtonAttribute("delete-department*", "biller.delivery_schedules.destroy").'
                 ';
     }
