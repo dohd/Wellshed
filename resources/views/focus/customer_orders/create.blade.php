@@ -197,6 +197,7 @@
                 // Update row
                 $row.find('.amt').text(lineTotal.toFixed(2));
                 $row.find('.amount').val(lineTotal.toFixed(2));
+                $row.find('.itemtax').val(vatAmount.toFixed(2));
 
                 return {
                     subtotal,

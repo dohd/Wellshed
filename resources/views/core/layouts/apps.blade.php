@@ -19,6 +19,15 @@
     .cta-btn{background:var(--brand); border:0;}
     .cta-btn:hover{filter:brightness(.95);}
   </style>
+  <!-- BEGIN: Vendor CSS-->
+    {{ Html::style(mix('focus/app_end-'.visual().'.css')) }}
+    {!! Html::style('core/app-assets/css-'.visual().'/core/menu/menu-types/horizontal-menu.css') !!}
+    {!! Html::style('core/app-assets/vendors/css/forms/icheck/icheck.css') !!}
+    {!! Html::style('core/app-assets/vendors/css/forms/icheck/custom.css') !!}
+    @yield('after-styles')
+    <!-- END: Vendor CSS-->
+    <!-- BEGIN: Custom CSS-->
+    {!! Html::style('core/assets/css/style-'.visual().'.css') !!}
 
   @stack('styles')
 </head>

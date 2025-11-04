@@ -21,6 +21,7 @@ class AddColumnsToStockTransactionsTable extends Migration
             $table->unsignedBigInteger('created_by')->nullable()->after('dispatch_id');
             $table->unsignedBigInteger('updated_by')->nullable()->after('created_by');
             $table->unsignedBigInteger('deleted_by')->nullable()->after('updated_by');
+            $table->unsignedBigInteger('dispatch_item_id')->nullable()->after('deleted_by');
             $table->timestamp('deleted_at')->nullable()->after('updated_at');
         });
     }

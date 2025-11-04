@@ -47,6 +47,11 @@ class DeliveryFreq extends Model
         'updated_at'
     ];
 
+    protected $casts = [
+        'delivery_days' => 'array',
+        'week_numbers'  => 'array',
+    ];
+
     /**
      * Guarded fields of model
      * @var array

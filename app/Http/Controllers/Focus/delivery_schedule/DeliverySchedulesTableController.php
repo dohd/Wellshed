@@ -121,10 +121,14 @@ class DeliverySchedulesTableController extends Controller
                 return $ds->delivery_frequency ? $ds->delivery_frequency->delivery_days : '';
             })
             ->addColumn('delivery_date', function ($ds) {
-                return dateFormat($ds->delivery_date);
+                $date = Carbon::parse($ds->delivery_date);
+                return $date->format('D, d M Y') . ' (' . $date->format('l') . ')';
             })
             ->addColumn('status', function ($ds) {
                 return ucfirst((string) $ds->status);
+            })
+            ->addColumn('location', function ($ds) {
+                return $ds->location ? $ds->location->sub_zone_name : '';
             })
             ->addColumn('actions', function ($ds) {
                 // use your accessor / presenter

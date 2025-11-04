@@ -115,7 +115,7 @@ class OrdersRepository extends BaseRepository
         // create or update items
         foreach($data_items as $item) {
             foreach ($item as $key => $val) {
-                if (in_array($key, ['rate', 'amount', 'itemtax', 'qty']))
+                if (in_array($key, ['rate', 'amount', 'tax_rate','itemtax', 'qty']))
                     $item[$key] = floatval(str_replace(',', '', $val));
                 
             }

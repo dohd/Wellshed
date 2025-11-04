@@ -18,7 +18,7 @@ class CreateStockTransactionsTable extends Migration
             $table->unsignedBigInteger('tid');
             $table->unsignedBigInteger('stock_item_id');
             $table->date('date');
-            $table->enum('type',['pending','adjustment','sale'])->default('pending');
+            $table->enum('type',['pending','adjustment','transfer','sale'])->default('pending');
             $table->decimal('qty',16,2)->default(0);
             $table->decimal('price',16,2)->default(0);
             $table->timestamp('created_at')->useCurrent();
