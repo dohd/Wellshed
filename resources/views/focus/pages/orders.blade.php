@@ -91,7 +91,7 @@
                 <i class="bi bi-person"></i>
                 <span>Profile</span>
             </a>
-            <a class="nav-pill" href="{{ route('biller.logout') }}"><i class="ft-power"></i>
+            <a class="nav-pill" href="{{ route('biller.logout') }}">
             <i class="bi bi-box-arrow-right"></i><span>Logout</span>
             </a>
         </div>

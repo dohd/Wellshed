@@ -493,7 +493,7 @@
                                 </a>
                             </li>
                             <li><a class="dropdown-item" href="{{ route('biller.delivery_schedules.daily_delivery_report') }}"
-                                   data-toggle="dropdown"><i class="ft-list"></i> Daily Delivery Report
+                                   data-toggle="dropdown"><i class="ft-list"></i> Order Summary Report
                                 </a>
                             </li>
                             <li><a class="dropdown-item" href="{{ route('biller.delivery_schedules.product_movement_report') }}"

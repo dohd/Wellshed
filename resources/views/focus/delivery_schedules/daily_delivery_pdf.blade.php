@@ -48,7 +48,14 @@
 </head>
 <body>
 
-    <h1>{{ $company->name ?? 'Company Name' }}</h1>
+    <table class="header-table">
+        <tr>
+            <td>
+                @php $image = "img/company/{$company->logo}" @endphp
+                <img src="{{ Storage::disk('public')->url($image) }}" alt="Company Logo" style="max-height: 100px;">
+            </td>
+        </tr>
+    </table>
     <h2>DAILY ORDERS SUMMARY</h2>
 
     <table class="no-border">
@@ -149,7 +156,7 @@
     </table>
 
     {{-- 4️⃣ Delivery Schedule Summary (Planned) --}}
-    <h3 class="section-title">Delivery Schedule Summary</h3>
+    {{-- <h3 class="section-title">Delivery Schedule Summary</h3>
     <table>
         <thead>
             <tr>
@@ -171,10 +178,10 @@
                 <tr><td colspan="4" class="text-center">No Delivery Schedules Found</td></tr>
             @endforelse
         </tbody>
-    </table>
+    </table> --}}
 
     {{-- 5️⃣ Actual Deliveries Summary (Executed) --}}
-    <h3 class="section-title">Actual Deliveries Summary</h3>
+    {{-- <h3 class="section-title">Actual Deliveries Summary</h3>
     <table>
         <thead>
             <tr>
@@ -196,7 +203,7 @@
                 <tr><td colspan="4" class="text-center">No Deliveries Recorded</td></tr>
             @endforelse
         </tbody>
-    </table>
+    </table> --}}
 
     {{-- 6️⃣ Closing Balances --}}
     <h3 class="section-title">Closing Balances</h3>
