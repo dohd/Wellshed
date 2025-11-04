@@ -1,10 +1,10 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Daily Delivery Report')
+@section ('title', 'Order Summary Report')
 
 @section('page-header')
     <h1>
-        <small>Daily Delivery Report</small>
+        <small>Order Summary Report</small>
     </h1>
 @endsection
 
@@ -13,7 +13,7 @@
         <div class="content-wrapper">
             <div class="content-header row">
                 <div class="content-header-left col-md-6 col-12 mb-2">
-                    <h4 class="content-header-title mb-0">Daily Delivery Report</h4>
+                    <h4 class="content-header-title mb-0">Order Summary Report</h4>
 
                 </div>
                 <div class="content-header-right col-md-6 col-12">
