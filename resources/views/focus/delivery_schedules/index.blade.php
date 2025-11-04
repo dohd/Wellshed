@@ -82,7 +82,7 @@
                                             <select name="customer" id="customer" class="form-control" data-placeholder="Search Customer">
                                             <option value="">Search Customer</option>
                                             @foreach ($customers as $customer)
-                                                <option value="{{ $customer->id }}">{{ $customer->company ?: $company->name }}</option>
+                                                <option value="{{ $customer->id }}">{{ $customer->company ?: $customer->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
