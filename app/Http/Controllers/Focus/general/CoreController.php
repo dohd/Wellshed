@@ -65,7 +65,7 @@ class CoreController extends Controller
             }
         }
 
-        return redirect()->intended(route('dashboard'));
+        return redirect()->intended($this->redirectPath());
     }
 
     /**
