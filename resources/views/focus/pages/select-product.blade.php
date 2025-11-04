@@ -45,24 +45,5 @@
         </button>
     </div>
 
-
-    <!-- ✅ Summary -->
-    <div class="alert alert-light border mt-3 mb-0">
-      <div class="fw-semibold">Selected Items</div>
-      <ul id="selectedItems" class="list-unstyled small mb-2"></ul>
-      <div class="d-flex justify-content-between fw-bold">
-        <span>Total:</span>
-        <span id="totalCost">KSh 0</span>
-      </div>
-    </div>
-
-    <!-- ✅ Navigation -->
-    <div class="footer-nav mt-4 pt-3 border-top">
-      <div class="d-flex justify-content-around">
-        <button class="btn btn-primary w-100" id="btnContinue">
-          Continue
-        </button>
-      </div>
-    </div>
   </div>
 </section>
