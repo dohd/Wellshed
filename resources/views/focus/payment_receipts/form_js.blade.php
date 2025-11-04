@@ -295,7 +295,7 @@
         customer_id: $('#customer').val(),
         phone: $('#phone').val(),
         amount: $('#amount').val(),
-        date: null,
+        confirmed_at: "{{ now() }}",
       };
 
       if (payload.entry_type === 'receive') {
@@ -344,16 +344,20 @@
         method:'POST',
         contentType:'application/json',
         data: JSON.stringify(payload),
-        success: function(){ 
+        success: function(data) { 
+          $('#saveToast').find('strong').text('Saved');
+          $('#saveToast').find('.toast-body').removeClass('text-danger').text(data.message || '');
           quickToast(); 
         },
-        error: function(xhr, status, error){ 
-          alert('Failed to save entry'); 
-          console.log(error);
+        error: function(xhr, status, error) { 
+          const {message} = xhr?.responseJSON;
+          if (message) {
+            $('#saveToast').find('strong').text('Error');
+            $('#saveToast').find('.toast-body').addClass('text-danger').text(message);
+            quickToast();
+          }
         }
       });
-
-      quickToast(); // demo only
     });
   });
 </script>

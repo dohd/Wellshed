@@ -277,7 +277,7 @@
 
       <!-- Toast -->
       <div aria-live="polite" aria-atomic="true" style="position:fixed; top:1rem; right:1rem; z-index:1080">
-        <div class="toast" id="saveToast" data-delay="2000">
+        <div class="toast" id="saveToast" data-delay="3500">
           <div class="toast-header">
             <strong class="mr-auto">Saved</strong><small>now</small>
             <button type="button" class="ml-2 mb-1 close" data-dismiss="toast">&times;</button>

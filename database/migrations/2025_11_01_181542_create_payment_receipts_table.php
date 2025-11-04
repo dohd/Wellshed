@@ -16,6 +16,7 @@ class CreatePaymentReceiptsTable extends Migration
         Schema::create('payment_receipts', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('tid')->default(0);
+            $table->timestamp('confirmed_at')->nullable();
 
             // Core context
             $table->enum('entry_type', ['receive', 'debit']);                  // from Entry Type

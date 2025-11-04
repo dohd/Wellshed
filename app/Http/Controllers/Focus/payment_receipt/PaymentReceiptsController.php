@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\payment_receipt\PaymentReceipt;
 use App\Models\customer\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class PaymentReceiptsController extends Controller
 {
@@ -56,8 +57,41 @@ class PaymentReceiptsController extends Controller
      */
     public function store(Request $request)
     {
+        // validate request
+        $validator = Validator::make($request->all(), [
+            'entry_type' => 'required',
+            'customer_id' => 'required',
+            'amount' => 'required',
+            'date' => 'required',
+            'payment_method' => 'required',
+            'payment_for' => 'required_if:entry_type,receipt',
+        ], [
+            'customer_id.required' => 'Customer is required',
+            'subscription_id.required' => 'Subscription plan is required',
+            'order_id.required' => 'Order Ref is required',
+            'charge_id.required' => 'Charge Ref is required',
+        ]);
+        foreach (['subscription_id', 'order_id', 'charge_id'] as $field) {
+            $validator->sometimes($field, 'required', function ($input) use ($field) {
+                return $input->entry_type === 'receipt' && $input->payment_for === explode('_', $field)[0];
+            });
+        }
+
+        if ($validator->fails()) {
+            $errors = $validator->errors(); // This is a MessageBag
+            // Get all errors as array
+            $errorMessages = $errors->all();
+            // Get specific field errors
+            // $customerErrors = $errors->get('customer_id');
+            return response()->json([
+                'status' => 'error', 
+                'message' => 'Validation failed! ' . implode(', ', $errorMessages),
+                'errors' => $errors
+            ], 422);
+        }
+
         $input = $request->all();
-        $main = $request->only(['entry_type', 'customer_id', 'amount', 'date', 'payment_method', 'payment_for']);
+        $main = $request->only(['entry_type', 'customer_id', 'amount', 'date', 'payment_method', 'confirmed_at']);
 
         try {
             $main['amount'] = numberClean($main['amount']);
@@ -101,22 +135,22 @@ class PaymentReceiptsController extends Controller
             if (isset($main['mpesa_ref'])) {
                 $mpesaRefExists = PaymentReceipt::where('mpesa_ref', $main['mpesa_ref'])->exists();
                 if ($mpesaRefExists) {
-                    return response()->json(['error' => "Mpesa reference {$main['mpesa_ref']} already exists"], 500);
+                    return response()->json(['message' => "Mpesa reference {$main['mpesa_ref']} already exists"], 409);
                 }
             }
 
             // validate debit reason
             if (isset($main['debit']) && empty($main['notes'])) {
-                return response()->json(['error' => "Charge description required"], 402);
+                return response()->json(['message' => "Charge description required"], 422);
             }
 
             // dd($main, $input);
             $receipt = PaymentReceipt::create($main);
 
-            return response()->json(['success' => 'Receipt created successfully']);
+            return response()->json(['message' => 'Receipt created successfully']);
         } catch (\Exception $e) {
             \Log::error($e->getMessage() . ' {user_id: ' . auth()->id() . '}' . ' at ' . $e->getFile() . ':' . $e->getLine());
-            return response()->json(['error' => 'Error creating Receipt'], 500);
+            return response()->json(['message' => 'Error creating Receipt'], 500);
         }
     }
 
