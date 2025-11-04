@@ -60,4 +60,9 @@ class CustomerZoneItem extends Model
         parent::boot();
     }
 
+    public function location()
+    {
+        return $this->belongsTo(TargetZoneItem::class, 'target_zone_item_id');
+    }
+
 }

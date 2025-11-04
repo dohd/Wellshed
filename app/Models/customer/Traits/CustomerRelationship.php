@@ -23,6 +23,7 @@ use App\Models\tenant\Tenant;
 use App\Models\tenant_package\TenantPackage;
 use App\Models\transaction\Transaction;
 use App\Models\subscription\Subscription;
+use App\Models\target_zone\CustomerZoneItem;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -30,6 +31,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 trait CustomerRelationship
 {
+    public function customer_zones(){
+        return $this->hasMany(CustomerZoneItem::class,'customer_id');
+    }
     public function charges() {
         return $this->hasMany(PaymentReceipt::class)->where('entry_type', 'debit');
     }

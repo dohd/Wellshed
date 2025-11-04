@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Focus\customer_page;
 
 use App\Http\Controllers\Controller;
 use App\Models\customer\Customer;
+use App\Models\delivery_frequency\DeliveryFreq;
 use App\Models\delivery_schedule\DeliverySchedule;
 use App\Models\delivery_schedule\DeliveryScheduleItem;
 use App\Models\orders\Orders;
@@ -28,7 +29,13 @@ class CustomerPagesController extends Controller
     }
     public function orders()
     {
-        $products = ProductVariation::where('type', 'full')->get(['id', 'name', 'price', 'name as eta']);
+        $products = ProductVariation::where('type', 'full')
+        ->get([
+            'id',
+            'name',
+            DB::raw('price * 1.16 as price'), // adds 16% VAT
+            'name as eta',
+        ]);
         return view('focus.pages.orders', compact('products'));
     }
     public function track()
@@ -43,7 +50,8 @@ class CustomerPagesController extends Controller
     public function delivery()
     {
         $customer = Customer::where('id', auth()->user()->customer_id)->first();
-        return view('focus.pages.delivery-details', compact('customer'));
+        $customer_zones = $customer->customer_zones()->with('location')->get();
+        return view('focus.pages.delivery-details', compact('customer','customer_zones'));
     }
     public function review()
     {
@@ -74,84 +82,128 @@ class CustomerPagesController extends Controller
 
     public function submit_order(Request $request)
     {
-        // Decode payload into array
         $payload = json_decode($request->order_payload, true);
 
         if (!$payload) {
             return back()->withErrors('Invalid order payload')->withInput();
         }
 
-        // ✅ Validate payload normally (errors redirect back)
+        // ✅ Validate structure, now including locations_for_days (IDs)
         $validator = Validator::make($payload, [
-            'customer.name'          => 'required|string|max:255',
-            'customer.customer_id'   => 'required|numeric',
-            'customer.order_type'    => 'required|string',
-            'customer.frequency'     => 'nullable|string',
-            'customer.delivery_date' => 'required|date',
-            'customer.start_month'   => 'nullable|string',
-            'customer.end_month'     => 'nullable|string',
-
-            'cart'  => 'required|array|min:1',
-            'total' => 'required|numeric|min:0'
+            'customer.name'              => 'required|string|max:255',
+            'customer.customer_id'       => 'required|numeric',
+            'customer.order_type'        => 'required|string|in:one_time,recurring',
+            'customer.frequency'         => 'nullable|string|in:daily,weekly,custom',
+            'customer.delivery_days'     => 'nullable|array',
+            'customer.week_numbers'      => 'nullable|array',
+            'customer.delivery_date'     => 'nullable|date',
+            'customer.start_month'       => 'nullable|date',
+            'customer.locations_for_days'=> 'nullable|array',
+            'cart'                       => 'required|array|min:1',
+            'total'                      => 'required|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
-            return back()
-                ->withErrors($validator) // ✅ Proper Laravel validation error flashing
-                ->withInput();           // ✅ Keep user-entered values
+            return back()->withErrors($validator)->withInput();
         }
-
 
         DB::beginTransaction();
 
         try {
-
             $customer = $payload['customer'];
 
-            // ✅ Create order
+            // ✅ Calculate order totals
+            $total = numberClean($payload['total']);
+            $subtotal = $total / 1.16;
+            $tax = $total - $subtotal;
+
+            // ✅ Create main order
             $order = Orders::create([
-                'tid'          => Orders::max('tid') + 1,
+                'tid'          => (Orders::max('tid') ?? 0) + 1,
                 'customer_id'  => $customer['customer_id'],
                 'order_type'   => $customer['order_type'],
-                'frequency'    => $customer['order_type'] === 'recurring'
-                    ? ($customer['frequency'] ?? null)
-                    : null,
-                'start_month'  => date_for_database($customer['start_month']) ?? null,
-                'end_month'    => date_for_database($customer['end_month']) ?? null,
-                'subtotal'     => $payload['total'],
-                'total'        => $payload['total'],
+                'description'  => $customer['description'] ?? null,
+                'frequency'    => $customer['order_type'] === 'recurring' ? ($customer['frequency'] ?? null) : null,
+                'start_month'  => !empty($customer['start_month']) ? date_for_database($customer['start_month']) : now(),
+                'subtotal'     => $subtotal,
+                'taxable'      => $subtotal,
+                'tax'          => $tax,
+                'total'        => $total,
+                'status'       => 'confirmed',
             ]);
 
-            // ✅ Save cart items
+            // ✅ Save order items
             foreach ($payload['cart'] as $item) {
+                $product = ProductVariation::find($item['id']);
+                $itemtax = $item['price'] - $product['price'];
+
                 OrdersItem::create([
                     'order_id'   => $order->id,
                     'product_id' => $item['id'],
                     'qty'        => $item['qty'],
-                    'rate'       => $item['price'],
-                    'itemtax'    => 0,
+                    'rate'       => $product['price'],
+                    'tax_rate'   => 16,
+                    'itemtax'    => $itemtax * $item['qty'],
                     'amount'     => $item['qty'] * $item['price'],
                 ]);
             }
 
-            // ✅ One-time order scheduling
-            if ($order->order_type === 'one_time') {
-                $this->create_schedule($order, $customer);
+            // ✅ Handle recurring or custom frequency setup
+            if ($order->order_type === 'recurring') {
+                $deliveryDays   = $customer['delivery_days'] ?? [];
+                $weekNumbers    = $customer['week_numbers'] ?? [];
+                $locationsMap   = $customer['locations_for_days'] ?? [];
 
-                $order->update([
-                    'status' => 'confirmed'
+                $freqRecord = DeliveryFreq::create([
+                    'order_id'           => $order->id,
+                    'frequency'          => $customer['frequency'] ?? null,
+                    'delivery_days'      => json_encode($deliveryDays),
+                    'week_numbers'       => json_encode($weekNumbers),
+                    'locations_for_days' => json_encode($locationsMap),
+                    'expected_time'      => $customer['expected_time'] ?? null,
+                    'user_id'            => auth()->id(),
+                    'ins'                => $order->ins,
                 ]);
+            }
+
+            // ✅ Create one-time delivery schedule
+            if ($order->order_type === 'one_time') {
+                $schedule = DeliverySchedule::create([
+                    'tid'           => (DeliverySchedule::max('tid') ?? 0) + 1,
+                    'order_id'      => $order->id,
+                    'customer_id'   => $order->customer_id,
+                    'delivery_date' => $customer['delivery_date'] ?? now(),
+                    'status'        => 'scheduled',
+                    'ins'           => $order->ins,
+                    'user_id'       => $order->user_id,
+                ]);
+
+                foreach ($order->items as $item) {
+                    DeliveryScheduleItem::create([
+                        'delivery_schedule_id' => $schedule->id,
+                        'order_item_id'        => $item->id,
+                        'product_id'           => $item->product_id,
+                        'qty'                  => $item->qty,
+                        'rate'                 => $item->rate,
+                        'amount'               => $item->amount,
+                        'ins'                  => $order->ins,
+                    ]);
+                }
             }
 
             DB::commit();
 
-            return redirect()->route('biller.customer_pages.thank_you');
-        } catch (\Throwable $th) {
+            return redirect()->route('biller.customer_pages.thank_you')
+                ->with('success', 'Order submitted successfully!');
 
+        } catch (\Throwable $th) {
             DB::rollBack();
+            \Log::error('Submit Order Error: ' . $th->getMessage());
             return back()->withErrors(['error' => 'Error creating order. Please try again.']);
         }
     }
+
+
 
 
     public function create_schedule($order, $customer)

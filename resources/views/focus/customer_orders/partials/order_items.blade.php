@@ -31,7 +31,7 @@
                         placeholder="0.00"></td>
                 <td><input type="text" name="rate[]" class="form-control rate" id="rate-0"></td>
                 <td>
-                    <select class="form-control rowtax" name="itemtax[]" id="rowtax-0">
+                    <select class="form-control rowtax" name="tax_rate[]" id="rowtax-0">
                         @foreach ($additionals as $tax)
                             <option value="{{ (int) $tax->value }}" {{ $tax->is_default ? 'selected' : '' }}>
                                 {{ $tax->name }}
@@ -46,6 +46,7 @@
                     </button>
                 </td>
                 <input type="hidden" class="amount" name="amount[]">
+                <input type="hidden" class="itemtax" name="itemtax[]">
                 <input type="hidden" name="id[]" value="0">
             </tr>
             @isset($customer_order)
@@ -79,9 +80,9 @@
                                     id="rate-{{ $index }}">
                             </td>
                             <td>
-                                <select class="form-control rowtax" name="itemtax[]" id="rowtax-{{ $index }}">
+                                <select class="form-control rowtax" name="tax_rate[]" id="rowtax-{{ $index }}">
                                     @foreach ($additionals as $tax)
-                                        <option value="{{ (int) $tax->value }}" {{ $tax->value == $item->itemtax ? 'selected' : '' }}>
+                                        <option value="{{ (int) $tax->value }}" {{ $tax->value == $item->tax_rate ? 'selected' : '' }}>
                                             {{ $tax->name }}
                                         </option>
                                     @endforeach
@@ -94,6 +95,7 @@
                                 </button>
                             </td>
                             <input type="hidden" class="amount" value="{{ $item->amount }}" name="amount[]">
+                            <input type="hidden" class="itemtax" value="{{ $item->itemtax }}" name="itemtax[]">
                             <input type="hidden" name="id[]" value="{{ $item->id }}">
                         </tr>
                     @endforeach
@@ -122,7 +124,7 @@
         <td><input type="number" step="0.01" name="qty[]" class="form-control qty" placeholder="0.00"></td>
         <td><input type="text" name="rate[]" class="form-control rate"></td>
         <td>
-            <select class="form-control rowtax" name="itemtax[]">
+            <select class="form-control rowtax" name="tax_rate[]">
                 @foreach ($additionals as $tax)
                     <option value="{{ (int) $tax->value }}" {{ $tax->is_default ? 'selected' : '' }}>
                         {{ $tax->name }}

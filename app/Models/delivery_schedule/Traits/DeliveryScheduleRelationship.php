@@ -7,6 +7,7 @@ use App\Models\delivery_frequency\DeliveryFreq;
 use App\Models\delivery_schedule\DeliveryScheduleItem;
 use App\Models\hrm\Hrm;
 use App\Models\orders\Orders;
+use App\Models\target_zone\TargetZoneItem;
 
 /**
  * Class DeliveryScheduleRelationship
@@ -31,5 +32,9 @@ trait DeliveryScheduleRelationship
     public function delivery()
     {
         return $this->belongsTo(Delivery::class, 'delivery_schedule_id');
+    }
+    public function location()
+    {
+        return $this->belongsTo(TargetZoneItem::class, 'location_id');
     }
 }

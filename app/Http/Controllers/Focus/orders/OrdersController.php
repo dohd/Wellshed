@@ -94,9 +94,10 @@ class OrdersController extends Controller
         ]);
         // $data['expected_time'] = Carbon::parse($data['expected_time'])->format('H:i:s');
         $days = $request->only(['delivery_days','expected_time']);
-        $data_items = $request->only(['product_id','qty','type','rate','itemtax','amount']);
+        $data_items = $request->only(['product_id','qty','type','rate','tax_rate','itemtax','amount']);
         $data_items = modify_array($data_items);
         $days = modify_array($days);
+        dd($data_items);
         try {
             //Create the model using repository create method
             $this->repository->create(compact('data','data_items','days'));
@@ -142,7 +143,7 @@ class OrdersController extends Controller
         ]);
         // dd($data);
         // $data['expected_time'] = Carbon::parse($data['expected_time'])->format('H:i:s');
-        $data_items = $request->only(['product_id','qty','type','rate','itemtax','amount','id']);
+        $data_items = $request->only(['product_id','qty','type','rate','tax_rate','itemtax','amount','id']);
         $data_items = modify_array($data_items);
         $days = $request->only(['delivery_days','expected_time','d_id']);
         $days = modify_array($days);

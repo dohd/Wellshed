@@ -125,9 +125,9 @@
                                                 <th>Schedule No.</th>
                                                 <th>Order</th>
                                                 <th>Customer</th>
-                                                <th>Delivery Days</th>
                                                 <th>Delivery Date</th>
                                                 <th>Status</th>
+                                                <th>Location</th>
                                                 <th>{{ trans('labels.general.actions') }}</th>
                                             </tr>
                                         </thead>
@@ -223,6 +223,9 @@
                 const currentStatus = $(this).data('status');
                 $('#status_id').val(id);
                 $('#status_current').val(currentStatus);
+                if(currentStatus == 'Delivered'){
+                    $('#saveStatusBtn').prop('disabled', true);
+                }
                 $('#statusModal').modal('show');
             });
 
@@ -297,7 +300,6 @@
                     { data: 'tid',          name: 'tid' },
                     { data: 'order',        name: 'order' },
                     { data: 'customer',     name: 'customer' },
-                    { data: 'delivery_days',name: 'delivery_days' },
                     { data: 'delivery_date',name: 'delivery_date' },
                     {
                         data: 'status',
@@ -323,6 +325,7 @@
                             `;
                         }
                     },
+                    { data: 'location',name: 'location' },
                     { data: 'actions', name: 'actions', searchable: false, sortable: false }
                 ],
                 dom: 'Blfrtip',
