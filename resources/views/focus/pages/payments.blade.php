@@ -99,19 +99,19 @@
 
     <ul class="list-group">
         @foreach ($receipts as $receipt)
-            @if ($receipt->subscription)
+            @if ($receipt->payment_for === 'subscription')
                 <li class="list-group-item d-flex justify-content-between">
                     <span>Subscription {{ gen4tid('#', $receipt->tid) }}</span>
                     <span class="text-success">+ KSh {{ numberFormat($receipt->amount) }}</span>
                     <small class="text-muted">{{ date('M d, Y', strtotime($receipt->date)) }}</small>
                 </li>
-            @elseif ($receipt->order)    
+            @elseif ($receipt->payment_for === 'order')    
                 <li class="list-group-item d-flex justify-content-between">
                     <span>Order <span style="margin-left: 40px;">&nbsp;</span> {{ gen4tid('#', $receipt->tid) }}</span>
                     <span class="text-success">+ KSh {{ numberFormat($receipt->amount) }}</span>
                     <small class="text-muted">{{ date('M d, Y', strtotime($receipt->date)) }}</small>
                 </li>
-            @elseif ($receipt->charge_id)    
+            @elseif ($receipt->payment_for === 'charge')    
                 <li class="list-group-item d-flex justify-content-between">
                     <span>Charge <span style="margin-left: 40px;">&nbsp;</span> {{ gen4tid('#', $receipt->tid) }}</span>
                     <span class="text-success">+ KSh {{ numberFormat($receipt->amount) }}</span>

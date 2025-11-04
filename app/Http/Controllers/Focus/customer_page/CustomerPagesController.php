@@ -65,7 +65,7 @@ class CustomerPagesController extends Controller
     public function payments()
     {
         $balance = PaymentReceipt::selectRaw('SUM(debit-credit) total')->value('total');
-        $receipts = PaymentReceipt::get();
+        $receipts = PaymentReceipt::latest()->get();
         $customer = auth()->user()->customer;
         return view('focus.pages.payments', compact('balance', 'receipts', 'customer'));
     }
