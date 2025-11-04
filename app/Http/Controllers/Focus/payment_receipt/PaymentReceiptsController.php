@@ -92,7 +92,7 @@ class PaymentReceiptsController extends Controller
 
         $input = $request->all();
         $main = $request->only([
-            'entry_type', 'customer_id', 'amount', 'date', 'payment_method', 'confirmed_at',
+            'entry_type', 'customer_id', 'amount', 'date', 'payment_method', 'payment_for', 'confirmed_at',
             'merchant_request_id', 'checkout_request_id',
         ]);
 
@@ -103,28 +103,28 @@ class PaymentReceiptsController extends Controller
                 if ($input['payment_for'] === 'subscription') {
                     $main = array_replace($main, [
                         'credit' => $main['amount'],
-                        'subscription_id' => $input['subscription']['subscription_id'],
-                        'notes' => $input['subscription']['notes'],
-                        'mpesa_ref' => strtoupper($input['refs']['mpesa']),
-                        'mpesa_phone' => $input['refs']['mpesa_phone'],
+                        'subscription_id' => @$input['subscription']['subscription_id'],
+                        'notes' => $input['subscription']['notes'] ?? $input['notes'],
+                        'mpesa_ref' => @$input['refs']['mpesa']? strtoupper($input['refs']['mpesa']) : null,
+                        'mpesa_phone' => $input['refs']['mpesa_phone'] ?? $input['mpesa_phone'],
                     ]);
                 } 
                 elseif ($input['payment_for'] === 'order') {
                     $main = array_replace($main, [
                         'credit' => $main['amount'],
-                        'order_id' => $input['order']['order_id'],
-                        'notes' => $input['order']['notes'],
-                        'mpesa_ref' => strtoupper($input['refs']['mpesa']),
-                        'mpesa_phone' => $input['refs']['mpesa_phone'],
+                        'order_id' => @$input['order']['order_id'],
+                        'notes' => $input['order']['notes'] ?? $input['notes'],
+                        'mpesa_ref' => @$input['refs']['mpesa']? strtoupper($input['refs']['mpesa']) : null,
+                        'mpesa_phone' => $input['refs']['mpesa_phone'] ?? $input['mpesa_phone'],
                     ]);
                 } 
                 elseif ($input['payment_for'] === 'charge') {
                     $main = array_replace($main, [
                         'credit' => $main['amount'],
-                        'charge_id' => $input['charge']['charge_id'],
-                        'notes' => $input['charge']['notes'],
-                        'mpesa_ref' => strtoupper($input['refs']['mpesa']),
-                        'mpesa_phone' => $input['refs']['mpesa_phone'],
+                        'charge_id' => @$input['charge']['charge_id'],
+                        'notes' => $input['charge']['notes'] ?? $input['notes'],
+                        'mpesa_ref' => @$input['refs']['mpesa']? strtoupper($input['refs']['mpesa']) : null,
+                        'mpesa_phone' => $input['refs']['mpesa_phone'] ?? $input['mpesa_phone'],
                     ]);
                 }
             } else {
@@ -136,7 +136,8 @@ class PaymentReceiptsController extends Controller
             
             // validate MPESA Reference
             if (isset($main['mpesa_ref'])) {
-                $mpesaRefExists = PaymentReceipt::where('mpesa_ref', $main['mpesa_ref'])->exists();
+                $mpesaRefExists = PaymentReceipt::whereNotNull('mpesa_ref') 
+                ->where('mpesa_ref', $main['mpesa_ref'])->exists();
                 if ($mpesaRefExists) {
                     return response()->json(['message' => "Mpesa reference {$main['mpesa_ref']} already exists"], 409);
                 }
@@ -147,7 +148,6 @@ class PaymentReceiptsController extends Controller
                 return response()->json(['message' => "Charge description required"], 422);
             }
 
-            dd($main, $input);
             $receipt = PaymentReceipt::create($main);
 
             return response()->json(['message' => 'Receipt created successfully']);

@@ -340,7 +340,7 @@
 
       // POST Data:
       $.ajax({
-        url: "{{ @$payment_receipt? route('biller.payment_receipts.update', $payment_receipt) : route('biller.payment_receipts.store') }}",
+        url: "{{ route('biller.payment_receipts.store') }}",
         method:'POST',
         contentType:'application/json',
         data: JSON.stringify(payload),

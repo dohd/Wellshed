@@ -171,6 +171,9 @@
 <script>
 $(function() {
     const customer = @json($customer);
+    $.ajaxSetup({ 
+      headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" } 
+    });
 
   // ==== Handle form submit ====
   $('#mpesaPromptForm').on('submit', function(e){
@@ -207,6 +210,7 @@ $(function() {
           .addClass('alert-success')
           .html('<i class="fas fa-check-circle mr-2"></i> Prompt sent successfully. Ask customer to complete on phone.');
         setTimeout(() => $('#mpesaPromptModal').modal('hide'), 2500);
+        $('#btnSendMpesa').prop('disabled', false);
 
         // post payment locally
         postPaymentLocally(res);
@@ -219,12 +223,20 @@ $(function() {
         $('#btnSendMpesa').prop('disabled', false);
       }
     });
+
+   {{--  $('#mpesaStatusArea .alert')
+          .removeClass('alert-info')
+          .addClass('alert-success')
+          .html('<i class="fas fa-check-circle mr-2"></i> Prompt sent successfully. Ask customer to complete on phone.');
+        setTimeout(() => $('#mpesaPromptModal').modal('hide'), 2500);
+    postPaymentLocally({merchant_request_id: 1234567, checkout_request_id: 1234567});
+    $('#btnSendMpesa').prop('disabled', false); --}}
   });
 
   // ==== Locally POST payment ====
-  function postPayment(data) {
+  function postPaymentLocally(data) {
     $.ajax({
-      url: "{{ route('api.mpesa_stkpush') }}",
+      url: "{{ route('biller.payment_receipts.store') }}",
       method: 'POST',
       data: {
         'entry_type': 'receive',
@@ -233,11 +245,18 @@ $(function() {
         'date': "{{ date('Y-m-d') }}",
         'payment_method': 'mpesa', 
         'payment_for': $('#mpesaPaymentFor').val().trim(),
+        'notes': $('#mpesaNotes').val().trim(),
         'merchant_request_id': data.merchant_request_id,
         'checkout_request_id': data.checkout_request_id,
+        'refs': {
+            mpesa_phone: $('#mpesaPhone').val().trim(),
+        },
       },
       success: function(res){
-        if (res.message) alert(res.message);
+        if (res.message) {
+            alert(res.message);
+            setTimeout(() => location.reload(), 1500);
+        }
       },
       error: function(xhr, status, error){
         const {message} = xhr?.responseJSON;
