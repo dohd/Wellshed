@@ -13,18 +13,27 @@
                   <p class="mb-3 text-muted">Enter the customer's phone number and amount to initiate an M-Pesa STK Push.</p>
 
                   <div class="form-group mb-2">
-                    <label for="mpesaPhonePrompt" class="font-weight-semibold">Phone Number (Safaricom)</label>
-                    <input type="tel" class="form-control" id="mpesaPhonePrompt" name="mpesa_phone" placeholder="+2547XXXXXXXX" required>
+                    <label for="mpesaPhonePrompt" class="font-weight-semibold">Phone Number (Safaricom) <span class="text-danger">*</span></label>
+                    <input type="tel" class="form-control" id="mpesaPhone" name="mpesa_phone" placeholder="+2547XXXXXXXX" required>
                   </div>
 
                   <div class="form-group mb-2">
-                    <label for="mpesaAmountPrompt" class="font-weight-semibold">Amount (KES)</label>
-                    <input type="number" min="1" step="1" class="form-control" id="mpesaAmountPrompt" name="amount" placeholder="e.g. 500" required>
+                    <label for="mpesaAmountPrompt" class="font-weight-semibold">Amount (KES) <span class="text-danger">*</span></label>
+                    <input type="number" min="1" step="1" class="form-control" id="mpesaAmount" name="amount" placeholder="e.g. 500" required>
                   </div>
 
                   <div class="form-group mb-2">
-                    <label for="mpesaOrderRef" class="font-weight-semibold">Reference / Order No.</label>
-                    <input type="text" class="form-control" id="mpesaOrderRef" name="reference" placeholder="e.g. ORD-1001">
+                    <label for="mpesaPaymentFor" class="font-weight-semibold">Payment For <span class="text-danger">*</span></label>
+                    <select id="mpesaPaymentFor" class="form-control">
+                      <option value="subscription">Subscription</option>
+                      <option value="order">Order</option>
+                      <option value="charge">Charge</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group mb-2">
+                    <label for="notes" class="font-weight-semibold">Notes <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="mpesaNotes" name="notes" placeholder="e.g. Pay for ORD-1001">
                   </div>
 
                   <div id="mpesaStatusArea" class="mt-3 d-none">

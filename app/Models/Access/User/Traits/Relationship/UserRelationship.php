@@ -7,6 +7,7 @@ use App\Models\Access\Permission\PermissionUser;
 use App\Models\Access\User\SocialLogin;
 use App\Models\calendar\CalendarEvent;
 use App\Models\Company\Company;
+use App\Models\customer\Customer;
 use App\Models\leave\Leave;
 use App\Models\System\Session;
 use App\Models\tenant\Tenant;
@@ -16,6 +17,11 @@ use App\Models\tenant\Tenant;
  */
 trait UserRelationship
 {
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
     public function leaves()
     {
         return $this->hasMany(Leave::class, 'employee_id');

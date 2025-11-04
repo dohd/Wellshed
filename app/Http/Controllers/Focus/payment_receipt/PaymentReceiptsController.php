@@ -91,7 +91,10 @@ class PaymentReceiptsController extends Controller
         }
 
         $input = $request->all();
-        $main = $request->only(['entry_type', 'customer_id', 'amount', 'date', 'payment_method', 'confirmed_at']);
+        $main = $request->only([
+            'entry_type', 'customer_id', 'amount', 'date', 'payment_method', 'confirmed_at',
+            'merchant_request_id', 'checkout_request_id',
+        ]);
 
         try {
             $main['amount'] = numberClean($main['amount']);
@@ -144,7 +147,7 @@ class PaymentReceiptsController extends Controller
                 return response()->json(['message' => "Charge description required"], 422);
             }
 
-            // dd($main, $input);
+            dd($main, $input);
             $receipt = PaymentReceipt::create($main);
 
             return response()->json(['message' => 'Receipt created successfully']);

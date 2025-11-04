@@ -169,40 +169,47 @@
 
 @section('after-scripts')
 <script>
-$(function(){
+$(function() {
+    const customer = @json($customer);
+
   // ==== Handle form submit ====
   $('#mpesaPromptForm').on('submit', function(e){
     e.preventDefault();
 
     // Simple validation
-    const phone = $('#mpesaPhonePrompt').val().trim();
-    const amount = $('#mpesaAmountPrompt').val().trim();
-    if(!phone || !amount){ alert('Please fill all required fields.'); return; }
+    const phone = $('#mpesaPhone').val().trim();
+    const amount = $('#mpesaAmount').val().trim();
+    const notes = $('#mpesaNotes').val().trim();
+    if(!phone || !amount || !notes) { 
+        return alert('Please fill all required fields.'); 
+    }
+    const customerName = customer.company || customer.name;
+    if (!customerName) return alert('Customer name or company required');
 
     $('#mpesaStatusArea').removeClass('d-none');
     $('#btnSendMpesa').prop('disabled', true);
 
-    console.log({
-        phone: phone,
-        amount: amount,
-        reference: $('#mpesaOrderRef').val()
-    });
 
     // Example AJAX stub
-    {{-- $.ajax({
-      url: '/api/payments/mpesa/stkpush',
+    $.ajax({
+      url: "{{ route('api.mpesa_stkpush') }}",
       method: 'POST',
       data: {
-        phone: phone,
-        amount: amount,
-        reference: $('#mpesaOrderRef').val()
+        phone,
+        amount,
+        account_reference: customerName,
+        description: notes,
+        ins: customer.ins,
       },
       success: function(res){
         $('#mpesaStatusArea .alert')
           .removeClass('alert-info')
           .addClass('alert-success')
           .html('<i class="fas fa-check-circle mr-2"></i> Prompt sent successfully. Ask customer to complete on phone.');
-        setTimeout(()=>$('#mpesaPromptModal').modal('hide'), 2500);
+        setTimeout(() => $('#mpesaPromptModal').modal('hide'), 2500);
+
+        // post payment locally
+        postPaymentLocally(res);
       },
       error: function(){
         $('#mpesaStatusArea .alert')
@@ -211,8 +218,33 @@ $(function(){
           .html('<i class="fas fa-times-circle mr-2"></i> Failed to send prompt. Please retry.');
         $('#btnSendMpesa').prop('disabled', false);
       }
-    }); --}}
+    });
   });
+
+  // ==== Locally POST payment ====
+  function postPayment(data) {
+    $.ajax({
+      url: "{{ route('api.mpesa_stkpush') }}",
+      method: 'POST',
+      data: {
+        'entry_type': 'receive',
+        'customer_id': customer.id,
+        'amount': $('#mpesaAmount').val().trim(),
+        'date': "{{ date('Y-m-d') }}",
+        'payment_method': 'mpesa', 
+        'payment_for': $('#mpesaPaymentFor').val().trim(),
+        'merchant_request_id': data.merchant_request_id,
+        'checkout_request_id': data.checkout_request_id,
+      },
+      success: function(res){
+        if (res.message) alert(res.message);
+      },
+      error: function(xhr, status, error){
+        const {message} = xhr?.responseJSON;
+        if (message) alert(message);
+      }
+    });
+  } 
 
   // ==== Auto-reset modal each time it closes ====
   $('#mpesaPromptModal').on('hidden.bs.modal', function(){

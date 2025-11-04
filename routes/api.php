@@ -99,6 +99,6 @@ Route::prefix('daily-report')->group(function () {
 });
 Route::post('dbm_json_report', [DailyBusinessMetricController::class, 'dbmJsonReport'])->name('dbm_json_report');
 //Mpesa
-Route::post('mpesa_payment/stkpush', [StkPushsController::class, 'stkPush']);       // initiate
+Route::post('mpesa_payment/stkpush', [StkPushsController::class, 'stkPush'])->name('api.mpesa_stkpush');       // initiate
 Route::post('mpesa_payment/callback', [StkPushsController::class, 'callback']);     // callback from Safaricom
 Route::get('mpesa_payment/status/{checkoutRequestID}', [StkPushsController::class, 'status']); // optional status probe
