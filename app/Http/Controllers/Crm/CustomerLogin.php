@@ -21,6 +21,7 @@ use App\Http\Responses\RedirectResponse;
 use App\Models\Company\ConfigMeta;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Jobs\NotifyCustomerRegistration;
 use App\Models\Company\Company;
 use App\Models\customer\Customer;
 use App\Models\hrm\Hrm;
@@ -147,6 +148,9 @@ class CustomerLogin extends Controller
             }
 
             DB::commit();
+            if($user){
+                NotifyCustomerRegistration::dispatch($user,$input['password'],$ins);
+            }
         } catch (\Exception $e) {
             return errorHandler('Registration Error: Please contact admin', $e);            
         }

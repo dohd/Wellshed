@@ -146,6 +146,21 @@
 
                 // branch dropdown
                 $("#branch").select2(config.branchSelect);
+                /** New — init multi selects **/
+                $("select[name='delivery_days[]']").select2({
+                    placeholder: "Select delivery days",
+                    width: "100%"
+                });
+
+                $("select[name='locations[]']").select2({
+                    placeholder: "Select locations",
+                    width: "100%"
+                });
+
+                $("select[name='week_numbers[]']").select2({
+                    placeholder: "Select week numbers",
+                    width: "100%"
+                });
 
                 // initialize product dropdowns in existing rows
                 initItemSelect2($('#itemsTbl'));

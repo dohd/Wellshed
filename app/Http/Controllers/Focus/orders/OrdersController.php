@@ -24,6 +24,7 @@ use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Models\additional\Additional;
 use App\Models\customer\Customer;
+use App\Models\delivery_schedule\DeliverySchedule;
 use App\Models\hrm\Hrm;
 use App\Models\orders\Orders;
 use App\Models\target_zone\TargetZoneItem;
@@ -58,7 +59,8 @@ class OrdersController extends Controller
      */
     public function index()
     {
-        return new ViewResponse('focus.customer_orders.index');
+        $customers = Customer::all();
+        return new ViewResponse('focus.customer_orders.index', compact('customers'));
     }
 
     /**
@@ -74,7 +76,7 @@ class OrdersController extends Controller
         $additionals = Additional::all();
         $users = Hrm::all();
         $locations = TargetZoneItem::with('target_zone')->get();
-        return view('focus.customer_orders.create', compact('last_tid','customers','additionals','users','locations'));
+        return view('focus.customer_orders.create', compact('last_tid', 'customers', 'additionals', 'users', 'locations'));
     }
 
     /**
@@ -88,22 +90,32 @@ class OrdersController extends Controller
         // dd($request->all());
         //Input received from the request
         $data = $request->only([
-            'tid','customer_id','branch_id','order_type','description',
-            'frequency','subtotal','total','tax','taxable',
-            'start_month','end_month','driver_id','route'
+            'tid',
+            'customer_id',
+            'branch_id',
+            'order_type',
+            'description',
+            'frequency',
+            'subtotal',
+            'total',
+            'tax',
+            'taxable',
+            'start_month',
+            'end_month',
+            'driver_id',
+            'route'
         ]);
         // $data['expected_time'] = Carbon::parse($data['expected_time'])->format('H:i:s');
-        $days = $request->only(['delivery_days','expected_time']);
-        $data_items = $request->only(['product_id','qty','type','rate','tax_rate','itemtax','amount']);
+        $days = $request->only(['delivery_days', 'expected_time']);
+        $data_items = $request->only(['product_id', 'qty', 'type', 'rate', 'tax_rate', 'itemtax', 'amount']);
         $data_items = modify_array($data_items);
         $days = modify_array($days);
-        dd($data_items);
         try {
             //Create the model using repository create method
-            $this->repository->create(compact('data','data_items','days'));
-        } catch (\Throwable $th) {dd($th);
+            $this->repository->create(compact('data', 'data_items', 'days'));
+        } catch (\Throwable $th) {
             //throw $th
-            return errorHandler('Error Creating Customer Order',$th);
+            return errorHandler('Error Creating Customer Order', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.customer_orders.index'), ['flash_success' => 'Order Created Successfully!!']);
@@ -123,7 +135,7 @@ class OrdersController extends Controller
         $additionals = Additional::all();
         $users = Hrm::all();
         $locations = TargetZoneItem::with('target_zone')->get();
-        return view('focus.customer_orders.edit', compact('customer_order','last_tid','customers','additionals','users','locations'));
+        return view('focus.customer_orders.edit', compact('customer_order', 'last_tid', 'customers', 'additionals', 'users', 'locations'));
     }
 
     /**
@@ -137,24 +149,28 @@ class OrdersController extends Controller
     {
         $order = Orders::find($order_id);
         $data = $request->only([
-            'customer_id','branch_id','order_type','description',
-            'frequency','subtotal','total','tax','taxable',
-            'start_month','end_month','driver_id','route'
+            'customer_id',
+            'branch_id',
+            'order_type',
+            'description',
+            'frequency',
+            'subtotal',
+            'total',
+            'tax',
+            'taxable',
+            'start_month',
+            'end_month',
+            'driver_id',
+            'route'
         ]);
-        // dd($data);
-        // $data['expected_time'] = Carbon::parse($data['expected_time'])->format('H:i:s');
-        $data_items = $request->only(['product_id','qty','type','rate','tax_rate','itemtax','amount','id']);
+        $data_items = $request->only(['product_id', 'qty', 'type', 'rate', 'tax_rate', 'itemtax', 'amount', 'id']);
         $data_items = modify_array($data_items);
-        $days = $request->only(['delivery_days','expected_time','d_id']);
-        $days = modify_array($days);
-        if($data['order_type'] == 'recurring'){
-            if(empty($days)) throw ValidationException::withMessages(['Delivery Days are not selected']);
-        }
         try {
             //Update the model using repository update method
-            $this->repository->update($order, compact('data','data_items','days'));
-        } catch (\Throwable $th) {dd($th);
-             return errorHandler('Error Updating Customer Order',$th);
+            $this->repository->update($order, compact('data', 'data_items'));
+        } catch (\Throwable $th) {
+            dd($th);
+            return errorHandler('Error Updating Customer Order', $th);
         }
         //return with successfull message
         return new RedirectResponse(route('biller.customer_orders.index'), ['flash_success' => 'Order Updated Successfully!!']);
@@ -194,16 +210,16 @@ class OrdersController extends Controller
         $q = $request->search;
         $customer_id = $request->customer_id;
 
-        $orders = Orders::whereIn('status',['confirmed','started'])->where('customer_id', $customer_id)
+        $orders = Orders::whereIn('status', ['confirmed', 'started'])->where('customer_id', $customer_id)
             // ->where('description', 'LIKE', '%'.$q.'%')
-            ->whereHas('schedules', function($q){
-                $q->whereDate('delivery_date',date('Y-m-d'));
+            ->whereHas('schedules', function ($q) {
+                $q->whereDate('delivery_date', date('Y-m-d'));
             })
             ->limit(6)->get();
-        $orders->map(function($v){
-            $v->name = gen4tid('ORD-',$v->tid). '-'.$v->description;
+        $orders->map(function ($v) {
+            $v->name = gen4tid('ORD-', $v->tid) . '-' . $v->description;
         });
-            
+
         return response()->json($orders);
     }
     public function search(Request $request)
@@ -211,13 +227,13 @@ class OrdersController extends Controller
         $q = $request->search;
         $customer_id = $request->customer_id;
 
-        $orders = Orders::whereIn('status',['confirmed','started','completed'])->where('customer_id', $customer_id)
+        $orders = Orders::whereIn('status', ['confirmed', 'started', 'completed'])->where('customer_id', $customer_id)
             // ->where('description', 'LIKE', '%'.$q.'%')
             ->limit(6)->get();
-        $orders->map(function($v){
-            $v->name = gen4tid('ORD-',$v->tid). '-'.$v->description;
+        $orders->map(function ($v) {
+            $v->name = gen4tid('ORD-', $v->tid) . '-' . $v->description;
         });
-            
+
         return response()->json($orders);
     }
 
@@ -225,7 +241,7 @@ class OrdersController extends Controller
     {
         $order = Orders::where('id', $request->order_id)->first();
         $items = $order->items()->get();
-        $items->map(function($v){
+        $items->map(function ($v) {
             $v->product_name = $v->product ? $v->product->name : '';
             $v->product_code = $v->product ? $v->product->code : '';
             return $v;
@@ -233,4 +249,68 @@ class OrdersController extends Controller
         return response()->json($items);
     }
 
+    public function update_status(Request $request, $order_id)
+    {
+        $order = Orders::find($order_id);
+        // dd($order);
+        $request->validate([
+            'status' => 'required|string',
+            'reason' => 'nullable|string',
+        ]);
+
+        $oldStatus = $order->status;
+        $newStatus = $request->status;
+        $today     = now()->toDateString();
+
+        // Save Order
+        $order->update([
+            'status' => $newStatus,
+            'reason' => $request->reason
+        ]);
+
+        // Handle schedule updates
+        $this->updateRelatedSchedules($order, $newStatus, $today);
+
+        return back()->with('flash_success', "Order status updated.");
+    }
+
+    private function updateRelatedSchedules($order, $newStatus, $today)
+    {
+        $query = DeliverySchedule::where('order_id', $order->id)
+            ->whereDate('delivery_date', '>=', $today)
+            ->where('status', '!=', 'delivered');  // don't modify delivered items
+
+        switch ($newStatus) {
+
+            case 'suspended':
+                $query->update([
+                    'status' => 'suspended'
+                ]);
+                break;
+
+            case 'cancelled':
+                $query->update([
+                    'status' => 'cancelled'
+                ]);
+                break;
+
+            case 'confirmed':
+            case 'started':
+                // Reactivate only previously suspended or cancelled
+                $query->whereIn('status', ['suspended', 'cancelled'])
+                    ->update([
+                        'status' => 'scheduled'
+                    ]);
+                break;
+
+            case 'completed':
+                // Usually no action needed; leave as is
+                break;
+
+            case 'draft':
+            default:
+                // no schedule manipulation
+                break;
+        }
+    }
 }

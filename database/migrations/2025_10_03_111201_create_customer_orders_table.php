@@ -26,6 +26,7 @@ class CreateCustomerOrdersTable extends Migration
             $table->enum('order_type', ['one_time', 'recurring'])->default('one_time');
             $table->string('frequency')->nullable();
             $table->enum('status',['draft','confirmed','started','completed','suspended'])->default('draft');
+            $table->string('reason')->nullable();
             // $table->enum('delivery_status', ['pending', 'delivered', 'cancelled'])->default('pending');
             $table->decimal('subtotal', 16, 2)->default(0);
             $table->decimal('tax', 16, 2)->default(0);

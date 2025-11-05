@@ -29,6 +29,11 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
+                            <div class="card-header">
+                                <a href="#" class="btn btn-primary btn-sm mr-1" data-toggle="modal" data-target="#statusModal">
+                                    <i class="fa fa-status" aria-hidden="true"></i> Status
+                                </a>
+                            </div>
 
                             <div class="card-content">
 
@@ -90,7 +95,7 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Schedule No.</th>
-                                            <th>Delivery Day</th>
+                                            {{-- <th>Delivery Day</th> --}}
                                             <th>Delivery Date</th>
                                             <th>Status</th>
                                             <th>Planned Item Count</th>
@@ -101,11 +106,15 @@
                                     </thead>
                                     <tbody>
                                         @foreach ($orders->schedules as $i => $item)
+                                        @php
+                                             $date = Carbon\Carbon::parse($item->delivery_date);
+                                             $today = $date->format('D, d M Y') . ' (' . $date->format('l') . ')';
+                                        @endphp
                                             <tr>
                                                 <td>{{ $i + 1 }}</td>
                                                 <td>{{ gen4tid('DS-',$item->tid) }}</td>
-                                                <td>{{ $item->delivery_frequency->delivery_days ?? '' }}</td>
-                                                <td>{{ $item->delivery_date }}</td>
+                                                {{-- <td>{{ $item->delivery_frequency->delivery_days ?? '' }}</td> --}}
+                                                <td>{{ $today }}</td>
                                                 <td>{{ $item->status }}</td>
                                                 <td>{{ count($item->items) ?? 0 }}</td>
                                                 <td>{{ 0 }}</td>
@@ -120,5 +129,6 @@
                 </div>
             </div>
         </div>
+        @include('focus.customer_orders.partials.status_modal')
     </div>
 @endsection

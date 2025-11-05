@@ -73,10 +73,13 @@
                     url: "{{ route('biller.branches.select') }}",
                     dataType: 'json',
                     type: 'POST',
-                    data: ({term}) => ({search: term, customer_id: $("#customer").val()}),
-                    processResults: data => {
-                        return { results: data.map(v => ({text: v.name, id: v.id})) }
-                    },
+                    data: ({term}) => ({
+                        search: term,
+                        customer_id: $("#customer").val()
+                    }),
+                    processResults: data => ({
+                        results: data.map(v => ({text: v.name, id: v.id}))
+                    })
                 }
             },
             itemSelect2: {
@@ -86,28 +89,18 @@
                     dataType: 'json',
                     delay: 250,
                     type: 'POST',
-                    data: ({
-                        keyword
-                    }) => ({
-                        keyword,
-                    }),
-                    processResults: response => {
-                        return {
-                            results: (response || []).map(v => {
-                                const selling_price = accounting.unformat(v.price);
-                                const purchase_price = accounting.unformat(v.purchase_price);
-                                const available_qty = accounting.unformat(v.qty);
-
-                                return {
-                                    id: v.id,
-                                    text: `${v.name}`,
-                                    selling_price,
-                                    purchase_price,
-                                    available_qty,
-                                };
-                            })
-                        }
-                    },
+                    data: ({keyword}) => ({ keyword }),
+                    processResults: response => ({
+                        results: (response || []).map(v => {
+                            return {
+                                id: v.id,
+                                text: v.name,
+                                selling_price: accounting.unformat(v.price),
+                                purchase_price: accounting.unformat(v.purchase_price),
+                                available_qty: accounting.unformat(v.qty),
+                            }
+                        })
+                    })
                 }
             },
         };
@@ -115,58 +108,58 @@
         function initItemSelect2($scope) {
             $scope.find('select.product_id')
                 .not('.select2-hidden-accessible')
-                .select2(Object.assign({}, config.itemSelect2, {
+                .select2({
+                    ...config.itemSelect2,
                     dropdownParent: $('body'),
                     width: '100%'
-                }));
+                });
         }
 
         const Index = {
             init() {
                 $.ajaxSetup(config.ajax);
-                // customer dropdown
-                $('#customer').select2({
-                    allowClear: true
-                });
-                $('#driver').select2({
-                    allowClear: true
-                });
-                $('#route').select2({
-                    allowClear: true
-                });
+
+                /** Base Select2 **/
+                $("#customer").select2({ allowClear: true });
+                $("#driver").select2({ allowClear: true });
+                $("#route").select2({ allowClear: true });
                 $("#branch").select2(config.branchSelect).change();
 
-                // init first row
-                initItemSelect2($('#itemsTbl'));
+                /** New — init multi selects **/
+                $("select[name='delivery_days[]']").select2({
+                    placeholder: "Select delivery days",
+                    width: "100%"
+                });
+
+                $("select[name='locations[]']").select2({
+                    placeholder: "Select locations",
+                    width: "100%"
+                });
+
+                $("select[name='week_numbers[]']").select2({
+                    placeholder: "Select week numbers",
+                    width: "100%"
+                });
+
+                /** Items init **/
+                initItemSelect2($("#itemsTbl"));
 
                 // product change handler
                 $('#itemsTbl').on('change', '.product_id', Index.onChangeProduct);
 
-                // add new row from template
-                $('#addRow').click(function() {
-                    let $newRow = $($('#rowTemplate').html()); // clone template row
-                    $('#itemsTbl tbody').append($newRow);
+                /** Add product row **/
+                $("#addRow").click(function() {
+                    let $newRow = $($("#rowTemplate").html());
+                    $("#itemsTbl tbody").append($newRow);
                     initItemSelect2($newRow);
                 });
 
-                $(document).on('input change', '#itemsTbl .qty, #itemsTbl .rate, #itemsTbl .rowtax', function() {
+                /** Recalculate totals **/
+                $(document).on("input change", "#itemsTbl .qty, #itemsTbl .rate, #itemsTbl .rowtax", function () {
                     Index.calculateAllTotals();
                 });
 
-                let docRowId = 0;
-                const docRow = $('#daysTbl tbody tr').html();
-                $('#addDoc').click(function() {
-                    docRowId++;
-                    let html = docRow.replace(/-0/g, '-'+docRowId);
-                    $('#daysTbl tbody').append('<tr>' + html + '</tr>');
-                });
-                // remove schedule row
-                $('#daysTbl').on('click', '.remove', function() {
-                    $(this).parents('tr').remove();
-                    docRowId--;
-                });
-
-                // remove row
+                /** Remove line **/
                 $('#itemsTbl').on('click', '.remove_doc', function() {
                     $(this).closest('tr').remove();
                     Index.calculateAllTotals();
@@ -177,33 +170,23 @@
                 const data = $(this).select2('data')[0];
                 const tr = $(this).closest('tr');
                 if (!data) return;
-                console.log(data)
                 tr.find('.rate').val(data.selling_price);
             },
+
             calculateLineTotals($row) {
                 let qty = parseFloat($row.find('.qty').val()) || 0;
                 let rate = parseFloat($row.find('.rate').val()) || 0;
                 let vat = parseFloat($row.find('.rowtax').val()) || 0;
 
-                // Subtotal per row (before VAT)
                 let subtotal = qty * rate;
-
-                // VAT amount per row
                 let vatAmount = subtotal * (vat / 100);
-
-                // Line total
                 let lineTotal = subtotal + vatAmount;
 
-                // Update row
                 $row.find('.amt').text(lineTotal.toFixed(2));
                 $row.find('.amount').val(lineTotal.toFixed(2));
                 $row.find('.itemtax').val(vatAmount.toFixed(2));
 
-                return {
-                    subtotal,
-                    vatAmount,
-                    lineTotal
-                };
+                return { subtotal, vatAmount, lineTotal };
             },
 
             calculateAllTotals() {
@@ -212,27 +195,22 @@
                 let grandTotal = 0;
 
                 $('#itemsTbl tbody tr').each(function() {
-                    let {
-                        subtotal: rowSubtotal,
-                        vatAmount,
-                        lineTotal
-                    } = Index.calculateLineTotals($(this));
+                    let { subtotal: rowSubtotal, vatAmount, lineTotal } = Index.calculateLineTotals($(this));
 
                     subtotal += rowSubtotal;
                     totalTax += vatAmount;
                     grandTotal += lineTotal;
                 });
 
-                // update totals section
                 $('#subtotal').val(subtotal.toFixed(2));
-                $('#vatable').val(subtotal.toFixed(2)); // taxable = subtotal
+                $('#vatable').val(subtotal.toFixed(2));
                 $('#tax').val(totalTax.toFixed(2));
                 $('#total').val(grandTotal.toFixed(2));
             },
-
 
         };
 
         $(() => Index.init());
     </script>
 @endsection
+

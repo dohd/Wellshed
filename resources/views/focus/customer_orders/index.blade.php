@@ -1,6 +1,6 @@
 @extends ('core.layouts.app')
 
-@section ('title', 'Orders Management')
+@section('title', 'Orders Management')
 
 @section('page-header')
     <h1>{{ 'Orders Management' }}</h1>
@@ -27,31 +27,57 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="customer" class="form-label mb-1">Customer</label>
+                                        <select name="customer" id="customer" class="form-control"
+                                            data-placeholder="Search Customer">
+                                            <option value="">Search Customer</option>
+                                            @foreach ($customers as $customer)
+                                                <option value="{{ $customer->id }}">
+                                                    {{ $customer->company ?: $customer->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="status" class="form-label mb-1">status</label>
+                                        <select name="status" id="status" class="form-control">
+                                            <option value="">Search status</option>
+                                            @foreach (['draft', 'confirmed', 'started', 'completed', 'cancelled', 'suspended'] as $i => $val)
+                                                <option value="{{ $val }}">
+                                                    {{ ucfirst($val) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
 
                             <div class="card-content">
 
                                 <div class="card-body">
                                     <table id="customer_orders-table"
-                                           class="table table-striped table-bordered zero-configuration" cellspacing="0"
-                                           width="100%">
+                                        class="table table-striped table-bordered zero-configuration" cellspacing="0"
+                                        width="100%">
                                         <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Order No.</th>
-                                            <th>Customer</th>
-                                            <th>Order Type</th>
-                                            <th>Status</th>
-                                            <th>Total</th>
-                                            <th>{{ trans('labels.general.actions') }}</th>
-                                        </tr>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Order No.</th>
+                                                <th>Customer</th>
+                                                <th>Order Type</th>
+                                                <th>Status</th>
+                                                <th>Total</th>
+                                                <th>{{ trans('labels.general.actions') }}</th>
+                                            </tr>
                                         </thead>
 
 
                                         <tbody>
-                                        <tr>
-                                            <td colspan="100%" class="text-center text-success font-large-1"><i
+                                            <tr>
+                                                <td colspan="100%" class="text-center text-success font-large-1"><i
                                                         class="fa fa-spinner spinner"></i></td>
-                                        </tr>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -69,11 +95,23 @@
 @section('after-scripts')
     {{-- For DataTables --}}
     {{ Html::script(mix('js/dataTable.js')) }}
+    {{ Html::script('focus/js/select2.min.js') }}
     <script>
-        $(function () {
-            setTimeout(function () {
+        $("#customer").select2({
+            allowClear: true
+        });
+
+        let dataTable;
+
+        $(function() {
+            setTimeout(function() {
                 draw_data()
-            }, {{config('master.delay')}});
+            }, {{ config('master.delay') }});
+
+            // Refresh table when filters change
+            $("#customer, #status").on("change", function() {
+                dataTable.draw();
+            });
         });
 
         function draw_data() {
@@ -83,7 +121,7 @@
                 }
             });
 
-            var dataTable = $('#customer_orders-table').dataTable({
+            dataTable = $('#customer_orders-table').DataTable({
                 processing: true,
                 serverSide: true,
                 responsive: true,
@@ -91,32 +129,77 @@
                     @lang('datatable.strings')
                 },
                 ajax: {
-                    url: '{{ route("biller.customer_orders.get") }}',
-                    type: 'post'
+                    url: '{{ route('biller.customer_orders.get') }}',
+                    type: 'post',
+                    data: function(d) {
+                        d.customer = $('#customer').val();
+                        d.status = $('#status').val();
+                    }
                 },
-                columns: [
-                    {data: 'DT_Row_Index', name: 'id'},
-                    {data: 'tid', name: 'tid'},
-                    {data: 'customer', name: 'customer'},
-                    {data: 'order_type', name: 'order_type'},
-                    {data: 'status', name: 'status'},
-                    {data: 'total', name: 'total'},
-                    {data: 'actions', name: 'actions', searchable: false, sortable: false}
+                columns: [{
+                        data: 'DT_Row_Index',
+                        name: 'id'
+                    },
+                    {
+                        data: 'tid',
+                        name: 'tid'
+                    },
+                    {
+                        data: 'customer',
+                        name: 'customer'
+                    },
+                    {
+                        data: 'order_type',
+                        name: 'order_type'
+                    },
+                    {
+                        data: 'status',
+                        name: 'status'
+                    },
+                    {
+                        data: 'total',
+                        name: 'total'
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        searchable: false,
+                        sortable: false
+                    }
                 ],
-                order: [[0, "desc"]],
+                order: [
+                    [0, "desc"]
+                ],
                 searchDelay: 500,
                 dom: 'Blfrtip',
                 buttons: {
-                    buttons: [
-
-                        {extend: 'csv', footer: true, exportOptions: {columns: [0, 1]}},
-                        {extend: 'excel', footer: true, exportOptions: {columns: [0, 1]}},
-                        {extend: 'print', footer: true, exportOptions: {columns: [0, 1]}}
+                    buttons: [{
+                            extend: 'csv',
+                            footer: true,
+                            exportOptions: {
+                                columns: [0, 1]
+                            }
+                        },
+                        {
+                            extend: 'excel',
+                            footer: true,
+                            exportOptions: {
+                                columns: [0, 1]
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            footer: true,
+                            exportOptions: {
+                                columns: [0, 1]
+                            }
+                        }
                     ]
                 }
             });
-            $('#customer_orders-table_wrapper').removeClass('form-inline');
 
+            $('#customer_orders-table_wrapper').removeClass('form-inline');
         }
     </script>
+
 @endsection

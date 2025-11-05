@@ -20,7 +20,7 @@ class CreateDeliverySchedulesTable extends Migration
             $table->unsignedBigInteger('delivery_frequency_id');
             $table->date('delivery_date');
             $table->time('delivery_time');
-            $table->enum('status',['scheduled','delivered','cancelled'])->default('scheduled');
+            $table->enum('status',['scheduled','delivered','cancelled','suspended'])->default('scheduled');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('ins');
             $table->timestamp('created_at')->useCurrent();

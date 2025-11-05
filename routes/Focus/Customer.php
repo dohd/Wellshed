@@ -43,6 +43,7 @@ Route::group(['namespace' => 'customer_enrollment'], function () {
 });
 
 Route::group(['namespace' => 'orders'], function () {
+    Route::patch('customer_orders/update_status/{id}', 'OrdersController@update_status')->name('customer_orders.update_status');
     Route::post('customer_orders/order_items', 'OrdersController@order_items')->name('customer_orders.order_items');
     Route::post('customer_orders/search', 'OrdersController@search')->name('customer_orders.search');
     Route::post('customer_orders/select', 'OrdersController@select')->name('customer_orders.select');

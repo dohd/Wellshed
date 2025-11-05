@@ -68,15 +68,9 @@ class DeliverySchedulesTableController extends Controller
         // Order No filter (supports "ORD-123" or "123")
         if ($request->filled('order_no')) {
             $needle = trim($request->input('order_no'));
-            $digits = preg_replace('/\D+/', '', $needle); // extract numeric portion
 
-            $query->whereHas('order', function ($oq) use ($needle, $digits) {
-                $oq->where(function ($w) use ($needle, $digits) {
-                    if ($digits !== '') {
-                        $w->orWhere('tid', 'like', "%{$digits}%");
-                    }
-                    $w->orWhere('tid', 'like', "%{$needle}%");
-                });
+            $query->whereHas('order', function ($oq) use ($needle) {
+                $oq->where('id', $needle);
             });
         }
 

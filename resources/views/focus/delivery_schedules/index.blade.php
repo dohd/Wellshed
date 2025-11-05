@@ -65,8 +65,6 @@
 
                                     <div class="col-md-3">
                                         <label for="order_no" class="form-label mb-1">Order No</label>
-                                        {{-- <input type="text" class="form-control" id="order_no" name="order_no"
-                                            placeholder="e.g. ORD-01245 or 1245"> --}}
                                         <select name="order_no" id="order_no" class="form-control" data-placeholder="Search Order">
                                             <option value="">Search Order</option>
                                             @foreach ($orders as $order)
@@ -77,8 +75,6 @@
 
                                     <div class="col-md-3">
                                         <label for="customer" class="form-label mb-1">Customer</label>
-                                        {{-- <input type="text" class="form-control" id="customer" name="customer"
-                                            placeholder="Company / Customer name"> --}}
                                             <select name="customer" id="customer" class="form-control" data-placeholder="Search Customer">
                                             <option value="">Search Customer</option>
                                             @foreach ($customers as $customer)
@@ -87,21 +83,18 @@
                                         </select>
                                     </div>
 
-                                    <div class="col-md-3">
+                                    {{-- <div class="col-md-3">
                                         @php
                                             $days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Sarturday','Sunday'];
                                         @endphp
                                         <label for="delivery_days" class="form-label mb-1">Delivery Days</label>
-                                        {{-- <input type="text" class="form-control" id="delivery_days" name="delivery_days"
-                                            placeholder="e.g. Mon,Wed,Fri or Daily"> --}}
                                             <select name="delivery_days" id="delivery_days" class="form-control">
                                                 <option value="">Select a day</option>
                                                 @foreach($days as $day)
                                                     <option value="{{ $day }}">{{ $day }}</option>
                                                 @endforeach
                                             </select>
-                                        {{-- If you prefer a dropdown, replace with a <select> and provide options --}}
-                                    </div>
+                                    </div> --}}
 
                                     <div class="col-md-3 d-flex align-items-end gap-2 mt-2">
                                         <button type="button" id="applyFilters" class="btn btn-primary me-2">Apply</button>

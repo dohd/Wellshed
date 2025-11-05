@@ -29,9 +29,20 @@ class OrdersRepository extends BaseRepository
      */
     public function getForDataTable()
     {
+        $customer = request('customer');
+        $status   = request('status');
 
-        return $this->query()
-            ->get();
+        $query = $this->query();
+
+        if ($customer) {
+            $query->where('customer_id', $customer);
+        }
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        return $query->get();
     }
 
     /**
@@ -124,24 +135,24 @@ class OrdersRepository extends BaseRepository
             if (!$order_item->id) unset($order_item->id);
             $order_item->save();
         }
-        $days = $input['days'];
-        // remove omitted items
-        $item_ids = array_map(function ($v) { return $v['d_id']; }, $days);
-        $order->deliver_days()->whereNotIn('id', $item_ids)->delete();
-        // create or update items
-        foreach($days as $item) {
-            $item['id'] = $item['d_id'];
-            unset($item['d_id']);
-            foreach ($item as $key => $val) {
-                if(in_array($key,['expected_time']))
-                    $item[$key] = Carbon::parse($val)->format('H:i:s');
-            }
-            $deliver = DeliveryFreq::firstOrNew(['id' => $item['id']]);
-            $deliver->fill(array_replace($item, ['order_id' => $order['id']]));
+        // $days = $input['days'];
+        // // remove omitted items
+        // $item_ids = array_map(function ($v) { return $v['d_id']; }, $days);
+        // $order->deliver_days()->whereNotIn('id', $item_ids)->delete();
+        // // create or update items
+        // foreach($days as $item) {
+        //     $item['id'] = $item['d_id'];
+        //     unset($item['d_id']);
+        //     foreach ($item as $key => $val) {
+        //         if(in_array($key,['expected_time']))
+        //             $item[$key] = Carbon::parse($val)->format('H:i:s');
+        //     }
+        //     $deliver = DeliveryFreq::firstOrNew(['id' => $item['id']]);
+        //     $deliver->fill(array_replace($item, ['order_id' => $order['id']]));
 
-            if (!$deliver->id) unset($deliver->id);
-            $deliver->save();
-        }
+        //     if (!$deliver->id) unset($deliver->id);
+        //     $deliver->save();
+        // }
 
     	if ($order)
             DB::commit();
