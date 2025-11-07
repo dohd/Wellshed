@@ -18,7 +18,6 @@ class CreateSubPackagesTable extends Migration
             $table->unsignedBigInteger('tid')->default(0);
             $table->string('name');
             $table->decimal('price', 16,2)->default(0);
-            $table->unsignedInteger('duration')->default(0);
             $table->string('features', 255);
 
             $table->unsignedInteger('is_disabled')->nullable();

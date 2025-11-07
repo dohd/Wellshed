@@ -11,6 +11,7 @@ use App\Models\orders\Orders;
 use App\Models\orders\OrdersItem;
 use App\Models\payment_receipt\PaymentReceipt;
 use App\Models\product\ProductVariation;
+use App\Models\subscription\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Validator;
@@ -72,7 +73,13 @@ class CustomerPagesController extends Controller
     
     public function subscriptions()
     {
-        return view('focus.pages.subscriptions');
+        $customerId = auth()->user()->customer_id;
+        $authsubscr = Subscription::with('package')->where('customer_id', $customerId)->latest()->first();
+        $subscriptions = Subscription::with('package')->where('id', '!=', @$authsubscr->id)->get();
+        $nextSchedule = DeliverySchedule::where('customer_id', $customerId)->where('status', 'scheduled')
+            ->first();
+
+        return view('focus.pages.subscriptions', compact('authsubscr', 'subscriptions', 'nextSchedule'));
     }
     public function my_orders()
     {

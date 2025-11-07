@@ -1,6 +1,7 @@
 @extends('core.layouts.apps')
 @section('title', 'Water Delivery Subscriptions')
 
+@section('content')
 <style>
     .glass-card {
         background: #ffffff;
@@ -75,78 +76,49 @@
     }
 </style>
 
-@section('content')
 <div class="container pb-5">
-
     <h3 class="mb-3 fw-bold">My Subscription</h3>
 
     {{-- ✅ Active Subscription (Dummy Example) --}}
+    @isset ($authsubscr->package)
     <div class="glass-card">
         <span class="sub-status active-status">Active</span>
-        <h5 class="fw-bold">Wave Plan</h5>
-        <p class="mb-1">8 Bottles Monthly</p>
-        <p class="price mb-1">KSh 4,000 / month</p>
-        <p class="text-muted small mb-2"><strong>Next Delivery:</strong> Nov 02, 2025</p>
-
-        <a href="#" class="btn btn-sm btn-outline-primary">View Subscription</a>
+        <h5 class="fw-bold">{{ @$authsubscr->package->name }} Plan</h5>
+        <p class="mb-1">{{ @$authsubscr->package->max_bottle }} Bottles Monthly</p>
+        <p class="price mb-1">KSh {{ numberFormat(@$authsubscr->package->price) }} / month</p>
+        <p class="text-muted small mb-2"><strong>Next Delivery:</strong> {{ $nextSchedule? date('M d, Y', $nextSchedule->delivery_date) : '_' }}</p>
+        <span class="badge bg-primary">View Subscription</span>
+        {{-- <a href="#" class="btn btn-sm btn-outline-primary">View Subscription</a> --}}
     </div>
+    @endisset
 
 
     {{-- ✅ Available Packages Section --}}
     <h4 class="p-title mt-4">Available Subscription Packages</h4>
 
-    {{-- FLOW PLAN --}}
-    <div class="pkg-card mt-3">
-        <h5 class="fw-bold">Flow Plan</h5>
-        <p class="price">KSh 2,000 / month</p>
-
-        <ul class="benefit mt-2">
-            <li>Up to 4 bottles per month</li>
-            <li>Loyalty point rewards</li>
-        </ul>
-
-        <a href="#" class="btn btn-primary w-100 mt-2">Subscribe</a>
-    </div>
-
-    {{-- WAVE PLAN --}}
-    <div class="pkg-card mt-3">
-        <h5 class="fw-bold">Wave Plan</h5>
-        <p class="price">KSh 4,000 / month</p>
-
-        <ul class="benefit mt-2">
-            <li>Up to 8 bottles per month</li>
-            <li>Loyalty point rewards</li>
-            <li>1 case free disposable cups every 3 months (Corporate)</li>
-        </ul>
-
-        <a href="#" class="btn btn-primary w-100 mt-2">Subscribe</a>
-    </div>
-
-    {{-- TIDE PLAN --}}
-    <div class="pkg-card mt-3">
-        <h5 class="fw-bold">Tide Plan</h5>
-        <p class="price">KSh 6,000 / month</p>
-
-        <ul class="benefit mt-2">
-            <li>Up to 12 bottles per month</li>
-            <li>Loyalty point rewards</li>
-            <li>1 case free disposable cups every 3 months (Corporate)</li>
-            <li>Same-day delivery (Kilimani & Upper Hill)</li>
-        </ul>
-
-        <a href="#" class="btn btn-primary w-100 mt-2">Subscribe</a>
-    </div>
+    {{-- Other subscriptions --}}
+    @foreach ($subscriptions as $subscr)
+        @isset ($subscr->package)
+            <div class="pkg-card mt-3">
+                <h5 class="fw-bold">{{ $subscr->package->name }} Plan</h5>
+                <p class="price">KSh {{ numberFormat($subscr->package->price) }} / month</p>
+                <div class="benefit">
+                    {{-- {!! $subscr->package->features !!} --}}
+                </div>
+                <a href="#" class="btn btn-primary w-100 mt-2">Subscribe</a>
+            </div>
+        @endisset
+    @endforeach
 
     {{-- ✅ Previous Subscriptions --}}
     <h4 class="p-title mt-4">Previous Subscriptions</h4>
 
     <div class="glass-card">
         <span class="sub-status expired-status">Expired</span>
-        <h6 class="fw-bold mb-1">Flow Plan</h6>
+        <h6 class="fw-bold mb-1">_ Plan</h6>
         <p class="text-muted mb-1 small">Ended: Sep 15, 2025</p>
         <a href="#" class="btn btn-sm btn-danger">Reactivate</a>
     </div>
-
 </div>
 
 {{-- ✅ Bottom Navigation --}}

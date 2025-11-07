@@ -1,6 +1,7 @@
 @extends('core.layouts.apps')
 @section('title', 'Home')
 
+@section('content')
 <style>
     .home-wrapper {
         padding: 1.2rem 1rem;
@@ -108,15 +109,12 @@
         }
     }
 </style>
-
-@section('content')
 <div class="row g-3 g-xl-4 home-wrapper">
     <section class="col-12">
         <div class="glass-card pane h-100">
             <h2 class="title lh-sm">Hi {{ $customer->name }},<br>Need a refill?</h2>
 
-            <button class="btn btn-lg cta-btn w-100 mt-3"
-                onclick="window.location.href='{{ route('biller.customer_pages.orders') }}'">
+            <button class="btn btn-lg cta-btn w-100 mt-3 text-white" onclick="window.location.href='{{ route('biller.customer_pages.orders') }}'">
                 Order Now
             </button>
 

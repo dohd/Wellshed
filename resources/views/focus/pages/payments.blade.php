@@ -1,6 +1,7 @@
 @extends('core.layouts.apps')
 @section('title', 'Payments')
 
+@section('content')
 <style>
     .page-wrapper {
         padding: 1.2rem 1rem;
@@ -81,15 +82,13 @@
         height: 60px;
     }
 </style>
-
-@section('content')
 <div class="page-wrapper">
     {{-- ✅ Wallet Summary --}}
     <div class="card-box text-center">
         <p class="text-muted mb-1">Wallet Balance</p>
         <h2 class="wallet-balance">KSh {{ numberFormat($balance) }}</h2>
 
-        <button type="button" class="btn w-100 mt-3 add-payment-btn" data-toggle="modal" data-target="#mpesaModal">
+        <button type="button" class="btn w-100 mt-3 add-payment-btn text-white" data-toggle="modal" data-target="#mpesaModal">
             + Add Payment
         </button>
     </div>
