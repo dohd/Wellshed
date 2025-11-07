@@ -15,6 +15,8 @@ class CreateCustomerAddressesTable extends Migration
     {
         Schema::create('customer_addresses', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->unsignedInteger('active')->nullable();
+
             $table->string('building_name')->nullable();
             $table->string('floor_no')->nullable();
             $table->string('door_no')->nullable();
