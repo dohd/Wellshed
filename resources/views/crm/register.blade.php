@@ -147,14 +147,18 @@
                                                     <div class="form-group">
                                                         <label>Delivery Zone</label>
                                                         <fieldset class="form-group position-relative has-icon-left mb-1">
-                                                            <select name="target_zone_id" id="targetzone" class="form-control" data-placeholder="Choose Zone" required>
+                                                            <input type="hidden" name="target_zone_id" id="targetzone">
+                                                            <select name="target_zone_item_id[]" id="targetzoneItem" class="form-control" data-placeholder="Choose Zone Location" required>
                                                                 <option></option>
                                                                 @foreach ($targetzones as $zone)
-                                                                    <option value="{{ $zone->id }}">
-                                                                        {{ $zone->name }}
-                                                                    </option>
+                                                                    <option value="{{ $zone->id }}" disabled>{{ $zone->name }}</option>
+                                                                    @foreach ($zone->items as $subzone)
+                                                                        <option value="{{ $subzone->id }}" data-target_zone_id="{{ $zone->id }}">
+                                                                            {{ $subzone->sub_zone_name }}
+                                                                        </option>
+                                                                    @endforeach                                                                    
                                                                 @endforeach
-                                                            </select>
+                                                            </select>                                                            
                                                             @if ($errors->has('target_zone_id'))
                                                                 <div class="alert bg-warning alert-dismissible m-1" role="alert">
                                                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -165,7 +169,7 @@
                                                             @endif
                                                         </fieldset>                                                        
                                                     </div> 
-                                                    <div class="form-group d-none">
+                                                    {{-- <div class="form-group d-none">
                                                         <label>Locations</label>
                                                         <fieldset class="position-relative has-icon-left mb-1">
                                                             <select name="target_zone_item_id[]" id="targetzoneItem" class="form-control" multiple required>
@@ -179,7 +183,7 @@
                                                                 </div>
                                                             @endif
                                                         </fieldset>                                                        
-                                                    </div>                                                    
+                                                    </div>  --}}                                                   
                                                 </div>
                                             </div>
 
@@ -208,7 +212,6 @@
                         </div>
                     </div>
                 </section>
-
             </div>
         </div>
     </div>
@@ -223,10 +226,10 @@
 
     const Form = {
         init() {
-            $('#segment, #targetzone, #targetzoneItem').select2({allowClear: true});
+            $('#segment, #targetzoneItem').select2({allowClear: true});
 
             $('#segment').change(Form.segmentChange).change();
-            $('#targetzone').change(Form.targetZoneChange).change();
+            $('#targetzoneItem').change(Form.targetZoneItemChange);
             $("#registerForm").submit(Form.formSubmit); 
         },
 
@@ -249,7 +252,13 @@
             }
         },
 
+        targetZoneItemChange() {
+            const targetzoneId = $(this).find(':selected').data('target_zone_id');
+            $('#targetzone').val(targetzoneId);
+        },
+
         targetZoneChange() {
+            return;
             $('#targetzoneItem').html('').closest('.form-group').addClass('d-none');
             if ($(this).val()) {
                 const zone = targetZones.filter(zone => zone.id == $(this).val())[0] || null;
@@ -260,24 +269,7 @@
                     });
                 }               
             }
-        },
-
-        formSubmit() {
-            {{-- let isValid = true;
-            $(this).find("input, select, textarea").each(function() {
-                if ($.trim($(this).val()) === "") {
-                    isValid = false;
-                    $(this).css("border", "1px solid red"); // highlight empty field
-                } else {
-                    $(this).css("border", ""); // reset border if filled
-                }
-            });
-
-            if (!isValid) {
-                e.preventDefault(); // stop form submission
-                alert("Please fill in all fields.");
-            } --}}
-        },
+        },    
     };
 
     $(Form.init);

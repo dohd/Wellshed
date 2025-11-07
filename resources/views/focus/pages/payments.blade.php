@@ -224,13 +224,15 @@ $(function() {
       }
     });
 
-   {{--  $('#mpesaStatusArea .alert')
+    /**
+    $('#mpesaStatusArea .alert')
           .removeClass('alert-info')
           .addClass('alert-success')
           .html('<i class="fas fa-check-circle mr-2"></i> Prompt sent successfully. Ask customer to complete on phone.');
         setTimeout(() => $('#mpesaPromptModal').modal('hide'), 2500);
     postPaymentLocally({merchant_request_id: 1234567, checkout_request_id: 1234567});
-    $('#btnSendMpesa').prop('disabled', false); --}}
+    $('#btnSendMpesa').prop('disabled', false);
+    **/
   });
 
   // ==== Locally POST payment ====

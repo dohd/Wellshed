@@ -427,7 +427,7 @@
                     <!-- AI Agent Leads -->
                     <li class="dropdown dropdown-submenu" data-menu="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-whatsapp" aria-hidden="true"></i> WhatsApp</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('biller.whatsapp.setup') }}" data-toggle="dropdown"><i class="fa fa-cogs" aria-hidden="true"></i> WhatsApp Setup </a></li>
+                            <li><a class="dropdown-item" href="{{ route('biller.whatsapp.setup') }}" data-toggle="dropdown"><i class="fa fa-cogs" aria-hidden="true"></i> WhatsApp Meta Setup </a></li>
                             <li><a class="dropdown-item" href="{{ route('biller.whatsapp.templates.index') }}" data-toggle="dropdown"><i class="icon-badge" aria-hidden="true"></i> Message Templates</a></li>
                             <li><a class="dropdown-item" href="{{ route('biller.whatsapp.messages.index') }}" data-toggle="dropdown"><i class="fa fa-bullhorn" aria-hidden="true"></i> WhatsApp Broadcast / Single Message</a></li>
                         </ul>
