@@ -1,23 +1,23 @@
 <?php
 
-namespace App\Models\subpackage;
+namespace App\Models\customer;
 
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\subpackage\Traits\BranchAttribute;
-use App\Models\subpackage\Traits\SubPackageRelationship;
+use App\Models\customer\Traits\CustomerAttribute;
+use App\Models\customer\Traits\CustomerRelationship;
 
-class SubPackage extends Model
+class CustomerAddress extends Model
 {
     use ModelTrait,
-        BranchAttribute,
-        SubPackageRelationship;
+        CustomerAttribute,
+        CustomerRelationship;
 
     /**
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'sub_packages';
+    protected $table = 'customer_addresses';
 
     /**
      * Mass Assignable fields of model
@@ -57,20 +57,25 @@ class SubPackage extends Model
         parent::__construct($attributes);
     }
 
+    /**
+     * model life cycle event listeners
+     * @return void
+     */
     protected static function boot()
     {
         parent::boot();
 
         if (auth()->id()) {
             static::creating(function ($model) {
-                $model->tid = SubPackage::max('tid')+1;
-                $model->created_by = auth()->user()->id;
-                $model->ins = auth()->user()->ins;
+                $model->tid = Customer::max('tid')+1;
+                $model->created_by = auth()->id();
                 return $model;
             });
-            static::addGlobalScope('ins', function ($builder) {
-                $builder->where('ins', auth()->user()->ins);
+
+            static::updating(function ($model) {
+                $model->updated_by = auth()->id();
+                return $model;
             });
-        }
+        }        
     }
 }

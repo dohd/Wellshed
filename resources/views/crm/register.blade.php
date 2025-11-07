@@ -40,6 +40,7 @@
                                                             @foreach ($subpackages as $package)
                                                                 <option value="{{ $package->id }}">
                                                                     {{ $package->name }} (Ksh. {{ numberFormat($package->price) }} / month)
+                                                                     - Up to {{ $package->max_bottle }} bottles
                                                                 </option>
                                                             @endforeach
                                                         </select>
@@ -84,56 +85,69 @@
                                                                 {{ $errors->first('company') }}
                                                             </div>
                                                         @endif
-                                                    </fieldset>                                                   
+                                                    </fieldset>   
 
-                                                    <fieldset class="form-group position-relative has-icon-left mb-1">
-                                                        <label>First Name</label>
-                                                        <input type="text" name="first_name" class="form-control" id="firstname"  placeholder="First Name" required>                                                
-                                                        @if ($errors->has('first_name'))
-                                                            <div class="alert bg-warning alert-dismissible m-1" role="alert">
-                                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                                                    <span aria-hidden="true">×</span>
-                                                                </button>
-                                                                {{ $errors->first('first_name') }}
-                                                            </div>
-                                                        @endif
-                                                    </fieldset>
-                                                    <fieldset class="form-group position-relative has-icon-left mb-1">
-                                                        <label>Last Name</label>
-                                                        <input type="text" name="last_name" class="form-control" id="lastname" placeholder="Last Name" required>                                                
-                                                        @if ($errors->has('last_name'))
-                                                            <div class="alert bg-warning alert-dismissible m-1" role="alert">
-                                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                                                    <span aria-hidden="true">×</span>
-                                                                </button>
-                                                                {{ $errors->first('last_name') }}
-                                                            </div>
-                                                        @endif
-                                                    </fieldset>
-                                                    <fieldset class="form-group position-relative has-icon-left mb-1">
-                                                        <label>Phone Number</label>
-                                                        <input type="text" name="phone_no" class="form-control" id="primarycontact" placeholder="Phone Number" required>                                                
-                                                        @if ($errors->has('phone_no'))
-                                                            <div class="alert bg-warning alert-dismissible m-1" role="alert">
-                                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                                                    <span aria-hidden="true">×</span>
-                                                                </button>
-                                                                {{ $errors->first('phone_no') }}
-                                                            </div>
-                                                        @endif
-                                                    </fieldset>
-                                                    <fieldset class="form-group position-relative has-icon-left mb-1">
-                                                        <label>Email</label>
-                                                        <input type="text" class="form-control" id="email" name="email" placeholder="Email" required>                                                
-                                                        @if ($errors->has('email'))
-                                                            <div class="alert bg-warning alert-dismissible m-1" role="alert">
-                                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                                                    <span aria-hidden="true">×</span>
-                                                                </button>
-                                                                {{ $errors->first('email') }}
-                                                            </div>
-                                                        @endif
-                                                    </fieldset>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <fieldset class="form-group position-relative has-icon-left mb-1">
+                                                                <label>First Name</label>
+                                                                <input type="text" name="first_name" class="form-control" id="firstname"  placeholder="First Name" required>                                                
+                                                                @if ($errors->has('first_name'))
+                                                                    <div class="alert bg-warning alert-dismissible m-1" role="alert">
+                                                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                                            <span aria-hidden="true">×</span>
+                                                                        </button>
+                                                                        {{ $errors->first('first_name') }}
+                                                                    </div>
+                                                                @endif
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <fieldset class="form-group position-relative has-icon-left mb-1">
+                                                                <label>Last Name</label>
+                                                                <input type="text" name="last_name" class="form-control" id="lastname" placeholder="Last Name" required>                                                
+                                                                @if ($errors->has('last_name'))
+                                                                    <div class="alert bg-warning alert-dismissible m-1" role="alert">
+                                                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                                            <span aria-hidden="true">×</span>
+                                                                        </button>
+                                                                        {{ $errors->first('last_name') }}
+                                                                    </div>
+                                                                @endif
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>                                                        
+                                                    
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <fieldset class="form-group position-relative has-icon-left mb-1">
+                                                                <label>Phone Number</label>
+                                                                <input type="text" name="phone_no" class="form-control p-1" id="primarycontact" placeholder="Phone Number" required>                                                
+                                                                @if ($errors->has('phone_no'))
+                                                                    <div class="alert bg-warning alert-dismissible m-1" role="alert">
+                                                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                                            <span aria-hidden="true">×</span>
+                                                                        </button>
+                                                                        {{ $errors->first('phone_no') }}
+                                                                    </div>
+                                                                @endif
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <fieldset class="form-group position-relative has-icon-left mb-1">
+                                                                <label>Email</label>
+                                                                <input type="text" class="form-control p-1" id="email" name="email" placeholder="Email" required>                                                
+                                                                @if ($errors->has('email'))
+                                                                    <div class="alert bg-warning alert-dismissible m-1" role="alert">
+                                                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                                            <span aria-hidden="true">×</span>
+                                                                        </button>
+                                                                        {{ $errors->first('email') }}
+                                                                    </div>
+                                                                @endif
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>                                                    
 
                                                     <label>Password</label>
                                                     <fieldset class="form-group position-relative has-icon-left">
@@ -183,7 +197,63 @@
                                                                 </div>
                                                             @endif
                                                         </fieldset>                                                        
-                                                    </div>  --}}                                                   
+                                                    </div>  --}}  
+
+                                                    <fieldset class="form-group position-relative has-icon-left mb-1">
+                                                        <label>Building Name</label>
+                                                        <input type="text" class="form-control" id="building" name="building_name" placeholder="Building Name" required>                                                
+                                                        @if ($errors->has('building_name'))
+                                                            <div class="alert bg-warning alert-dismissible m-1" role="alert">
+                                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                                    <span aria-hidden="true">×</span>
+                                                                </button>
+                                                                {{ $errors->first('building_name') }}
+                                                            </div>
+                                                        @endif
+                                                    </fieldset>  
+
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <fieldset class="form-group position-relative has-icon-left mb-1">
+                                                                <label>Floor Number</label>
+                                                                <input type="text" class="form-control" id="floor" name="floor_no" placeholder="Floor Number" required>                                                
+                                                                @if ($errors->has('floor_no'))
+                                                                    <div class="alert bg-warning alert-dismissible m-1" role="alert">
+                                                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                                            <span aria-hidden="true">×</span>
+                                                                        </button>
+                                                                        {{ $errors->first('floor_no') }}
+                                                                    </div>
+                                                                @endif
+                                                            </fieldset>  
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label>Door Number</label>
+                                                                <input type="text" class="form-control" id="door" name="door_no" placeholder="Door Number" required>                                                
+                                                                @if ($errors->has('door_no'))
+                                                                    <div class="alert bg-warning alert-dismissible m-1" role="alert">
+                                                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                                            <span aria-hidden="true">×</span>
+                                                                        </button>
+                                                                        {{ $errors->first('door_no') }}
+                                                                    </div>
+                                                                @endif
+                                                            </fieldset>  
+                                                        </div>
+                                                    </div>  
+
+                                                    <fieldset class="form-group position-relative has-icon-left mb-1">
+                                                        <label>Additional Info</label>
+                                                        <input type="text" class="form-control" id="additionalInfo" name="additional_info" placeholder="Additional Info">                                                
+                                                        @if ($errors->has('additional_info'))
+                                                            <div class="alert bg-warning alert-dismissible m-1" role="alert">
+                                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                                    <span aria-hidden="true">×</span>
+                                                                </button>
+                                                                {{ $errors->first('additional_info') }}
+                                                            </div>
+                                                        @endif
+                                                    </fieldset>                                                 
                                                 </div>
                                             </div>
 

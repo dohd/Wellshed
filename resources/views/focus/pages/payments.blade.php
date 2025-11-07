@@ -170,9 +170,26 @@
 <script>
 $(function() {
     const customer = @json($customer);
+
     $.ajaxSetup({ 
       headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" } 
     });
+
+    // ==== Handle payment for change =====
+    $('#mpesaPaymentFor').change(function() {
+        $option = $(this).find(':selected');
+        const price = accounting.unformat($option.data('price'));
+        $('#mpesaAmount').val(price);
+
+        if ($(this).val() === 'subscription') {
+            $('#mpesaNotes').attr('placeholder', 'e.g subscription');
+        } else if ($(this).val() === 'order') {
+            $('#mpesaNotes').attr('placeholder', 'e.g order');
+        } else if ($(this).val() === 'charge') {
+            $('#mpesaNotes').attr('placeholder', 'e.g charge');
+        }
+    });
+    $('#mpesaPaymentFor').change();
 
   // ==== Handle form submit ====
   $('#mpesaPromptForm').on('submit', function(e){

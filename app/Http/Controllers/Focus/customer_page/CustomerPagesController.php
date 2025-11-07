@@ -65,10 +65,15 @@ class CustomerPagesController extends Controller
 
     public function payments()
     {
+        $customer = auth()->user()->customer;
         $balance = PaymentReceipt::selectRaw('SUM(debit-credit) total')->value('total');
         $receipts = PaymentReceipt::latest()->get();
-        $customer = auth()->user()->customer;
-        return view('focus.pages.payments', compact('balance', 'receipts', 'customer'));
+
+        $subscrPackage = $customer->packages()
+            ->whereHas('subscriptions', fn($q) => $q->where('status', 'active'))
+            ->first();
+
+        return view('focus.pages.payments', compact('balance', 'receipts', 'customer', 'subscrPackage'));
     }
     
     public function subscriptions()

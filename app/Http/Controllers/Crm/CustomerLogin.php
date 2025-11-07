@@ -1,20 +1,5 @@
 <?php
-/*
- * Rose Business Suite - Accounting, CRM and POS Software
- * Copyright (c) UltimateKode.com. All Rights Reserved
- * ***********************************************************************
- *
- *  Email: support@ultimatekode.com
- *  Website: https://www.ultimatekode.com
- *
- *  ************************************************************************
- *  * This software is furnished under a license and may be used and copied
- *  * only  in  accordance  with  the  terms  of such  license and with the
- *  * inclusion of the above copyright notice.
- *  * If you Purchased from Codecanyon, Please read the full License from
- *  * here- http://codecanyon.net/licenses/standard/
- * ***********************************************************************
- */
+
 namespace App\Http\Controllers\Crm;
 
 use App\Http\Responses\RedirectResponse;
@@ -24,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\NotifyCustomerRegistration;
 use App\Models\Company\Company;
 use App\Models\customer\Customer;
+use App\Models\customer\CustomerAddress;
 use App\Models\hrm\Hrm;
 use App\Models\subpackage\SubPackage;
 use App\Models\subscription\Subscription;
@@ -70,6 +56,7 @@ class CustomerLogin extends Controller
     
     /**
      * Customer Self Registration
+     * 
      * */
     public function register(Request $request )
     {
@@ -90,6 +77,9 @@ class CustomerLogin extends Controller
             'password' => 'required',
             'target_zone_id' => 'required',
             'target_zone_item_id' => ['required', 'array', 'min:1'],
+            'building_name' => 'required',
+            'floor_no' => 'required',
+            'door_no' => 'required',
         ], [
             'sub_package_id' => 'package is required',
             'target_zone_id' => 'delivery zone is required',
@@ -101,6 +91,7 @@ class CustomerLogin extends Controller
 
         try {
             DB::beginTransaction();
+
             $ins = Company::where('id', 2)->first(['id'])->id;
 
             // create customer
@@ -115,6 +106,9 @@ class CustomerLogin extends Controller
             ]);    
 
             // create user
+            $emailExists = Hrm::where('email', $input['email'])->exists();
+            if ($emailExists) return errorHandler('Email: ' . $input['email'] . ' is already taken!');
+
             $user = Hrm::create([
                 'tid' => Hrm::max('tid')+1,
                 'first_name' => $input['first_name'] ?? $input['company'],
@@ -138,19 +132,25 @@ class CustomerLogin extends Controller
                 'ins' => $ins,
             ]);
 
+            // create address
+            $addressData = $request->only('building_name', 'floor_no', 'door_no', 'additional_info');
+            $addressData['ins'] = $ins;
+            $customerAddr = CustomerAddress::create($addressData);
+
             // create zone items
             foreach ($input['target_zone_item_id'] as $id) {
                 $customerZoneItems[] = CustomerZoneItem::create([
                     'target_zone_item_id' => $id,
                     'target_zone_id' => $input['target_zone_id'],
                     'customer_id' => $customer->id,
+                    'customer_address_id' => $customerAddr->id,
                 ]);
             }
 
             DB::commit();
-            if($user){
-                NotifyCustomerRegistration::dispatch($user,$input['password'],$ins);
-            }
+
+            if ($user) NotifyCustomerRegistration::dispatch($user,$input['password'],$ins);
+            
         } catch (\Exception $e) {
             return errorHandler('Registration Error: Please contact admin', $e);            
         }

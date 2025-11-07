@@ -19,6 +19,7 @@ use App\Models\project\Project;
 use App\Models\quote\Quote;
 use App\Models\recentCustomer\RecentCustomerEmail;
 use App\Models\recentCustomer\RecentCustomerSms;
+use App\Models\subpackage\SubPackage;
 use App\Models\tenant\Tenant;
 use App\Models\tenant_package\TenantPackage;
 use App\Models\transaction\Transaction;
@@ -31,9 +32,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 trait CustomerRelationship
 {
-    public function customer_zones(){
+    public function packages() {
+        return $this->hasManyThrough(SubPackage::class, Subscription::class, 'customer_id', 'id', 'id', 'sub_package_id')
+        ->withoutGlobalScopes();
+    }
+
+    public function customer_zones() {
         return $this->hasMany(CustomerZoneItem::class,'customer_id');
     }
+    
     public function charges() {
         return $this->hasMany(PaymentReceipt::class)->where('entry_type', 'debit');
     }
