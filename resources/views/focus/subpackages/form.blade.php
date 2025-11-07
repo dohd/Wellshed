@@ -17,12 +17,12 @@
     </div>
 </div>
 
-{{-- <div class='form-group'>
-    {{ Form::label( 'duration', 'Duration (Days)',['class' => 'col-lg-2 control-label']) }}
+<div class='form-group'>
+    {{ Form::label( 'max_bottle', 'Max Deliverable Bottles',['class' => 'col-lg-2 control-label']) }}
     <div class='col-lg-10'>
-        {{ Form::number('duration', null, ['class' => 'form-control box-size', 'placeholder' => '0', 'required' => 'required']) }}
+        {{ Form::number('max_bottle', null, ['class' => 'form-control box-size', 'placeholder' => '0', 'required' => 'required']) }}
     </div>
-</div> --}}
+</div>
 
 <div class='form-group'>
     {{ Form::label('features', 'Features', ['class' => 'col-lg-2 control-label']) }}

@@ -28,6 +28,7 @@
                                         <th>CODE#</th>
                                         <th>NAME</th>
                                         <th>PRICE</th>
+                                        <th>Max Bottle</th>
                                         <th>FEATURES</th>
                                         <th>DISABLED</th>
                                         <th>ACTIONS</th>
@@ -68,7 +69,7 @@
             },
             columns: [
                 {data: 'DT_Row_Index',name: 'id'},                
-                ...['tid', 'name', 'price', 'features', 'is_disabled'].map(v => ({data: v, name: v})),
+                ...['tid', 'name', 'price', 'max_bottle', 'features', 'is_disabled'].map(v => ({data: v, name: v})),
                 {
                     data: 'actions',
                     name: 'actions',
