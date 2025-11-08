@@ -30,14 +30,42 @@ class CustomerPagesController extends Controller
     }
     public function orders()
     {
-        $products = ProductVariation::where('type', 'full')
-        ->get([
-            'id',
-            'name',
-            DB::raw('price * 1.16 as price'), // adds 16% VAT
-            'name as eta',
-        ]);
-        return view('focus.pages.orders', compact('products'));
+        $recurring = 0;
+        $customer = Customer::where('id', auth()->user()->customer_id)->first();
+        $products = collect();
+        $order = Orders::where('customer_id', $customer->id)->whereNotIn('status', ['cancelled', 'completed'])->first();
+        if (!$order) {
+            $recurring = 1;
+            $subscription = $customer->subscriptions()->where('status', 'active')->first();
+            $package = $subscription->package;
+            //Subscription products only
+            $products = ProductVariation::where('type', 'full')
+                ->where('id', $package->productvar_id)
+                ->get([
+                    'id',
+                    'name',
+                    DB::raw('price * 1.16 as price'), // adds 16% VAT
+                    'name as eta',
+                ]);
+            $products = $products->map(function ($q) use ($package) {
+                $q->qty = $package->max_bottle;
+                return $q;
+            });
+            // dd($products);
+
+        } else {
+            $recurring = 0;
+            $products = ProductVariation::where('type', 'full')
+                ->get([
+                    'id',
+                    'name',
+                    DB::raw('price * 1.16 as price'), // adds 16% VAT
+                    'name as eta',
+                ]);
+        }
+        // dd($products);
+
+        return view('focus.pages.orders', compact('products', 'recurring'));
     }
     public function track()
     {
@@ -50,13 +78,24 @@ class CustomerPagesController extends Controller
     }
     public function delivery()
     {
+        $recurring = 1;
+        $qty = 0;
+        $customer = Customer::where('id', auth()->user()->customer_id)->first();
+        $order = Orders::where('customer_id', $customer->id)->whereNotIn('status', ['cancelled', 'completed'])->first();
+        if (!$order) {
+            $recurring = 0;
+            $subscription = $customer->subscriptions()->where('status', 'active')->first();
+            $package = $subscription->package;
+            $qty = $package->max_bottle;
+        }
         $customer = Customer::where('id', auth()->user()->customer_id)->first();
         $customer_zones = $customer->customer_zones()->with('location')->get();
-        return view('focus.pages.delivery-details', compact('customer','customer_zones'));
+        return view('focus.pages.delivery-details', compact('customer', 'customer_zones', 'recurring', 'qty'));
     }
     public function review()
     {
-        return view('focus.pages.review-order');
+        $customer = Customer::where('id', auth()->user()->customer_id)->first();
+        return view('focus.pages.review-order', compact('customer'));
     }
     public function thank_you()
     {
@@ -70,7 +109,7 @@ class CustomerPagesController extends Controller
         $customer = auth()->user()->customer;
         return view('focus.pages.payments', compact('balance', 'receipts', 'customer'));
     }
-    
+
     public function subscriptions()
     {
         $customerId = auth()->user()->customer_id;
@@ -96,7 +135,7 @@ class CustomerPagesController extends Controller
             return back()->withErrors('Invalid order payload')->withInput();
         }
 
-        // ✅ Validate structure, now including locations_for_days (IDs)
+        // ✅ Validate structure
         $validator = Validator::make($payload, [
             'customer.name'              => 'required|string|max:255',
             'customer.customer_id'       => 'required|numeric',
@@ -104,9 +143,10 @@ class CustomerPagesController extends Controller
             'customer.frequency'         => 'nullable|string|in:daily,weekly,custom',
             'customer.delivery_days'     => 'nullable|array',
             'customer.week_numbers'      => 'nullable|array',
+            'customer.qty_per_day'       => 'nullable|array',     // ✅ added
             'customer.delivery_date'     => 'nullable|date',
             'customer.start_month'       => 'nullable|date',
-            'customer.locations_for_days'=> 'nullable|array',
+            'customer.locations_for_days' => 'nullable|array',
             'cart'                       => 'required|array|min:1',
             'total'                      => 'required|numeric|min:0',
         ]);
@@ -156,17 +196,20 @@ class CustomerPagesController extends Controller
                 ]);
             }
 
-            // ✅ Handle recurring or custom frequency setup
+            // ✅ Handle recurring/custom frequency setup
             if ($order->order_type === 'recurring') {
+
                 $deliveryDays   = $customer['delivery_days'] ?? [];
                 $weekNumbers    = $customer['week_numbers'] ?? [];
                 $locationsMap   = $customer['locations_for_days'] ?? [];
+                $qtyPerDay      = $customer['qty_per_day'] ?? [];   // ✅ NEW
 
-                $freqRecord = DeliveryFreq::create([
+                DeliveryFreq::create([
                     'order_id'           => $order->id,
                     'frequency'          => $customer['frequency'] ?? null,
                     'delivery_days'      => json_encode($deliveryDays),
                     'week_numbers'       => json_encode($weekNumbers),
+                    'qty_per_day'        => json_encode($qtyPerDay),     // ✅ NEW
                     'locations_for_days' => json_encode($locationsMap),
                     'expected_time'      => $customer['expected_time'] ?? null,
                     'user_id'            => auth()->id(),
@@ -176,6 +219,7 @@ class CustomerPagesController extends Controller
 
             // ✅ Create one-time delivery schedule
             if ($order->order_type === 'one_time') {
+
                 $schedule = DeliverySchedule::create([
                     'tid'           => (DeliverySchedule::max('tid') ?? 0) + 1,
                     'order_id'      => $order->id,
@@ -203,13 +247,13 @@ class CustomerPagesController extends Controller
 
             return redirect()->route('biller.customer_pages.thank_you')
                 ->with('success', 'Order submitted successfully!');
-
         } catch (\Throwable $th) {
             DB::rollBack();
             \Log::error('Submit Order Error: ' . $th->getMessage());
             return back()->withErrors(['error' => 'Error creating order. Please try again.']);
         }
     }
+
 
 
 

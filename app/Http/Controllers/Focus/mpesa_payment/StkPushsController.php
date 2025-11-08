@@ -187,7 +187,7 @@ class StkPushsController extends Controller
     /**
      * Check payment status
      */
-    public function status($checkoutRequestID)
+    public function delivery_status($checkoutRequestID)
     {
         $payment = StkPush::where('checkout_request_id', $checkoutRequestID)->first();
         if (!$payment) {

@@ -101,4 +101,4 @@ Route::post('dbm_json_report', [DailyBusinessMetricController::class, 'dbmJsonRe
 //Mpesa
 Route::post('mpesa_payment/stkpush', [StkPushsController::class, 'stkPush'])->name('api.mpesa_stkpush');       // initiate
 Route::post('mpesa_payment/callback', [StkPushsController::class, 'callback']);     // callback from Safaricom
-Route::get('mpesa_payment/status/{checkoutRequestID}', [StkPushsController::class, 'status']); // optional status probe
+Route::get('mpesa_payment/{checkoutRequestID}', [StkPushsController::class, 'delivery_status'])->name('mpesa_payment.delivery_status'); // optional status probe

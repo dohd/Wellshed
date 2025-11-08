@@ -31,13 +31,5 @@ class StkPush extends Model
     protected static function boot()
     {
         parent::boot();
-        // static::creating(function ($instance) {
-        //     $instance->user_id = auth()->user()->id;
-        //     $instance->ins = auth()->user()->ins;
-        //     return $instance;
-        // });
-        // static::addGlobalScope('ins', function($builder){
-        //     $builder->where('ins', '=', auth()->user()->ins);
-        // });
     }
 }
