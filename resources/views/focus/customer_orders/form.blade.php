@@ -102,7 +102,9 @@
             @php
                 $dayList = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-                $selected = optional($customer_order->deliver_days()->first())->delivery_days ?? [];
+                $selected = isset($customer_order)
+                    ? optional($customer_order->deliver_days()->first())->delivery_days ?? []
+                    : [];
 
                 // If stored as JSON string → decode
                 if (!is_array($selected)) {
@@ -126,8 +128,12 @@
 
         @php
             // Load JSON from DB
-            $savedDays = optional($customer_order->deliver_days()->first())->locations_for_days; // adjust column name if different
+            // adjust column name if different
 
+            $savedDays = isset($customer_order)
+                    ? optional($customer_order->deliver_days()->first())->locations_for_days ?? []
+                    : [];
+            
             // Decode JSON to array
             $savedDays = is_array($savedDays) ? $savedDays : json_decode($savedDays, true);
 
@@ -170,7 +176,9 @@
         <label>Week Numbers</label>
 
         @php
-            $selected = optional($customer_order->deliver_days()->first())->week_numbers ?? [];
+            $selected = isset($customer_order)
+                    ? optional($customer_order->deliver_days()->first())->week_numbers ?? []
+                    : [];
 
             // Ensure value is an array
             if (!is_array($selected)) {
