@@ -8,231 +8,209 @@ use App\Models\orders\Orders;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CreateDeliverySchedule extends Command
 {
     protected $signature = 'create:delivery_schedule';
     protected $description = 'Automatically create delivery schedules based on order frequency and type';
 
-    // 🗓 Generate 1 month ahead
     protected $generationWindowMonths = 1;
 
     public function handle()
     {
-        $today   = Carbon::today();
-        $endDate = $today->copy()->addMonths($this->generationWindowMonths)->endOfMonth();
-
+        $today = Carbon::today();
         $orders = Orders::whereIn('status', ['confirmed', 'started'])
-            ->with(['deliver_days', 'items'])
+            ->with(['deliver_days', 'items', 'customer.subscriptions'])
             ->get();
 
         DB::beginTransaction();
 
         try {
-
             foreach ($orders as $order) {
 
+                $activeSubscription = $order->customer->subscriptions
+                    ->where('status', 'active')
+                    ->first();
+
                 $startDate = Carbon::parse($order->start_month ?? $today)->startOfDay();
+                $endDate = $activeSubscription
+                    ? Carbon::parse($activeSubscription->end_date)->endOfDay()
+                    : $today->copy()->addMonths($this->generationWindowMonths)->endOfMonth();
+
+                Log::info("Processing Order ID {$order->id}: Start {$startDate->toDateString()} - End {$endDate->toDateString()}");
 
                 if ($startDate->gt($endDate)) {
+                    Log::warning("Skipping Order ID {$order->id} because start date is after end date.");
                     continue;
                 }
 
                 foreach ($order->deliver_days as $freq) {
-
                     $frequency = strtolower($freq->frequency);
 
-                    // ✅ SAFE extractions
                     $deliveryDays = $this->safeArray($freq->delivery_days);
                     $weekNumbers  = $this->safeArray($freq->week_numbers);
                     $locationsMap = $this->safeAssoc($freq->locations_for_days);
+                    $qtyPerDay    = $this->safeAssoc($freq->qty_per_day);
+
+                    Log::info("Order ID {$order->id}, Frequency: {$frequency}, Days: " . json_encode($deliveryDays) . ", Weeks: " . json_encode($weekNumbers));
 
                     switch ($frequency) {
-
                         case 'daily':
-                            $this->handleDaily($order, $freq, $startDate, $endDate, $locationsMap);
+                            $this->handleDaily($order, $freq, $startDate, $endDate, $locationsMap, $qtyPerDay);
                             break;
 
                         case 'weekly':
-                            $this->handleWeekly($order, $freq, $startDate, $endDate, $deliveryDays, $locationsMap);
+                            $this->handleWeekly($order, $freq, $startDate, $endDate, $deliveryDays, $locationsMap, $qtyPerDay);
                             break;
 
                         case 'custom':
-                            $this->handleCustom($order, $freq, $startDate, $endDate, $deliveryDays, $weekNumbers, $locationsMap);
+                            $this->handleCustom($order, $freq, $startDate, $endDate, $deliveryDays, $weekNumbers, $locationsMap, $qtyPerDay);
                             break;
 
                         default:
+                            Log::warning("Unknown frequency '{$frequency}' for Order ID {$order->id}");
                             continue 2;
                     }
                 }
             }
 
             DB::commit();
-            $this->info('✅ Delivery schedules generated for the next ' . $this->generationWindowMonths . ' month(s).');
-
+            Log::info("✅ Delivery schedules generated successfully for all orders.");
+            $this->info('✅ Delivery schedules generated successfully');
         } catch (\Throwable $e) {
-
             DB::rollBack();
-            \Log::error('❌ Error creating delivery schedules: ' . $e->getMessage());
+            Log::error('❌ Error creating delivery schedules: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
             $this->error('Error: ' . $e->getMessage());
         }
     }
 
-    /**
-     * DAILY: generate every day
-     */
-    private function handleDaily($order, $freq, $startDate, $endDate, array $locationsMap)
+    private function handleDaily($order, $freq, $startDate, $endDate, array $locationsMap, array $qtyPerDay)
     {
         $date = $startDate->copy();
         while ($date->lte($endDate)) {
             $dayName = strtolower($date->format('l'));
             $locationId = $locationsMap[$dayName][0] ?? null;
 
-            $this->createScheduleIfNotExists($order, $freq, $date, $locationId);
-            $date->addDay();
-        }
-    }
-
-    /**
-     * WEEKLY: specific weekdays
-     */
-    private function handleWeekly($order, $freq, $startDate, $endDate, array $deliveryDays, array $locationsMap)
-    {
-        $date = $startDate->copy();
-
-        while ($date->lte($endDate)) {
-
-            $dayName = $date->format('l');
-
-            if (in_array($dayName, $deliveryDays)) {
-                $key = strtolower($dayName);
-                $locationId = $locationsMap[$key][0] ?? null;
-
-                $this->createScheduleIfNotExists($order, $freq, $date, $locationId);
+            $qty = intval($qtyPerDay[$dayName] ?? 0);
+            if ($qty > 0) {
+                Log::info("Creating DAILY schedule: Order ID {$order->id}, Date {$date->toDateString()}, Qty {$qty}");
+                $this->createSchedule($order, $freq, $date, $locationId, $qty);
             }
 
             $date->addDay();
         }
     }
 
-    /**
-     * CUSTOM frequency: week numbers + weekdays
-     */
-    private function handleCustom($order, $freq, $startDate, $endDate, array $deliveryDays, array $weekNumbers, array $locationsMap)
+    private function handleWeekly($order, $freq, $startDate, $endDate, array $deliveryDays, array $locationsMap, array $qtyPerDay)
+    {
+        $date = $startDate->copy();
+        while ($date->lte($endDate)) {
+            $dayNameFull = $date->format('l');
+            if (in_array($dayNameFull, $deliveryDays)) {
+                $dayKey = strtolower($dayNameFull);
+                $locationId = $locationsMap[$dayKey][0] ?? null;
+                $key = "qty_for_day[{$dayKey}]";
+                $qty = intval($qtyPerDay[$key] ?? 0);
+
+                // dd($dayNameFull,$qty);
+                if ($qty > 0) {
+                    Log::info("Creating WEEKLY schedule: Order ID {$order->id}, Date {$date->toDateString()}, Qty {$qty}");
+                    $this->createSchedule($order, $freq, $date, $locationId, $qty);
+                }
+            }
+            $date->addDay();
+        }
+    }
+
+    private function handleCustom($order, $freq, $startDate, $endDate, array $deliveryDays, array $weekNumbers, array $locationsMap, array $qtyPerDay)
     {
         $currentMonth = $startDate->copy()->startOfMonth();
-
         while ($currentMonth->lte($endDate)) {
-
             foreach ($weekNumbers as $weekNum) {
-
                 foreach ($deliveryDays as $dayName) {
-
                     $targetDate = $this->getNthWeekdayOfMonth($currentMonth, $dayName, intval($weekNum));
-
                     if ($targetDate && $targetDate->between($startDate, $endDate)) {
+                        $dayKey = strtolower($dayName);
+                        $locationId = $locationsMap[$dayKey][0] ?? null;
 
-                        $key = strtolower($dayName);
-                        $locationId = $locationsMap[$key][0] ?? null;
+                        // Parse qty_per_day key
+                        $key = "qty_for_custom[{$dayKey}][{$weekNum}]";
+                        $weekQty = intval($qtyPerDay[$key] ?? 0);
 
-                        $this->createScheduleIfNotExists($order, $freq, $targetDate, $locationId);
+
+                        if ($weekQty > 0) {
+                            Log::info("Creating CUSTOM schedule: Order ID {$order->id}, Date {$targetDate->toDateString()}, Week {$weekNum}, Qty {$weekQty}");
+                            $this->createSchedule($order, $freq, $targetDate, $locationId, $weekQty);
+                        }
                     }
                 }
             }
-
             $currentMonth->addMonth();
         }
     }
 
-    /** Create if not exists */
-    private function createScheduleIfNotExists($order, $freq, Carbon $date, $locationId = null)
+    private function createSchedule($order, $freq, Carbon $date, $locationId = null, int $qty = 0)
     {
-        $exists = DeliverySchedule::where('order_id', $order->id)
-            ->whereDate('delivery_date', $date->toDateString())
-            ->exists();
+        $schedule = DeliverySchedule::firstOrCreate(
+            ['order_id' => $order->id, 'delivery_date' => $date->toDateString()],
+            [
+                'tid' => (DeliverySchedule::max('tid') ?? 0) + 1,
+                'customer_id' => $order->customer_id,
+                'delivery_time' => $freq->expected_time,
+                'delivery_frequency_id' => $freq->id,
+                'location_id' => $locationId,
+                'status' => 'scheduled',
+                'ins' => $order->ins,
+                'user_id' => $order->user_id,
+            ]
+        );
 
-        if ($exists) {
-            return;
-        }
+        DeliveryScheduleItem::where('delivery_schedule_id', $schedule->id)->delete();
 
-        $schedule = DeliverySchedule::create([
-            'tid'                   => (DeliverySchedule::max('tid') ?? 0) + 1,
-            'order_id'              => $order->id,
-            'customer_id'           => $order->customer_id,
-            'delivery_date'         => $date->toDateString(),
-            'delivery_time'         => $freq->expected_time,
-            'delivery_frequency_id' => $freq->id,
-            'location_id'           => $locationId,
-            'status'                => 'scheduled',
-            'ins'                   => $order->ins,
-            'user_id'               => $order->user_id,
-        ]);
-
-        // Items
-        $items = $order->items->map(function ($item) use ($schedule) {
+        $items = $order->items->map(function ($item) use ($schedule, $qty) {
             return [
                 'delivery_schedule_id' => $schedule->id,
-                'order_item_id'        => $item->id,
-                'product_id'           => $item->product_id,
-                'qty'                  => $item->qty,
-                'rate'                 => $item->rate,
-                'amount'               => $item->amount,
-                'ins'                  => $schedule->ins,
-                'created_at'           => now(),
-                'updated_at'           => now(),
+                'order_item_id' => $item->id,
+                'product_id' => $item->product_id,
+                'qty' => $qty,
+                'rate' => $item->rate,
+                'amount' => $item->rate * $qty,
+                'ins' => $schedule->ins,
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
         })->toArray();
 
         if ($items) {
             DeliveryScheduleItem::insert($items);
+            Log::info("Inserted " . count($items) . " schedule items for Order ID {$order->id} on {$date->toDateString()}");
         }
     }
 
-    /**
-     * Find Nth weekday of a month (e.g., 2nd Monday)
-     */
     private function getNthWeekdayOfMonth(Carbon $startOfMonth, string $dayName, int $weekNum): ?Carbon
     {
         $dayName = ucfirst(strtolower(trim($dayName)));
-
         $date = $startOfMonth->copy();
         while ($date->format('l') !== $dayName) {
             $date->addDay();
         }
-
         $target = $date->copy()->addWeeks($weekNum - 1);
         return $target->month === $startOfMonth->month ? $target : null;
     }
 
-    /**
-     * Convert `$value` → array (for list JSON)
-     */
     private function safeArray($value): array
     {
         if (is_array($value)) return $value;
         if (is_null($value)) return [];
-
-        if (is_string($value)) {
-            $decoded = json_decode($value, true);
-            return is_array($decoded) ? $decoded : [];
-        }
-
-        return [];
+        $decoded = json_decode($value, true);
+        return is_array($decoded) ? $decoded : [];
     }
 
-    /**
-     * Convert `$value` → associative array (for map JSON)
-     */
     private function safeAssoc($value): array
     {
-        if (is_array($value)) return $value;
-        if (is_null($value)) return [];
-
-        if (is_string($value)) {
-            $decoded = json_decode($value, true);
-            return is_array($decoded) ? $decoded : [];
-        }
-
-        return [];
+        return $this->safeArray($value);
     }
 }

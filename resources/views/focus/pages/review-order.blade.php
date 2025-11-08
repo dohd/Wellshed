@@ -13,7 +13,6 @@
         border: 1px solid #e8e8e8;
     }
 
-    /* ✅ Fixed Bottom Nav */
     .footer-nav {
         position: fixed;
         bottom: 0;
@@ -53,106 +52,130 @@
 </style>
 
 @section('content')
-<div class="row g-3 g-xl-4 review-wrapper">
-    <section class="col-12">
-        <div class="glass-card pane h-100">
-            <h5 class="mb-3">Review Your Order</h5>
+    <div class="row g-3 g-xl-4 review-wrapper">
+        <section class="col-12">
+            <div class="glass-card pane h-100">
+                <h5 class="mb-3">Review Your Order</h5>
 
-            <!-- ✅ Product Summary -->
-            <div class="mb-3">
-                <h6>Products</h6>
-                <ul id="reviewCartItems" class="list-group small"></ul>
-            </div>
-
-            <!-- ✅ Delivery Details -->
-            <div class="mb-3">
-                <h6>Delivery Details</h6>
-                <ul class="list-group small" id="deliverySummary">
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Name:</span> <span id="reviewName">—</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Order Type:</span> <span id="reviewOrderType">—</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between recurringField">
-                        <span>Frequency:</span> <span id="reviewFrequency">—</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Delivery Date:</span> <span id="reviewDeliveryDate">—</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between recurringField">
-                        <span>Start:</span> <span id="reviewStartMonth">—</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between recurringField">
-                        <span>End:</span> <span id="reviewEndMonth">—</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="d-flex justify-content-between fw-bold my-3">
-                <span>Total:</span>
-                <span id="reviewTotal">KSh 0</span>
-            </div>
-
-            <form id="submitOrderForm" method="POST" action="{{ route('biller.customer_pages.submit_order') }}">
-                @csrf
-                <input type="hidden" name="order_payload" id="orderPayload">
-
-                <div class="d-flex justify-content-between mt-4">
-                    <button type="button" class="btn btn-light" id="btnBack">← Back</button>
-                    <button type="submit" class="btn btn-primary" id="btnSubmitOrder">Submit Order →</button>
+                <div class="mb-3">
+                    <h6>Products</h6>
+                    <ul id="reviewCartItems" class="list-group small"></ul>
                 </div>
-            </form>
-        </div>
-    </section>
-</div>
 
-<!-- ✅ Bottom Nav -->
-<div class="footer-nav">
-    <div class="d-flex justify-content-around">
-        <a class="nav-pill {{ request()->routeIs('biller.customer_pages.home') ? 'active' : '' }}"
-           href="{{ route('biller.customer_pages.home') }}">
-            <i class="bi bi-house"></i><span>Home</span>
-        </a>
-        <a class="nav-pill {{ request()->routeIs('biller.customer_pages.orders') ? 'active' : '' }}"
-           href="{{ route('biller.customer_pages.orders') }}">
-            <i class="bi bi-receipt"></i><span>Orders</span>
-        </a>
-        <a class="nav-pill {{ request()->routeIs('biller.customer_pages.profile') ? 'active' : '' }}"
-           href="{{ route('biller.customer_pages.profile') }}">
-            <i class="bi bi-person"></i><span>Profile</span>
-        </a>
-        <a class="nav-pill" href="{{ route('biller.logout') }}">
-            <i class="bi bi-box-arrow-right"></i><span>Logout</span>
-        </a>
+                <div class="mb-3">
+                    <input type="hidden" value="{{ $customer->ins }}" id="ins">
+                    <h6>Delivery Details</h6>
+                    <ul class="list-group small" id="deliverySummary">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Name:</span> <span id="reviewName">—</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Order Type:</span> <span id="reviewOrderType">—</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between recurringField">
+                            <span>Frequency:</span> <span id="reviewFrequency">—</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Delivery Date:</span> <span id="reviewDeliveryDate">—</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between recurringField">
+                            <span>Start:</span> <span id="reviewStartMonth">—</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between recurringField">
+                            <span>End:</span> <span id="reviewEndMonth">—</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="d-flex justify-content-between fw-bold my-3">
+                    <span>Total:</span>
+                    <span id="reviewTotal">KSh 0</span>
+                </div>
+
+                <form id="submitOrderForm" method="POST" action="{{ route('biller.customer_pages.submit_order') }}">
+                    @csrf
+                    <input type="hidden" name="order_payload" id="orderPayload">
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-light" id="btnBack">← Back</button>
+                        <button type="submit" class="btn btn-primary" id="btnSubmitOrder">Submit Order →</button>
+                    </div>
+                </form>
+            </div>
+        </section>
     </div>
-</div>
+
+    <!-- ✅ Bottom Nav -->
+    <div class="footer-nav">
+        <div class="d-flex justify-content-around">
+            <a class="nav-pill {{ request()->routeIs('biller.customer_pages.home') ? 'active' : '' }}"
+                href="{{ route('biller.customer_pages.home') }}">
+                <i class="bi bi-house"></i><span>Home</span>
+            </a>
+            <a class="nav-pill {{ request()->routeIs('biller.customer_pages.orders') ? 'active' : '' }}"
+                href="{{ route('biller.customer_pages.orders') }}">
+                <i class="bi bi-receipt"></i><span>Orders</span>
+            </a>
+            <a class="nav-pill {{ request()->routeIs('biller.customer_pages.profile') ? 'active' : '' }}"
+                href="{{ route('biller.customer_pages.profile') }}">
+                <i class="bi bi-person"></i><span>Profile</span>
+            </a>
+            <a class="nav-pill" href="{{ route('biller.logout') }}">
+                <i class="bi bi-box-arrow-right"></i><span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- ✅ M-PESA MODAL -->
+    <div class="modal fade" id="mpesaModal" tabindex="-1" aria-labelledby="mpesaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mpesaModalLabel">M-Pesa Payment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p>Enter your MPESA phone number:</p>
+
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input type="text" id="mpesaPhone" class="form-control" placeholder="07XXXXXXXX">
+                    </div>
+
+                    <div id="mpesaStatus" class="text-center small text-muted"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button id="mpesaPayBtn" class="btn btn-success">Pay Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('extra-scripts')
 <script>
 $(function() {
+
     let cart = JSON.parse(localStorage.getItem("cartItems") || "{}");
     let customer = JSON.parse(localStorage.getItem("customerDetails") || "{}");
 
     let total = 0;
     let cartHtml = "";
 
-    // Build cart summary
     $.each(cart, function(id, item) {
         let line = item.qty * item.price;
         total += line;
         cartHtml += `
-            <li class="list-group-item d-flex justify-content-between">
-                <span>${item.name} (x${item.qty})</span>
-                <strong>KSh ${line.toLocaleString()}</strong>
-            </li>`;
+        <li class="list-group-item d-flex justify-content-between">
+            <span>${item.name} (x${item.qty})</span>
+            <strong>KSh ${line.toLocaleString()}</strong>
+        </li>`;
     });
 
     $("#reviewCartItems").html(cartHtml);
     $("#reviewTotal").text("KSh " + total.toLocaleString());
-
-    // Fill in delivery details
     $("#reviewName").text(customer.name || "—");
     $("#reviewOrderType").text(customer.order_type || "—");
     $("#reviewFrequency").text(customer.frequency || "—");
@@ -160,79 +183,147 @@ $(function() {
     $("#reviewStartMonth").text(customer.start_month || "—");
     $("#reviewEndMonth").text(customer.end_month || "—");
 
-    // Delivery Days + Week Numbers
-    let daysList = (customer.delivery_days && customer.delivery_days.length)
-        ? customer.delivery_days.join(", ")
-        : "—";
-
-    let weekList = (customer.week_numbers && customer.week_numbers.length)
-        ? customer.week_numbers.join(", ")
-        : "—";
-
-    let extraInfo = "";
-
-    if (customer.frequency === "daily") {
-        extraInfo = `<li class="list-group-item d-flex justify-content-between">
-                        <span>Delivery Days:</span><span>All Days (Mon–Sun)</span>
-                     </li>`;
-    } else if (customer.frequency === "weekly") {
-        extraInfo = `<li class="list-group-item d-flex justify-content-between">
-                        <span>Delivery Days:</span><span>${daysList}</span>
-                     </li>`;
-    } else if (customer.frequency === "custom") {
-        extraInfo = `
-            <li class="list-group-item d-flex justify-content-between">
-                <span>Delivery Days:</span><span>${daysList}</span>
-            </li>
-            <li class="list-group-item d-flex justify-content-between">
-                <span>Week Numbers:</span><span>${weekList}</span>
-            </li>`;
-    }
-
-    $("#reviewFrequency").closest('li').after(extraInfo);
-
-    // ✅ Show Locations per Day (new section)
-    if (customer.locations_for_days && Object.keys(customer.locations_for_days).length > 0) {
-        let locationInfo = "<li class='list-group-item'><strong>Day-to-Location Mapping:</strong><br><ul class='ps-3 small mb-0'>";
-        $.each(customer.locations_for_days, function(dayKey, locs) {
-            if (locs.length > 0) {
-                locationInfo += `<li>${capitalize(dayKey.replace(/_/g, ' '))}: <span class="text-muted">${locs.join(', ')}</span></li>`;
-            }
-        });
-        locationInfo += "</ul></li>";
-        $("#deliverySummary").append(locationInfo);
-    }
-
-    // Hide recurring-only fields for one-time orders
     if (customer.order_type !== "recurring") {
         $(".recurringField").hide();
     }
 
-    // Optional: Preview short delivery schedule summary
-    if (customer.order_type === "recurring") {
-        let summary = "<ul class='list-group small mt-2'>";
-        summary += `<li class="list-group-item text-muted">Schedule will start from 
-                    <strong>${customer.start_month}</strong> 
-                    to <strong>${customer.end_month}</strong>.</li>`;
-        summary += "</ul>";
-        $("#reviewEndMonth").closest('li').after(summary);
-    }
-
-    // ✅ Final payload for backend
     $("#orderPayload").val(JSON.stringify({
         customer: customer,
         cart: cart,
         total: total
     }));
 
-    // Back button
     $("#btnBack").click(() => {
         window.location.href = "{{ route('biller.customer_pages.delivery') }}";
     });
 
-    function capitalize(str) {
-        return str.charAt(0).toUpperCase() + str.slice(1);
+    /* ✅ ONE-TIME ORDER → MPESA PAYMENT FLOW */
+    if (customer.order_type === "one_time") {
+
+        let checkoutID = null;
+        let pollTimer = null;
+
+        $("#btnSubmitOrder").text("Pay with M-Pesa →");
+
+        $("#btnSubmitOrder").off("click").on("click", function(e) {
+            e.preventDefault();
+            new bootstrap.Modal(document.getElementById("mpesaModal")).show();
+        });
+
+        /** ✅ Step 1 — Start STK Push */
+        $("#mpesaPayBtn").on("click", function() {
+
+            let phone = $("#mpesaPhone").val();
+            let ins = $("#ins").val();
+            if (!phone) {
+                alert("Enter phone number");
+                return;
+            }
+
+            $("#mpesaStatus").text("Sending STK push…");
+
+            $.ajax({
+                url: "{{ route('api.mpesa_stkpush') }}",
+                method: "POST",
+                data: {
+                    phone: phone,
+                    // amount: 1,
+                    amount: total,
+                    account_reference: customer.name,
+                    description: "Order Payment",
+                    ins: ins,
+                },
+                success: function (res) {
+
+                    console.log("STK Response:", res);
+
+                    if (res.ok && res.status === "PENDING") {
+
+                        checkoutID = res.checkout_request_id;
+                        $("#mpesaStatus").text("STK sent ✅ — Enter M-Pesa PIN");
+
+                        startPolling();
+
+                    } else {
+                        $("#mpesaStatus").text("Error: " + (res.gateway?.ResponseDescription || res.message));
+                    }
+                },
+                error: function(xhr) {
+                    $("#mpesaStatus").text("Server error");
+                }
+            });
+        });
+
+        /** ✅ Step 2 — Poll status until SUCCESS */
+        function startPolling() {
+
+            $("#mpesaStatus").text("Waiting for confirmation…");
+
+            pollTimer = setInterval(function() {
+
+                $.get(`/api/mpesa_payment/${checkoutID}`, function(res) {
+
+                    console.log("Polling:", res);
+
+                    if (!res.ok) return;
+
+                    let status = res.status;
+                    $("#mpesaStatus").text("Status: " + status);
+
+                    if (status === "SUCCESS") {
+                        clearInterval(pollTimer);
+                        $("#mpesaStatus").html(`<span class='text-success fw-bold'>Payment Confirmed ✅</span>`);
+
+                        setTimeout(() => {
+                            postPaymentLocally(res.data);
+                        }, 600);
+                    }
+
+                    if (status === "FAILED" || status === "CANCELLED") {
+                        clearInterval(pollTimer);
+                        $("#mpesaStatus").html(`<span class='text-danger fw-bold'>Payment ${status} ❌</span>`);
+                    }
+                });
+
+            }, 3500);
+        }
+
+        /** ✅ Step 3 — Save payment locally then submit order */
+        function postPaymentLocally(data) {
+
+            $.ajax({
+                url: "{{ route('biller.payment_receipts.store') }}",
+                method: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    entry_type: 'receive',
+                    customer_id: customer.customer_id,
+                    amount: data.amount,                   // ✅ from callback
+                    date: "{{ date('Y-m-d') }}",
+                    payment_method: 'mpesa',
+                    payment_for: "Order Payment",
+                    notes: `Mpesa Receipt ${data.mpesa_receipt_number}`,
+                    merchant_request_id: data.merchant_request_id,
+                    checkout_request_id: data.checkout_request_id,
+                    refs: {
+                        mpesa_phone: data.phone
+                    },
+                },
+                success: function (res) {
+                    console.log("Local save:", res);
+
+                    // ✅ Submit order only AFTER storing receipt
+                    $("#submitOrderForm").submit();
+                },
+                error: function(xhr) {
+                    console.log(xhr.responseJSON);
+                    alert("Failed to save local MPESA receipt");
+                }
+            });
+        }
     }
+
 });
 </script>
 @endsection
+

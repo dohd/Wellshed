@@ -109,7 +109,8 @@ class DeliverySchedulesTableController extends Controller
                 return $ds->order ? gen4tid('ORD-', $ds->order->tid) : '';
             })
             ->addColumn('customer', function ($ds) {
-                return optional(optional($ds->order)->customer)->company ?? '';
+                $customer = optional($ds->order)->customer ?? $ds->customer;
+                return $customer->company ?? $customer->name ?? '';
             })
             ->addColumn('delivery_days', function ($ds) {
                 return $ds->delivery_frequency ? $ds->delivery_frequency->delivery_days : '';

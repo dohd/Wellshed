@@ -40,7 +40,13 @@
                                         @include('focus.deliveries.form')
                                         <div class="edit-form-btn">
                                             {{ link_to_route('biller.deliveries.index', trans('buttons.general.cancel'), [], ['class' => 'btn btn-danger btn-md']) }}
-                                            {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-md']) }}
+                                            @php
+                                                $disabled = '';
+                                                if($delivery->status == 'delivered'){
+                                                    $disabled = 'disabled';
+                                                }
+                                            @endphp
+                                            {{ Form::submit(trans('buttons.general.crud.update'), ['class' => 'btn btn-primary btn-md', $disabled]) }}
                                             <div class="clearfix"></div>
                                         </div><!--edit-form-btn-->
                                     </div><!--form-group-->

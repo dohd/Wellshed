@@ -56,7 +56,7 @@ class OrdersTableController extends Controller
             ->escapeColumns(['id'])
             ->addIndexColumn()
             ->addColumn('customer', function ($orders) {
-                return $orders->customer ? $orders->customer->company : '';
+                return $orders->customer ? ($orders->customer->company ?? $orders->customer->name ): '';
             })
             ->addColumn('tid', function ($orders) {
                 return gen4tid('ORD-',$orders->tid);

@@ -2,6 +2,7 @@
 
 namespace App\Models\delivery_schedule\Traits;
 
+use App\Models\customer\Customer;
 use App\Models\delivery\Delivery;
 use App\Models\delivery_frequency\DeliveryFreq;
 use App\Models\delivery_schedule\DeliveryScheduleItem;
@@ -36,5 +37,9 @@ trait DeliveryScheduleRelationship
     public function location()
     {
         return $this->belongsTo(TargetZoneItem::class, 'location_id');
+    }
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
 }
