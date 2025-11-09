@@ -48,7 +48,7 @@
     var $debitSection = $('#debitSection');
 
     // Subscription
-    var $plan = $('#plan');
+    var $plan = $('#plan'), $order = $('#order'), $charge = $('#charge');
     // Charge Receive
     var $chargeRef = $('#chargeRef'), $chargeOutstanding = $('#chargeOutstanding'), $applyAmount = $('#applyAmount');
     var $applyHint = $('#applyHint'), $applyNow = $('#applyNow'), $applyRefShow = $('#applyRefShow');
@@ -78,7 +78,9 @@
       var t = currentEntry();
       if (t === 'debit') {
         $debitSection.removeClass('d-none');
-        $debitReason.prop('required', true); $debitDue.prop('required', true);
+        $debitReason.prop('required', true); 
+        $debitDue.prop('required', true);
+        $amount.val('').prop('readonly', false);
         $('#paymentMethodBlock').addClass('d-none');
         $('input[name="paymentMethod"]').prop('checked', false);
         $mpesaRef.prop('required', false);
@@ -91,7 +93,8 @@
         $chargeReceiveSection.hide();
       } else {
         $debitSection.addClass('d-none');
-        $debitReason.prop('required', false); $debitDue.prop('required', false);
+        $debitReason.prop('required', false); 
+        $debitDue.prop('required', false);
         $('#paymentMethodBlock').removeClass('d-none');
         if (!$('input[name="paymentMethod"]:checked').length) $('#pmMpesa').prop('checked', true).trigger('change');
         $('#entryHint').text('You’re recording money received (Dr Cash/Bank, Cr A/R).');
@@ -135,26 +138,27 @@
     // Subscription: auto-amount from plan
     $plan.on('change', function(){
       var amt = $(this).find('option:selected').data('amount');
-      if (amt) $amount.val(amt);
+      if (amt) $amount.val(amt).attr('readonly', true);
       updateSummary();
     });
 
     // Order change
-    $('#order').on('change', function() {
+    $order.on('change', function() {
       $option = $(this).find(':selected');
       const orderNo = $option.data('order_no');
       const total = $option.data('total');
       $('#orderNo').val(orderNo).change(); 
-      $('#amount').val(total);
+      $('#amount').val(total).attr('readonly', true);
       updateSummary();
     });
 
     // Charge change
-    $('#charge').on('change', function() {
+    $charge.on('change', function() {
       $option = $(this).find(':selected');
       const chargeRef = $option.data('order_no');
       $('#chargeRef').val(chargeRef).change(); 
-      $amount.val('');
+      const amount = accounting.unformat($option.data('amount'));
+      $amount.val(amount).attr('readonly', true);
     });
 
     // Customer change
@@ -187,8 +191,8 @@
           $('#order').append(`<option value="${id}" data-order_no="${tid}" data-total="${total}">${tid}</option>`);
         });
         // charges
-        customer.charges.forEach(({id, tid, notes}) => {
-          $('#charge').append(`<option value="${id}" data-charge_no="${tid}" data-notes="${notes}">${tid} ${notes? ' - ' : ''} ${notes}</option>`);
+        customer.charges.forEach(({id, tid, notes, amount}) => {
+          $('#charge').append(`<option value="${id}" data-charge_no="${tid}" data-notes="${notes}" data-amount="${amount}">${tid} ${notes? ' - ' : ''} ${notes}</option>`);
         });
       }
     });
@@ -217,22 +221,22 @@
       var custName = $customer.find('option:selected').data('name') || '—';
       var entry = currentEntry();
       var pf = currentPaymentFor();
-      var amountVal = Number($amount.val()||0);
+      var amountVal = Number($amount.val() || 0);
 
       let forTxt = '—', details = '—', dateTxt = '—', typeTxt = (entry==='debit' ? 'Charge Customer (Debit)' : 'Receive Payment');
 
-      if (entry==='debit'){
+      if (entry === 'debit') {
         forTxt = 'Charge';
         details = ($('#debitReason').val() || 'Debit');
         dateTxt = $('#debitDue').val()||'—';
         $summaryMethod.text('—');
       } else {
-        if (pf==='subscription'){
+        if (pf === 'subscription') {
           forTxt = 'Subscription';
           const planName = $plan.find('option:selected').data('name') || '—';
           details = planName;
           dateTxt = $('#subscrDate').val()||'—';
-        } else if (pf==='order'){
+        } else if (pf === 'order') {
           forTxt = 'Order';
           details = ($('#orderNo').val()? ('Order '+$('#orderNo').val()) : 'Order');
           dateTxt = $('#orderDate').val()||'—';
@@ -348,6 +352,9 @@
           $('#saveToast').find('strong').text('Saved');
           $('#saveToast').find('.toast-body').removeClass('text-danger').text(data.message || '');
           quickToast(); 
+          setTimeout(() => { 
+            location.href = "{{ route('biller.payment_receipts.index') }}"; 
+          }, 2500);
         },
         error: function(xhr, status, error) { 
           const {message} = xhr?.responseJSON;

@@ -199,12 +199,12 @@
                 <div class="mb-1" id="paymentMethodBlock">
                   <div class="section-title">Payment Method</div>
                   <div class="row">
-                    <div class="col-12 col-md-4 mb-2">
+                    {{-- <div class="col-12 col-md-4 mb-2">
                       <div class="custom-control custom-radio">
                         <input type="radio" id="pmCash" name="paymentMethod" class="custom-control-input" value="cash">
                         <label class="custom-control-label" for="pmCash">Cash</label>
                       </div>
-                    </div>
+                    </div> --}}
                     <div class="col-12 col-md-4 mb-2">
                       <div class="custom-control custom-radio">
                         <input type="radio" id="pmMpesa" name="paymentMethod" class="custom-control-input" value="mpesa" checked>

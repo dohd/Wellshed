@@ -31,7 +31,7 @@ class PaymentReceiptsController extends Controller
            'subscriptions' => fn($q) => $q->select('id', 'customer_id', 'sub_package_id')->where('status', 'active'),
            'subscriptions.package' => fn($q) => $q->select('id', 'name', 'price'),
            'orders' => fn($q) => $q->select('id', 'customer_id', 'tid', 'total'),
-           'charges' => fn($q) => $q->select('id', 'customer_id', 'tid', 'notes'),
+           'charges' => fn($q) => $q->select('id', 'customer_id', 'tid', 'notes', 'amount'),
         ])
         ->get(['id', 'company', 'name', 'phone'])
         ->map(function($c) {
@@ -63,8 +63,8 @@ class PaymentReceiptsController extends Controller
             'customer_id' => 'required',
             'amount' => 'required',
             'date' => 'required',
-            'payment_method' => 'required',
             'payment_for' => 'required_if:entry_type,receipt',
+            'payment_method' => 'required_if:entry_type,receipt',
         ], [
             'customer_id.required' => 'Customer is required',
             'subscription_id.required' => 'Subscription plan is required',
