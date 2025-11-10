@@ -5,13 +5,13 @@ namespace App\Models\subscription;
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\subscription\Traits\CustomerAttribute;
-use App\Models\subscription\Traits\CustomerRelationship;
+use App\Models\subscription\Traits\SubscriptionRelationship;
 
 class Subscription extends Model
 {
     use ModelTrait,
         CustomerAttribute,
-        CustomerRelationship;
+        SubscriptionRelationship;
 
     /**
      * The database table used by the model.
@@ -65,41 +65,25 @@ class Subscription extends Model
     {
         parent::boot();
 
+        static::creating(function ($model) {
+            if (auth()->id()) {
+                $model->ins = auth()->user()->ins;
+                $model->created_by = auth()->id();                
+            }
+            $model->tid = Subscription::max('tid')+1;
+            return $model;
+        });
+
         if (auth()->id()) {
-            static::creating(function ($instance) {
-                $instance->ins = auth()->user()->ins;
-                $instance->created_by = auth()->user()->id;
-                return $instance;
+            static::updating(function ($model) {
+                $model->updated_by = auth()->user()->id;
+                return $model;
             });
         }
-
+        
         static::addGlobalScope('ins', function ($builder) {
-            if (isset(auth()->user()->ins)) {
-                $builder->where('ins', auth()->user()->ins);
-            }
+            if (isset(auth()->user()->ins))
+            $builder->where('ins', auth()->user()->ins);
         });
-    }
-
-    // Override resolveRouteBinding to bypass global scope
-    public function resolveRouteBinding($value, $field = null)
-    {
-        return $this->withoutGlobalScopes(['currency_id'])->where($field ?? 'id', $value)->firstOrFail();
-    }
-
-    /**
-     * Set password attribute.
-     *
-     * @param [string] $password
-     */
-    public function setPasswordAttribute($password)
-    {
-        if (isset($password)) $this->attributes['password'] = bcrypt($password);
-    }
-
-    public function getPictureAttribute()
-    {
-        if (!$this->attributes['picture']) return 'example.png';
-            
-        return $this->attributes['picture'];
     }
 }

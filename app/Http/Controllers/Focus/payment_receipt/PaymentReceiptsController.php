@@ -156,9 +156,9 @@ class PaymentReceiptsController extends Controller
             // update payment status
             if ($receipt->subscription) {
                 $sub = $receipt->subscription;
+                // extend end_date and update last renewal date
                 $endDate = $sub->end_date;
                 $newDate = date('Y-m-d', strtotime('+1 month', strtotime($endDate)));
-                // extend end_date and update last renewal date
                 $sub->update([
                     'payment_status' => 'paid', 
                     'last_renewal_date' => $receipt->date,

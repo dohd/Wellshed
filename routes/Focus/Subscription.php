@@ -7,6 +7,7 @@ Route::group( ['namespace' => 'subpackage'], function () {
 });
 
 Route::group( ['namespace' => 'subscription'], function () {
+  Route::post('subscriptions/upgrade', 'SubscriptionsController@upgrade')->name('subscriptions.upgrade');
   Route::resource('subscriptions', 'SubscriptionsController');
   //For Datatable
   Route::post('subscriptions/get', 'SubscriptionsTableController')->name('subscriptions.get');

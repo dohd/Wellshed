@@ -50,8 +50,9 @@ class SubscriptionsController extends Controller
         $data = $request->except(['_token', '_method']);
 
         try {
-            $data['start_date'] = Carbon::parse($data['start_date'])->format('Y-m-d H:i:s');
-            $data['end_date'] = Carbon::parse($data['end_date'])->format('Y-m-d H:i:s');
+            foreach($request->only('start_date', 'end_date') ?? [] as $key => $value) {
+                $data[$key] = Carbon::parse($value)->format('Y-m-d H:i:s');
+            }
             $subscription = Subscription::create($data);
 
             return redirect(route('biller.subscriptions.index'))->with(['flash_success' => 'Package Created Successfully']);
@@ -68,7 +69,8 @@ class SubscriptionsController extends Controller
      */
     public function show(Subscription $subscription)
     {
-        //
+        $packages = SubPackage::where('id', '!=', $subscription->sub_package_id)->get();
+        return view('focus.subscriptions.view', compact('subscription', 'packages'));
     }
 
     /**
@@ -101,8 +103,9 @@ class SubscriptionsController extends Controller
         $data = $request->except(['_token', '_method']);
 
         try {
-            $data['start_date'] = Carbon::parse($data['start_date'])->format('Y-m-d H:i:s');
-            $data['end_date'] = Carbon::parse($data['end_date'])->format('Y-m-d H:i:s');
+            foreach($request->only('start_date', 'end_date') ?? [] as $key => $value) {
+                $data[$key] = Carbon::parse($value)->format('Y-m-d H:i:s');
+            }
             $subscription->update($data);
             
             return redirect(route('biller.subscriptions.index'))->with(['flash_success' => 'Package Updated Successfully']);
@@ -120,10 +123,35 @@ class SubscriptionsController extends Controller
     public function destroy(Subscription $subscription)
     {
         try {
-            $subscription->delete();            
+            $subscription->update(['deleted_at' => now(), 'deleted_by' => auth()->id()]);            
             return redirect(route('biller.subscriptions.index'))->with(['flash_success' => 'Package Deleted Successfully']);
         } catch (Exception $e) {
             return errorHandler('Error Deleting Package', $e);
+        }
+    }
+
+    /**
+     * Subscription Plan Upgrade
+     * 
+     * **/
+    public function upgrade(Request $request)
+    {
+        try {
+            $subscription = Subscription::findOrFail(request('subscription_id'));
+            $prevPlanId = $subscription->sub_package_id;
+            $subscription->update([
+                'sub_package_id' => request('sub_package_id'),
+                'prev_sub_package_id' => $prevPlanId,
+                'upgrade_date' => now()->toDateString(),
+                'upgrade_effective_date' => now()->toDateString(),
+            ]);                
+            return response()->json([
+                'status' => 'success', 
+                'message' => 'Subscription upgraded successfully'
+            ]);
+        } catch (Exception $e) {
+            \Log::error($e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
+            return response()->json(['status' => 'error', 'message' => 'Subscription upgraded failed'], 500);
         }
     }
 }
