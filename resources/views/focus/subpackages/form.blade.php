@@ -25,6 +25,20 @@
 </div>
 
 <div class='form-group'>
+    {{ Form::label('product', 'Default Product',['class' => 'col-lg-2 control-label']) }}
+    <div class='col-lg-10'>
+        <select name="productvar_id" id="product" class="form-control" data-placeholder="Choose Product">
+            <option value=""></option>
+            @foreach ($productvars as $product)
+            <option value="{{ $product->id }}" {{ @$subpackage->productvar_id === $product->id? 'selected' : '' }}>
+              {{ $product->code }}  - {{ $product->name }}
+            </option>
+            @endforeach
+        </select>
+    </div>
+</div>
+
+<div class='form-group'>
     {{ Form::label('features', 'Features', ['class' => 'col-lg-2 control-label']) }}
     <div class='col-lg-10'>
         {{ Form::textarea('features', null, ['class' => 'form-control box-size tinyinput', 'placeholder' => 'Features...', 'rows' => '2']) }}
@@ -33,6 +47,7 @@
 
 @section("after-scripts")
 @include('tinymce.scripts')
+{{ Html::script('focus/js/select2.min.js') }}
 <script>
     const config = {
         tinymce: {
@@ -46,7 +61,8 @@
 
     const Form = {
         init() {
-            tinymce.init(config.tinymce);            
+            tinymce.init(config.tinymce);   
+            $('#product').select2({allowClear: true});         
         },
     }
 

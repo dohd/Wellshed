@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Focus\subpackage;
 
 use App\Http\Controllers\Controller;
+use App\Models\product\ProductVariation;
 use App\Models\subpackage\SubPackage;
 use Exception;
 use Illuminate\Http\Request;
@@ -26,7 +27,8 @@ class SubPackagesController extends Controller
      */
     public function create()
     {
-        return view('focus.subpackages.create');
+        $productvars = ProductVariation::get();
+        return view('focus.subpackages.create', compact('productvars'));
     }
 
     /**
@@ -72,7 +74,8 @@ class SubPackagesController extends Controller
      */
     public function edit(SubPackage $subpackage)
     {
-        return view('focus.subpackages.edit', compact('subpackage'));
+        $productvars = ProductVariation::get();
+        return view('focus.subpackages.edit', compact('subpackage', 'productvars'));
     }
 
     /**
