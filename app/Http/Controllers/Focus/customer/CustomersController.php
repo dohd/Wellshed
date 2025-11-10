@@ -41,6 +41,14 @@ class CustomersController extends Controller
     public function __construct(CustomerRepository $repository)
     {
         $this->repository = $repository;
+
+        // redirect to subscription expiry page
+        // $subExists = optional(auth()->user()->customer->subscriptions())->exists();
+        // if ($subExists) {
+        //     return redirect()
+        //         ->route('subscription.expired')
+        //         ->with('message', 'Your subscription has expired');
+        // }
     }
 
     /**
@@ -167,12 +175,9 @@ class CustomersController extends Controller
      * @param App\Models\customer\Customer $customer
      * @return \App\Http\Responses\RedirectResponse
      */
-    public function show(Customer $customer, ManageCustomerRequest $request)
+    public function show(ManageCustomerRequest $request, Customer $customer)
     {
-        $projects = Project::whereHas('deposits', fn($q) => $q->where('customer_id', $customer->id))
-            ->orWhereHas('invoices', fn($q) => $q->where('customer_id', $customer->id))
-            ->orWhereHas('quotes', fn($q) => $q->whereHas('invoice', fn($q) => $q->where('customer_id', $customer->id)))
-            ->get(['id', 'tid', 'name']);
+        $projects = collect();
 
         $startDate = date('Y-m-d');
         $endDate = "2000-01-01";

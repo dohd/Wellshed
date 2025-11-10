@@ -21,7 +21,7 @@
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table id="customerTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
+                    <table id="customersTbl" class="table table-striped table-bordered zero-configuration" cellspacing="0" width="100%">
                         <thead>
                             <tr>
                                 <th>NO#</th>
@@ -51,40 +51,47 @@
 @section('after-scripts')
 {{ Html::script(mix('js/dataTable.js')) }}
 <script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        }
-    });
-
-    setTimeout(() => draw_data(), "{{ config('master.delay') }}");
-    
-    function draw_data() {
-        const tableLan = {@lang('datatable.strings')};
-        const dataTable = $('#customerTbl').dataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            stateSave: true,
-            language: tableLan,
-            ajax: {
-                url: '{{ route("biller.customers.get") }}',
-                type: 'post'
-            },
-            columns: [
-                {data: 'DT_Row_Index',name: 'id'},
-                ...['tid', 'name', 'company', 'email', 'phone', 'balance'].map(v => ({name: v, data: v}))
-            ],
-            ordering: false,
-            searchDelay: 500,
-            // dom: 'frt',
-            dom: 'Blfrtip',
-            buttons: [],
-            lengthMenu: [
-                [15, 25, 50, 100, 200, -1],
-                [15, 25, 50, 100, 200, "All"]
-            ],
-        });
+    const config = {
+        ajax: {
+            headers: {
+                'X-CSRF-TOKEN': "{{ csrf_token() }}"
+            }
+        },
     }
+
+    const Index = {
+        init() {
+            $.ajaxSetup(config.ajax);
+            Index.drawData();
+        },
+
+        drawData() {
+            const dataTable = $('#customersTbl').dataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                stateSave: true,
+                ajax: {
+                    url: '{{ route("biller.customers.get") }}',
+                    type: 'post'
+                },
+                columns: [
+                    {data: 'DT_Row_Index', name: 'id'},
+                    ...['tid', 'name', 'company', 'email', 'phone', 'balance'].map(v => ({name: v, data: v})),
+                ],
+                ordering: false,
+                searchDelay: 500,
+                // dom: 'frt',
+                dom: 'Blfrtip',
+                buttons: [],
+                lengthMenu: [
+                    [15, 25, 50, 100, 200, -1],
+                    [15, 25, 50, 100, 200, "All"]
+                ],
+            });
+        },
+    }
+
+    $(Index.init);
 </script>
 @endsection

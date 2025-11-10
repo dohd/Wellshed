@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Focus\payment_receipt;
 use App\Http\Controllers\Controller;
 use App\Models\payment_receipt\PaymentReceipt;
 use App\Models\customer\Customer;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -148,7 +149,27 @@ class PaymentReceiptsController extends Controller
                 return response()->json(['message' => "Charge description required"], 422);
             }
 
+            DB::beginTransaction();
+
             $receipt = PaymentReceipt::create($main);
+
+            // update payment status
+            if ($receipt->subscription) {
+                $sub = $receipt->subscription;
+                $endDate = $sub->end_date;
+                $newDate = date('Y-m-d', strtotime('+1 month', strtotime($endDate)));
+                // extend end_date and update last renewal date
+                $sub->update([
+                    'payment_status' => 'paid', 
+                    'last_renewal_date' => $receipt->date,
+                    'end_date' => $newDate,
+                ]);
+            } elseif ($receipt->order) {
+                $order = $receipt->order;
+                $order->update(['payment_status' => 'paid']);
+            }
+
+            DB::commit();
 
             return response()->json(['message' => 'Receipt created successfully']);
         } catch (\Exception $e) {

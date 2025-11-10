@@ -13,10 +13,6 @@
                         @php
                             $labels = [
                                 'Company', 'Phone', 'Email', 'Address',
-                                'Contact Name' => 'name',
-                                 'City', 'Region', 'Country', 'PostBox',
-                                'Tax ID' => 'taxid',  
-                                'Contact Person Info' => 'contact_person_info'
                             ];
                         @endphp
                         <tbody>

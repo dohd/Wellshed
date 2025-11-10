@@ -63,9 +63,10 @@ class CustomerRepository extends BaseRepository
     public function getForDataTable()
     {
         $q = $this->query();
-        $q->orderByRaw("CASE WHEN LOWER(name) = LOWER(?) THEN 1 ELSE 2 END", ['Walk-In'])->orderByRaw('LOWER(name) ASC');
 
-        return $q->get(['id', 'name','company','email', 'phone', 'currency_id', 'address','picture','active','created_at']);
+        $q->with(['paymentReceipts' => fn($q) => $q->select('id', 'customer_id', 'debit', 'credit')]);
+
+        return $q;
     }
 
     /**

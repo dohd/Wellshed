@@ -2,7 +2,6 @@
 
 namespace App\Console;
 
-use App\Models\documentManager\DocumentManager;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -15,7 +14,6 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        Commands\CreatePMEInvoice::class,
         Commands\SendScheduledSms::class,
         Commands\SendScheduleEmail::class,
         Commands\SubscriptionNotification::class,
@@ -24,6 +22,7 @@ class Kernel extends ConsoleKernel
         Commands\CreateDeliverySchedule::class,
         Commands\UpdateSmsDeliveryStatus::class,
         Commands\NotifySubscriptionExpiry::class,
+        Commands\CheckSubscription::class
     ];
 
     /**
@@ -39,6 +38,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('sms:update-status')->everyMinute();
         $schedule->command('subscriptions:notify-expiry')->everyMinute();
         // $schedule->command('send:monthly-customer-statements')->monthly();
+        $schedule->command('subscription:check')->daily();
 
         // Queue Worker
         $schedule->command('queue:work --tries=3 --timeout=90')->everyMinute()->withoutOverlapping();

@@ -42,7 +42,6 @@ class CustomersTableController extends Controller
         if (request('is_statement')) return $this->invoke_statement();
             
         $core = $this->customer->getForDataTable();
-
         // foreach ($core as $key => $customer) {
         //     $customer->update(['tid' => $key+1]);
         // }
@@ -62,7 +61,8 @@ class CustomersTableController extends Controller
                 return '<a class="font-weight-bold" href="' . route('biller.customers.show', $customer) . '">' . $company . '</a>';
             })
             ->addColumn('balance', function ($customer) {
-                return;
+                $bal = $customer->paymentReceipts->sum(fn($v) => $v->debit - $v->credit);
+                return numberFormat($bal);
             })
             ->addColumn('actions', function ($customer) {
                 $customer->action_buttons;

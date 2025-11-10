@@ -79,12 +79,6 @@ class Customer extends Model
         }        
     }
 
-    // Override resolveRouteBinding to bypass global scope
-    public function resolveRouteBinding($value, $field = null)
-    {
-        // return $this->withoutGlobalScopes(['currency_id'])->where($field ?? 'id', $value)->firstOrFail();
-    }
-
     /**
      * Set password attribute.
      *

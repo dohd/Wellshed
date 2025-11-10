@@ -32,12 +32,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 trait CustomerRelationship
 {
-    public function packages() {
+    public function paymentReceipts() 
+    {
+        return $this->hasMany(PaymentReceipt::class);
+    }
+
+    public function packages() 
+    {
         return $this->hasManyThrough(SubPackage::class, Subscription::class, 'customer_id', 'id', 'id', 'sub_package_id')
         ->withoutGlobalScopes();
     }
 
-    public function customer_zones() {
+    public function customer_zones() 
+    {
         return $this->hasMany(CustomerZoneItem::class,'customer_id');
     }
     
@@ -45,39 +52,48 @@ trait CustomerRelationship
         return $this->hasMany(PaymentReceipt::class)->where('entry_type', 'debit');
     }
 
-    public function orders() {
+    public function orders() 
+    {
         return $this->hasMany(Orders::class);
     }
 
-    public function subscriptions() {
+    public function subscriptions() 
+    {
         return $this->hasMany(Subscription::class);
     }
 
-    public function jobValuations() {
+    public function jobValuations() 
+    {
         return $this->hasMany(JobValuation::class);
     }
 
-    public function currency() {
+    public function currency() 
+    {
         return $this->belongsTo(Currency::class);
     }
 
-    public function ar_account() {
+    public function ar_account() 
+    {
         return $this->belongsTo(Account::class, 'ar_account_id');
     }
 
-    public function tenant() {
+    public function tenant() 
+    {
         return $this->hasOneThrough(Tenant::class, TenantPackage::class, 'customer_id', 'id', 'id', 'company_id');
     }
 
-    public function tenant_package() {
+    public function tenant_package() 
+    {
         return $this->hasOne(TenantPackage::class);
     }
 
-    public function journal() {
+    public function journal() 
+    {
         return $this->hasOne(Journal::class);
     }
 
-    public function quotes() {
+    public function quotes() 
+    {
         return $this->hasMany(Quote::class);
     }
 
