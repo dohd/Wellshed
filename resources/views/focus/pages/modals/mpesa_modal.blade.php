@@ -36,6 +36,11 @@
                   </div>
 
                   <div class="form-group mb-2">
+                    <label for="serviceFee" class="font-weight-semibold">Service Fee (One Time)</label>
+                    <input type="number" min="1" step="1" class="form-control" id="serviceFee" name="serviceFee" placeholder="e.g. 500">
+                  </div>
+
+                  <div class="form-group mb-2">
                     <label for="mpesaAmountPrompt" class="font-weight-semibold">Amount (KES) <span class="text-danger">*</span></label>
                     <input type="number" min="1" step="1" class="form-control" id="mpesaAmount" name="amount" placeholder="e.g. 500" readonly required>
                   </div>

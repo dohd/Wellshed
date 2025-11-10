@@ -198,6 +198,13 @@ $(function() {
     });
     $('#mpesaPaymentFor').change();
 
+    $('#serviceFee').keyup(function() {
+        const value = accounting.unformat(this.value);
+        const amount = accounting.unformat($('#mpesaPaymentFor :selected').data('price'));
+        const total = value + amount;
+         $('#mpesaAmount').val(total);
+    });
+
   // ==== Handle form submit ====
   $('#mpesaPromptForm').on('submit', function(e){
     e.preventDefault();

@@ -38,39 +38,40 @@ class CustomerPagesController extends Controller
     public function orders()
     {
         $recurring = 0;
-        $customer = Customer::where('id', auth()->user()->customer_id)->first();
         $products = collect();
-        $order = Orders::where('customer_id', $customer->id)->whereNotIn('status', ['cancelled', 'completed'])->first();
-        if (!$order) {
+
+        $customer = Customer::where('id', auth()->user()->customer_id)->first();
+        $order = Orders::where('customer_id', $customer->id)
+            ->whereNotIn('status', ['cancelled', 'completed'])
+            ->first();
+
+        if ($order) {
+            $products = ProductVariation::where('type', 'full')
+                ->get([
+                    'id',
+                    'name',
+                    DB::raw('price * 1.16 as price'), // adds 16% VAT
+                    'name as eta',
+                ]);
+
+        } else {
             $recurring = 1;
             $subscription = $customer->subscriptions()->where('status', 'active')->first();
             $package = $subscription->package;
             //Subscription products only
-            $products = ProductVariation::where('type', 'full')
-                ->where('id', $package->productvar_id)
+            $products = ProductVariation::where('id', $package->productvar_id)
+                ->where('type', 'full')
                 ->get([
                     'id',
                     'name',
-                    DB::raw('price * 1.16 as price'), // adds 16% VAT
+                     DB::raw('price * 1.16 as price'), // adds 16% VAT
                     'name as eta',
-                ]);
-            $products = $products->map(function ($q) use ($package) {
-                $q->qty = $package->max_bottle;
-                return $q;
-            });
-            // dd($products);
-
-        } else {
-            $recurring = 0;
-            $products = ProductVariation::where('type', 'full')
-                ->get([
-                    'id',
-                    'name',
-                    DB::raw('price * 1.16 as price'), // adds 16% VAT
-                    'name as eta',
-                ]);
+                ])
+                ->map(function ($q) use ($package) {
+                    $q->qty = $package->max_bottle;
+                    return $q;
+                });
         }
-        // dd($products);
 
         return view('focus.pages.orders', compact('products', 'recurring'));
     }
@@ -119,15 +120,16 @@ class CustomerPagesController extends Controller
      * */
     public function payments()
     {
-        $balance = PaymentReceipt::selectRaw('SUM(debit-credit) total')->value('total');
-        $receipts = PaymentReceipt::latest()->get();
-
         $customer = auth()->user()->customer;
+        $balance = PaymentReceipt::where('customer_id', $customer->id)->selectRaw('SUM(debit-credit) total')->value('total');
+        $receipts = PaymentReceipt::where('customer_id', $customer->id)->latest()->get();
+
         $subscription = $customer->subscription;
         $subscrPlan = optional($customer->subscription->package);
         if ($subscription->status !== 'active') $subscrPlan = null;
 
-        $charges = PaymentReceipt::where('entry_type', 'debit')
+        $charges = PaymentReceipt::where('customer_id', $customer->id)
+        ->where('entry_type', 'debit')
         ->get(['id', 'tid', 'notes', 'amount'])
         ->map(function($v) {
             $v->tid = gen4tid('RCPT-', $v->tid);
@@ -149,6 +151,7 @@ class CustomerPagesController extends Controller
 
         return view('focus.pages.subscriptions', compact('authsubscr', 'subscriptions', 'nextSchedule'));
     }
+
     public function my_orders()
     {
         $customer = Customer::where('id', auth()->user()->customer_id)->first();

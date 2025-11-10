@@ -2,6 +2,7 @@
 
 namespace App\Models\target_zone;
 
+use App\Models\customer\CustomerAddress;
 use Illuminate\Database\Eloquent\Model;
 
 class CustomerZoneItem extends Model
@@ -65,4 +66,8 @@ class CustomerZoneItem extends Model
         return $this->belongsTo(TargetZoneItem::class, 'target_zone_item_id');
     }
 
+    public function address()
+    {
+        return $this->belongsTo(CustomerAddress::class, 'customer_address_id');
+    }
 }

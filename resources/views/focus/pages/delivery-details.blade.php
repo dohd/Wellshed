@@ -22,9 +22,13 @@
         </div>
         <div class="mb-3">
             <label for="addresses">Address</label>
-            <input type="text"
-                   value="{{ $customer->address }}"
-                   class="form-control" readonly>
+            @foreach ($customer->customer_zones()->with(['location', 'address'])->get() as $zone)
+                <input type="text" 
+                    value="{{ @$zone->location->sub_zone_name }}:  ({{ @$zone->address->building_name }} || {{ @$zone->address->floor_no }} || {{ @$zone->address->door_no }})" 
+                    class="form-control" 
+                    readonly
+                >
+            @endforeach                   
         </div>
 
         {{-- DESCRIPTION --}}
