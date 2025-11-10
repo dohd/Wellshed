@@ -302,7 +302,7 @@ $(function() {
                     amount: data.amount,                   // ✅ from callback
                     date: "{{ date('Y-m-d') }}",
                     payment_method: 'mpesa',
-                    payment_for: "Order Payment",
+                    payment_for: "order",
                     notes: `Mpesa Receipt ${data.mpesa_receipt_number}`,
                     merchant_request_id: data.merchant_request_id,
                     checkout_request_id: data.checkout_request_id,

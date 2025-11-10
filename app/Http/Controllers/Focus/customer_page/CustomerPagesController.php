@@ -227,8 +227,11 @@ class CustomerPagesController extends Controller
             if ($order->order_type === 'one_time') {
 
                 $payment = PaymentReceipt::find($payment_id);
-                $payment->order_id = $order->id;
-                $payment->update();
+                if($payment){
+                    $payment->order_id = $order->id;
+                    $payment->update();
+                    $order->update(['payment_status' => 'paid']);
+                }
                 $schedule = DeliverySchedule::create([
                     'tid'           => (DeliverySchedule::max('tid') ?? 0) + 1,
                     'order_id'      => $order->id,

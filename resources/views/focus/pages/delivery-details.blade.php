@@ -8,14 +8,23 @@
 
         {{-- CUSTOMER --}}
         <div class="mb-3">
-            <label for="name">Name</label>
+            <label for="name">Segment</label>
+            <input type="text"
+                   value="{{ $customer->segment }}"
+                   class="form-control" readonly>
             <input type="text"
                    value="{{ $customer->name ?: $customer->company }}"
-                   class="form-control"
-                   id="customerName">
+                   class="form-control d-none"
+                   id="customerName" readonly>
             <input type="hidden"
                    value="{{ $customer->id }}"
                    id="customer_id">
+        </div>
+        <div class="mb-3">
+            <label for="addresses">Address</label>
+            <input type="text"
+                   value="{{ $customer->address }}"
+                   class="form-control" readonly>
         </div>
 
         {{-- DESCRIPTION --}}
@@ -71,7 +80,7 @@
         </div>
 
         {{-- LOCATIONS + Automatic Qty --}}
-        <div class='mb-3'>
+        <div class='mb-3 div_locations d-none'>
             {{ Form::label('customer_zone_ids', 'Locations & Qty per Day', ['class' => 'control-label']) }}
             <div id="location-day-mapping">
                 <p class="text-muted">Select delivery days to assign locations + qty.</p>
@@ -178,6 +187,7 @@ $(function() {
             return;
         }
 
+        $('.div_locations').removeClass('d-none');
         selectedDays.forEach(day => {
             const dkey = day.replace(/\s+/g, '_').toLowerCase();
             container.append(`
