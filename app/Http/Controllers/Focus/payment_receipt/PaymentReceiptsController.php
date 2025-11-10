@@ -104,7 +104,7 @@ class PaymentReceiptsController extends Controller
                 if ($input['payment_for'] === 'subscription') {
                     $main = array_replace($main, [
                         'credit' => $main['amount'],
-                        'subscription_id' => @$input['subscription']['subscription_id'],
+                        'subscription_id' => $input['subscription']['subscription_id'] ?? $input['subscription_id'],
                         'notes' => $input['subscription']['notes'] ?? $input['notes'],
                         'mpesa_ref' => @$input['refs']['mpesa']? strtoupper($input['refs']['mpesa']) : null,
                         'mpesa_phone' => $input['refs']['mpesa_phone'] ?? $input['mpesa_phone'],
@@ -122,7 +122,7 @@ class PaymentReceiptsController extends Controller
                 elseif ($input['payment_for'] === 'charge') {
                     $main = array_replace($main, [
                         'credit' => $main['amount'],
-                        'charge_id' => @$input['charge']['charge_id'],
+                        'charge_id' => $input['charge']['charge_id'] ?? $input['charge_id'],
                         'notes' => $input['charge']['notes'] ?? $input['notes'],
                         'mpesa_ref' => @$input['refs']['mpesa']? strtoupper($input['refs']['mpesa']) : null,
                         'mpesa_phone' => $input['refs']['mpesa_phone'] ?? $input['mpesa_phone'],
@@ -164,9 +164,6 @@ class PaymentReceiptsController extends Controller
                     'last_renewal_date' => $receipt->date,
                     'end_date' => $newDate,
                 ]);
-            } elseif ($receipt->order) {
-                $order = $receipt->order;
-                $order->update(['payment_status' => 'paid']);
             }
 
             DB::commit();

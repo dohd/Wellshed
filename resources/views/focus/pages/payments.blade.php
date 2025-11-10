@@ -177,16 +177,23 @@ $(function() {
 
     // ==== Handle payment for change =====
     $('#mpesaPaymentFor').change(function() {
+        $('#subscrId').val('');
+        $('#chargeId').val('');
+        $('#mpesaAmount').val('');
         $option = $(this).find(':selected');
-        const price = accounting.unformat($option.data('price'));
-        $('#mpesaAmount').val(price);
 
         if ($(this).val() === 'subscription') {
-            $('#mpesaNotes').attr('placeholder', 'e.g subscription');
-        } else if ($(this).val() === 'order') {
-            $('#mpesaNotes').attr('placeholder', 'e.g order');
+            const price = accounting.unformat($option.data('price'));
+            const subscrId = accounting.unformat($option.data('id'));
+            $('#subscrId').val(subscrId);
+            $('#mpesaAmount').val(price);
+            $('#mpesaNotes').attr('placeholder', 'e.g Subscription');
         } else if ($(this).val() === 'charge') {
-            $('#mpesaNotes').attr('placeholder', 'e.g charge');
+            const amount = accounting.unformat($option.data('amount'));
+            const chargeId = accounting.unformat($option.data('id'));
+            $('#chargeId').val(chargeId);
+            $('#mpesaAmount').val(amount);
+            $('#mpesaNotes').attr('placeholder', 'e.g Charge');
         }
     });
     $('#mpesaPaymentFor').change();
@@ -198,8 +205,8 @@ $(function() {
     // Simple validation
     const phone = $('#mpesaPhone').val().trim();
     const amount = $('#mpesaAmount').val().trim();
-    const notes = $('#mpesaNotes').val().trim();
-    if(!phone || !amount || !notes) { 
+    const notes = $('#mpesaNotes').val().trim() || null;
+    if(!phone || !amount) { 
         return alert('Please fill all required fields.'); 
     }
     const customerName = customer.company || customer.name;
@@ -240,15 +247,14 @@ $(function() {
       }
     });
 
-    /**
-    $('#mpesaStatusArea .alert')
+    
+    {{-- $('#mpesaStatusArea .alert')
           .removeClass('alert-info')
           .addClass('alert-success')
           .html('<i class="fas fa-check-circle mr-2"></i> Prompt sent successfully. Ask customer to complete on phone.');
         setTimeout(() => $('#mpesaPromptModal').modal('hide'), 2500);
     postPaymentLocally({merchant_request_id: 1234567, checkout_request_id: 1234567});
-    $('#btnSendMpesa').prop('disabled', false);
-    **/
+    $('#btnSendMpesa').prop('disabled', false); --}}
   });
 
   // ==== Locally POST payment ====
@@ -264,6 +270,8 @@ $(function() {
         'payment_method': 'mpesa', 
         'payment_for': $('#mpesaPaymentFor').val().trim(),
         'notes': $('#mpesaNotes').val().trim(),
+        'subscription_id': $('#subscrId').val(),
+        'charge_id': $('#chargeId').val(),
         'merchant_request_id': data.merchant_request_id,
         'checkout_request_id': data.checkout_request_id,
         'refs': {

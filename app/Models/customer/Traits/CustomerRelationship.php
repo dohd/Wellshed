@@ -37,6 +37,12 @@ trait CustomerRelationship
         return $this->hasMany(PaymentReceipt::class);
     }
 
+    public function package() 
+    {
+        return $this->hasOneThrough(SubPackage::class, Subscription::class, 'customer_id', 'id', 'id', 'sub_package_id')
+        ->withoutGlobalScopes();
+    }
+
     public function packages() 
     {
         return $this->hasManyThrough(SubPackage::class, Subscription::class, 'customer_id', 'id', 'id', 'sub_package_id')
@@ -55,6 +61,11 @@ trait CustomerRelationship
     public function orders() 
     {
         return $this->hasMany(Orders::class);
+    }
+
+    public function subscription() 
+    {
+        return $this->hasOne(Subscription::class);
     }
 
     public function subscriptions() 

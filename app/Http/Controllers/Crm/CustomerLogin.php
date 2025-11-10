@@ -150,12 +150,13 @@ class CustomerLogin extends Controller
             DB::commit();
 
             if ($user) NotifyCustomerRegistration::dispatch($user,$input['password'],$ins);
-            
+
+            return redirect()
+                ->route('login')
+                ->with(['flash_success' => 'Registration Successful']);
         } catch (\Exception $e) {
             return errorHandler('Registration Error: Please contact admin', $e);            
         }
-
-        return redirect(route('login'))->with(['flash_success' => 'Registration Successful']);
     }
 
     // login from for customer

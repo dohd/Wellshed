@@ -18,6 +18,9 @@ use Validator;
 
 class CustomerPagesController extends Controller
 {
+    /**
+     * Landing Home Page
+     * */
     public function home()
     {
         // dd(auth()->user()->toArray());
@@ -28,6 +31,10 @@ class CustomerPagesController extends Controller
         // dd($incoming_schedules);
         return view('focus.pages.home', compact('customer', 'prev_schedules', 'incoming_schedules'));
     }
+
+    /**
+     * Order Page
+     * */
     public function orders()
     {
         $recurring = 0;
@@ -67,15 +74,18 @@ class CustomerPagesController extends Controller
 
         return view('focus.pages.orders', compact('products', 'recurring'));
     }
+
     public function track()
     {
         return view('focus.pages.track');
     }
+
     public function profile()
     {
         $customer = Customer::where('id', auth()->user()->customer_id)->first();
         return view('focus.pages.profile', compact('customer'));
     }
+
     public function delivery()
     {
         $recurring = 1;
@@ -92,27 +102,41 @@ class CustomerPagesController extends Controller
         $customer_zones = $customer->customer_zones()->with('location')->get();
         return view('focus.pages.delivery-details', compact('customer', 'customer_zones', 'recurring', 'qty'));
     }
+
     public function review()
     {
         $customer = Customer::where('id', auth()->user()->customer_id)->first();
         return view('focus.pages.review-order', compact('customer'));
     }
+
     public function thank_you()
     {
         return view('focus.pages.thank-you');
     }
 
+    /**
+     * Payments Page
+     * */
     public function payments()
     {
-        $customer = auth()->user()->customer;
         $balance = PaymentReceipt::selectRaw('SUM(debit-credit) total')->value('total');
         $receipts = PaymentReceipt::latest()->get();
 
-        $subscrPackage = $customer->packages()
-            ->whereHas('subscriptions', fn($q) => $q->where('status', 'active'))
-            ->first();
+        $customer = auth()->user()->customer;
+        $subscription = $customer->subscription;
+        $subscrPlan = optional($customer->subscription->package);
+        if ($subscription->status !== 'active') $subscrPlan = null;
 
-        return view('focus.pages.payments', compact('balance', 'receipts', 'customer', 'subscrPackage'));
+        $charges = PaymentReceipt::where('entry_type', 'debit')
+        ->get(['id', 'tid', 'notes', 'amount'])
+        ->map(function($v) {
+            $v->tid = gen4tid('RCPT-', $v->tid);
+            return $v;
+        });
+
+        return view('focus.pages.payments', 
+            compact('balance', 'receipts', 'customer', 'subscrPlan', 'charges', 'subscription'),            
+        );
     }
 
     public function subscriptions()

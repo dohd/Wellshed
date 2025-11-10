@@ -10,21 +10,28 @@
 
             <form id="mpesaPromptForm">
                 <div class="modal-body">
-                  <p class="mb-3 text-muted">Enter the customer's phone number to initiate an M-Pesa STK Push.</p>
+                  <p class="mb-1 text-muted">Enter the customer's phone number to initiate an M-Pesa STK Push.</p>
 
                   <div class="form-group mb-2">
                     <label for="mpesaPhonePrompt" class="font-weight-semibold">Phone Number (Safaricom) <span class="text-danger">*</span></label>
-                    <input type="tel" class="form-control" id="mpesaPhone" name="mpesa_phone" placeholder="+2547XXXXXXXX" required>
+                    <input type="tel" class="form-control" id="mpesaPhone" name="mpesa_phone" placeholder="2547XXXXXXXX" required>
                   </div>
 
                   <div class="form-group mb-2">
                     <label for="mpesaPaymentFor" class="font-weight-semibold">Payment For <span class="text-danger">*</span></label>
+                    <input type="hidden" id="subscrId">
+                    <input type="hidden" id="chargeId">
                     <select id="mpesaPaymentFor" class="form-control">
-                      <option value="subscription" data-price="{{ +$subscrPackage->price }}">
-                        {{ $subscrPackage->name }} Plan (KES {{ numberFormat($subscrPackage->price) }} / month)
+                      @if ($subscrPlan)
+                      <option value="subscription" data-id="{{ $subscription->id }}" data-price="{{ +$subscrPlan->price }}">
+                        {{ $subscrPlan->name }} Plan (KES {{ numberFormat($subscrPlan->price) }} / month)
                       </option>
-                      <option value="order">Order</option>
-                      <option value="charge">Charge</option>
+                      @endif
+                      @foreach ($charges as $charge)
+                        <option value="charge" data-id="{{ $charge->id }}" data-amount="{{ $charge->amount }}">
+                          {{ $charge->tid }}  - {{ $charge->notes }}
+                        </option>
+                      @endforeach
                     </select>
                   </div>
 
@@ -34,7 +41,7 @@
                   </div>
 
                   <div class="form-group mb-2">
-                    <label for="notes" class="font-weight-semibold">Notes <span class="text-danger">*</span></label>
+                    <label for="notes" class="font-weight-semibold">Notes (Optional)</label>
                     <input type="text" class="form-control" id="mpesaNotes" name="notes" placeholder="e.g. Pay for ORD-1001">
                   </div>
 
