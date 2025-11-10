@@ -95,6 +95,7 @@
                 <form id="submitOrderForm" method="POST" action="{{ route('biller.customer_pages.submit_order') }}">
                     @csrf
                     <input type="hidden" name="order_payload" id="orderPayload">
+                    <input type="hidden" name="payment_id" id="paymentId"><!-- ✅ new -->
 
                     <div class="d-flex justify-content-between mt-4">
                         <button type="button" class="btn btn-light" id="btnBack">← Back</button>
@@ -311,6 +312,14 @@ $(function() {
                 },
                 success: function (res) {
                     console.log("Local save:", res);
+
+                    const paymentId =
+                        res?.payment?.id ||
+                        null;
+
+                    if (paymentId) {
+                        $("#paymentId").val(paymentId);   // ✅ attach to the form
+                    }
 
                     // ✅ Submit order only AFTER storing receipt
                     $("#submitOrderForm").submit();

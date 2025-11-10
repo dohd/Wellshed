@@ -135,6 +135,7 @@ class CustomerPagesController extends Controller
     public function submit_order(Request $request)
     {
         $payload = json_decode($request->order_payload, true);
+        $payment_id = $request->payment_id;
 
         if (!$payload) {
             return back()->withErrors('Invalid order payload')->withInput();
@@ -225,6 +226,9 @@ class CustomerPagesController extends Controller
             // ✅ Create one-time delivery schedule
             if ($order->order_type === 'one_time') {
 
+                $payment = PaymentReceipt::find($payment_id);
+                $payment->order_id = $order->id;
+                $payment->update();
                 $schedule = DeliverySchedule::create([
                     'tid'           => (DeliverySchedule::max('tid') ?? 0) + 1,
                     'order_id'      => $order->id,

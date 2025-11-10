@@ -94,7 +94,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="close" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Update Status</button>
                 </div>
             </form>
@@ -153,6 +153,10 @@ $(function () {
         const id = $(this).data('id');
         $('#delivery_id').val(id);
         $('#changeStatusModal').modal('show');
+    });
+    $(document).on('click', '#close', function (e) {
+        e.preventDefault();
+        $('#changeStatusModal').modal('hide');
     });
 
     // ✅ Submit form via AJAX

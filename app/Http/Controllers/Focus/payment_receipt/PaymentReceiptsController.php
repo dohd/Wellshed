@@ -171,7 +171,7 @@ class PaymentReceiptsController extends Controller
 
             DB::commit();
 
-            return response()->json(['message' => 'Receipt created successfully']);
+            return response()->json(['message' => 'Receipt created successfully','payment'=>$receipt]);
         } catch (\Exception $e) {
             \Log::error($e->getMessage() . ' {user_id: ' . auth()->id() . '}' . ' at ' . $e->getFile() . ':' . $e->getLine());
             return response()->json(['message' => 'Error creating Receipt'], 500);

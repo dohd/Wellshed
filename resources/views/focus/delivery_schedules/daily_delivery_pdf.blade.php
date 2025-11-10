@@ -73,22 +73,32 @@
     <table class="summary-table">
         <tr>
             <th>Metric</th>
+            <th>HouseHold</th>
+            <th>Office</th>
             <th>Amount</th>
         </tr>
         <tr>
             <td>Gross Orders</td>
+            <td>0.00</td>
+            <td>0.00</td>
             <td>{{ number_format($summary['gross_orders'], 2) }}</td>
         </tr>
         <tr>
             <td>Taxes Collected</td>
+            <td>0.00</td>
+            <td>0.00</td>
             <td>{{ number_format($summary['taxes'], 2) }}</td>
         </tr>
         <tr>
             <td>Total Receipts</td>
+            <td>0.00</td>
+            <td>0.00</td>
             <td>{{ number_format($summary['total_receipts'], 2) }}</td>
         </tr>
         <tr>
             <td>Number of Orders</td>
+            <td>0</td>
+            <td>0</td>
             <td>{{ $summary['orders_count'] }}</td>
         </tr>
     </table>
