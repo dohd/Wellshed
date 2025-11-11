@@ -16,6 +16,12 @@
         {{ Form::text('price', null, ['class' => 'form-control box-size', 'placeholder' => '0.00', 'required' => 'required']) }}
     </div>
 </div>
+<div class='form-group'>
+    {{ Form::label('onetime_fee', 'One-time Fee',['class' => 'col-lg-2 control-label']) }}
+    <div class='col-lg-10'>
+        {{ Form::text('onetime_fee', null, ['class' => 'form-control box-size', 'placeholder' => '0.00', 'required' => 'required']) }}
+    </div>
+</div>
 
 <div class='form-group'>
     {{ Form::label( 'max_bottle', 'Max Deliverable Bottles',['class' => 'col-lg-2 control-label']) }}

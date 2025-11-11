@@ -11,7 +11,6 @@
             <form id="mpesaPromptForm">
                 <div class="modal-body">
                   <p class="mb-1 text-muted">Enter the customer's phone number to initiate an M-Pesa STK Push.</p>
-
                   <div class="form-group mb-2">
                     <label for="mpesaPhonePrompt" class="font-weight-semibold">Phone Number (Safaricom) <span class="text-danger">*</span></label>
                     <input type="tel" class="form-control" id="mpesaPhone" name="mpesa_phone" placeholder="2547XXXXXXXX" required>
@@ -23,22 +22,24 @@
                     <input type="hidden" id="chargeId">
                     <select id="mpesaPaymentFor" class="form-control">
                       @if ($subscrPlan)
-                      <option value="subscription" data-id="{{ $subscription->id }}" data-price="{{ +$subscrPlan->price }}">
+                      <option value="subscription" data-name="{{ $subscrPlan->name }} Plan" data-id="{{ $subscription->id }}" data-price="{{ +$subscrPlan->price }}">
                         {{ $subscrPlan->name }} Plan (KES {{ numberFormat($subscrPlan->price) }} / month)
                       </option>
                       @endif
                       @foreach ($charges as $charge)
-                        <option value="charge" data-id="{{ $charge->id }}" data-amount="{{ $charge->amount }}">
+                        <option value="charge" data-name="Debit Charge" data-id="{{ $charge->id }}" data-amount="{{ $charge->amount }}">
                           {{ $charge->tid }}  - {{ $charge->notes }}
                         </option>
                       @endforeach
                     </select>
                   </div>
 
+                  @if ($isRecur)
                   <div class="form-group mb-2">
-                    <label for="serviceFee" class="font-weight-semibold">Service Fee (One Time)</label>
-                    <input type="number" min="1" step="1" class="form-control" id="serviceFee" name="serviceFee" placeholder="e.g. 500">
+                    <label for="serviceFee" class="font-weight-semibold">One-time Service Fee <span class="text-danger">*</span></label>
+                    <input type="number" min="1" step="1" class="form-control" id="serviceFee" name="serviceFee" value="{{ $subscrPlan->onetime_fee }}" readonly>
                   </div>
+                  @endif
 
                   <div class="form-group mb-2">
                     <label for="mpesaAmountPrompt" class="font-weight-semibold">Amount (KES) <span class="text-danger">*</span></label>
@@ -46,7 +47,7 @@
                   </div>
 
                   <div class="form-group mb-2">
-                    <label for="notes" class="font-weight-semibold">Notes (Optional)</label>
+                    <label for="notes" class="font-weight-semibold">Notes <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="mpesaNotes" name="notes" placeholder="e.g. Pay for ORD-1001">
                   </div>
 

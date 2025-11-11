@@ -42,11 +42,13 @@ class SubPackagesController extends Controller
         $request->validate([
             'name' => 'required',
             'price' => 'required',
+            'onetime_fee' => 'required',
         ]);
         $data = $request->except(['_token']);
 
         try {
             $data['price'] = numberClean($data['price']);
+            $data['onetime_fee'] = numberClean($data['onetime_fee']);
             $subpackage = SubPackage::create($data);
             
             return redirect(route('biller.subpackages.index'))->with(['flash_success' => 'Package Created Successfully']);
@@ -90,11 +92,13 @@ class SubPackagesController extends Controller
         $request->validate([
             'name' => 'required',
             'price' => 'required',
+            'onetime_fee' => 'required',
         ]);
         $data = $request->except(['_token', '_method']);
 
         try {
             $data['price'] = numberClean($data['price']);
+            $data['onetime_fee'] = numberClean($data['onetime_fee']);
             $data['is_disabled'] = $data['is_disabled'] ?? null;
             $subpackage->update($data);
             
@@ -113,7 +117,7 @@ class SubPackagesController extends Controller
     public function destroy(SubPackage $subpackage)
     {
         try {
-            $subpackage->delete();
+            $subpackage->update(['deleted_at' => now(), 'deleted_by' => auth()->id()]);
             
             return redirect(route('biller.subpackages.index'))->with(['flash_success' => 'Package Deleted Successfully']);
         } catch (Exception $e) {

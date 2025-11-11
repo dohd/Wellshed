@@ -121,7 +121,7 @@ class CustomerPagesController extends Controller
     public function payments()
     {
         $customer = auth()->user()->customer;
-        $balance = PaymentReceipt::where('customer_id', $customer->id)->selectRaw('SUM(debit-credit) total')->value('total');
+        $balance = PaymentReceipt::where('customer_id', $customer->id)->selectRaw('SUM(credit-debit) total')->value('total');
         $receipts = PaymentReceipt::where('customer_id', $customer->id)->latest()->get();
 
         $subscription = $customer->subscription;
@@ -136,8 +136,12 @@ class CustomerPagesController extends Controller
             return $v;
         });
 
+        $isRecur = Orders::where('customer_id', $customer->id)
+            ->where('order_type', 'recurring')
+            ->doesntExist();
+
         return view('focus.pages.payments', 
-            compact('balance', 'receipts', 'customer', 'subscrPlan', 'charges', 'subscription'),            
+            compact('isRecur', 'balance', 'receipts', 'customer', 'subscrPlan', 'charges', 'subscription'),            
         );
     }
 

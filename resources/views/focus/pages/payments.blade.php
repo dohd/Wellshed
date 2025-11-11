@@ -177,11 +177,11 @@ $(function() {
 
     // ==== Handle payment for change =====
     $('#mpesaPaymentFor').change(function() {
-        $('#subscrId').val('');
-        $('#chargeId').val('');
-        $('#mpesaAmount').val('');
         $option = $(this).find(':selected');
+        const name = $option.data('name');
 
+        $('#mpesaAmount, #chargeId, #subscrId').val('');
+        $('#mpesaNotes').val(name);
         if ($(this).val() === 'subscription') {
             const price = accounting.unformat($option.data('price'));
             const subscrId = accounting.unformat($option.data('id'));
@@ -204,6 +204,7 @@ $(function() {
         const total = value + amount;
          $('#mpesaAmount').val(total);
     });
+    $('#serviceFee').keyup();
 
   // ==== Handle form submit ====
   $('#mpesaPromptForm').on('submit', function(e){
@@ -213,7 +214,7 @@ $(function() {
     const phone = $('#mpesaPhone').val().trim();
     const amount = $('#mpesaAmount').val().trim();
     const notes = $('#mpesaNotes').val().trim() || null;
-    if(!phone || !amount) { 
+    if(!phone || !amount || !notes) { 
         return alert('Please fill all required fields.'); 
     }
     const customerName = customer.company || customer.name;
@@ -239,11 +240,11 @@ $(function() {
           .removeClass('alert-info')
           .addClass('alert-success')
           .html('<i class="fas fa-check-circle mr-2"></i> Prompt sent successfully. Ask customer to complete on phone.');
-        setTimeout(() => $('#mpesaPromptModal').modal('hide'), 2500);
-        $('#btnSendMpesa').prop('disabled', false);
-
-        // post payment locally
-        postPaymentLocally(res);
+          setTimeout(() => {
+            $('#mpesaModal').modal('hide');
+            $('#btnSendMpesa').prop('disabled', false);
+            postPaymentLocally(res);
+          }, 2500);
       },
       error: function(){
         $('#mpesaStatusArea .alert')
@@ -253,15 +254,17 @@ $(function() {
         $('#btnSendMpesa').prop('disabled', false);
       }
     });
-
     
+    // Test
     {{-- $('#mpesaStatusArea .alert')
           .removeClass('alert-info')
           .addClass('alert-success')
           .html('<i class="fas fa-check-circle mr-2"></i> Prompt sent successfully. Ask customer to complete on phone.');
-        setTimeout(() => $('#mpesaPromptModal').modal('hide'), 2500);
-    postPaymentLocally({merchant_request_id: 1234567, checkout_request_id: 1234567});
-    $('#btnSendMpesa').prop('disabled', false); --}}
+    setTimeout(() => {
+        $('#mpesaModal').modal('hide');
+        $('#btnSendMpesa').prop('disabled', false);
+        postPaymentLocally({merchant_request_id: 1234567, checkout_request_id: 1234567});
+    }, 2500);   --}}    
   });
 
   // ==== Locally POST payment ====
@@ -299,7 +302,7 @@ $(function() {
   } 
 
   // ==== Auto-reset modal each time it closes ====
-  $('#mpesaPromptModal').on('hidden.bs.modal', function(){
+  $('#mpesaModal').on('hidden.bs.modal', function(){
     $('#mpesaPromptForm')[0].reset();
     $('#mpesaStatusArea').addClass('d-none')
       .find('.alert')
