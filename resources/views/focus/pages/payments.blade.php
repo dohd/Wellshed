@@ -110,15 +110,15 @@
                     <span class="text-success">+ KSh {{ numberFormat($receipt->amount) }}</span>
                     <small class="text-muted">{{ date('M d, Y', strtotime($receipt->date)) }}</small>
                 </li>
-            @elseif ($receipt->payment_for === 'charge')    
+            @elseif ($receipt->payment_for === 'charge' && $receipt->credit > 0)    
                 <li class="list-group-item d-flex justify-content-between">
-                    <span>Charge <span style="margin-left: 40px;">&nbsp;</span> {{ gen4tid('#', $receipt->tid) }}</span>
+                    <span>Top-up <span style="margin-left: 40px;">&nbsp;</span> {{ gen4tid('#', $receipt->tid) }}</span>
                     <span class="text-success">+ KSh {{ numberFormat($receipt->amount) }}</span>
                     <small class="text-muted">{{ date('M d, Y', strtotime($receipt->date)) }}</small>
                 </li>
             @elseif ($receipt->debit > 0)
                 <li class="list-group-item d-flex justify-content-between">
-                    <span>Charge Debit {{ gen4tid('#', $receipt->tid) }}</span>
+                    <span>Debit Charge <span style="margin-left: 10px;">&nbsp;</span> {{ gen4tid('#', $receipt->tid) }}</span>
                     <span class="text-danger">- KSh {{ numberFormat($receipt->amount) }}</span>
                     <small class="text-muted">{{ date('M d, Y', strtotime($receipt->date)) }}</small>
                 </li>
@@ -254,17 +254,23 @@ $(function() {
         $('#btnSendMpesa').prop('disabled', false);
       }
     });
+
+    function testStub() {
+        $('#mpesaStatusArea .alert')
+              .removeClass('alert-info')
+              .addClass('alert-success')
+              .html('<i class="fas fa-check-circle mr-2"></i> Prompt sent successfully. Ask customer to complete on phone.');
+        setTimeout(() => {
+            $('#mpesaModal').modal('hide');
+            $('#btnSendMpesa').prop('disabled', false);
+            postPaymentLocally({merchant_request_id: 1234567, checkout_request_id: 1234567});
+        }, 2500);   
+    }
     
     // Test
-    {{-- $('#mpesaStatusArea .alert')
-          .removeClass('alert-info')
-          .addClass('alert-success')
-          .html('<i class="fas fa-check-circle mr-2"></i> Prompt sent successfully. Ask customer to complete on phone.');
-    setTimeout(() => {
-        $('#mpesaModal').modal('hide');
-        $('#btnSendMpesa').prop('disabled', false);
-        postPaymentLocally({merchant_request_id: 1234567, checkout_request_id: 1234567});
-    }, 2500);   --}}    
+    @if (env('APP_ENV') === 'local' && env('APP_DEBUG') === true)
+        testStub();
+    @endif 
   });
 
   // ==== Locally POST payment ====

@@ -11,6 +11,7 @@ use App\Models\Company\Company;
 use App\Models\customer\Customer;
 use App\Models\customer\CustomerAddress;
 use App\Models\hrm\Hrm;
+use App\Models\payment_receipt\PaymentReceipt;
 use App\Models\subpackage\SubPackage;
 use App\Models\subscription\Subscription;
 use App\Models\target_zone\CustomerZoneItem;
@@ -146,6 +147,20 @@ class CustomerLogin extends Controller
                     'customer_address_id' => $customerAddr->id,
                 ]);
             }
+
+            // create subscription plan debit charge
+            $package = SubPackage::findOrFail(request('sub_package_id'));
+            $amount = $package->price + $package->onetime_fee;
+            $receipt = PaymentReceipt::create([
+                'entry_type' => 'debit',
+                'customer_id' => $customer->id,
+                'date' => now()->toDateString(),
+                'notes' => "{$package->name} Plan",
+                'amount' => $amount,
+                'debit' => $amount,
+                'payment_for' => 'charge',
+                'ins' => $ins,
+            ]);
 
             DB::commit();
 

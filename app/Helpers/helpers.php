@@ -7,7 +7,7 @@
 if (!function_exists('errorHandler')) {
     function errorHandler($msg = '', $e = null)
     {
-        if (env('APP_ENV') == 'local' && env('APP_DEBUG') == true) dd($msg, $e);
+        if (env('APP_ENV') === 'local' && env('APP_DEBUG') === true) dd($msg, $e);
         if ($e instanceof \Illuminate\Validation\ValidationException) throw $e;
         if ($e instanceof \Throwable) \Illuminate\Support\Facades\Log::error($e->getMessage() . ' {user_id: ' . auth()->id() . '}' . ' at ' . $e->getFile() . ':' . $e->getLine());
         return redirect()->back()->with('flash_error', $msg ?: 'Internal Server Error! Please try again later.');

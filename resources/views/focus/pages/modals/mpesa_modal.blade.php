@@ -22,19 +22,19 @@
                     <input type="hidden" id="chargeId">
                     <select id="mpesaPaymentFor" class="form-control">
                       @if ($subscrPlan)
-                      <option value="subscription" data-name="{{ $subscrPlan->name }} Plan" data-id="{{ $subscription->id }}" data-price="{{ +$subscrPlan->price }}">
+                      {{-- <option value="subscription" data-name="{{ $subscrPlan->name }} Plan" data-id="{{ $subscription->id }}" data-price="{{ +$subscrPlan->price }}">
                         {{ $subscrPlan->name }} Plan (KES {{ numberFormat($subscrPlan->price) }} / month)
-                      </option>
+                      </option> --}}
                       @endif
                       @foreach ($charges as $charge)
-                        <option value="charge" data-name="Debit Charge" data-id="{{ $charge->id }}" data-amount="{{ $charge->amount }}">
+                        <option value="charge" data-name="{{ $charge->notes ?? 'Debit Charge' }}" data-id="{{ $charge->id }}" data-amount="{{ $charge->amount }}">
                           {{ $charge->tid }}  - {{ $charge->notes }}
                         </option>
                       @endforeach
                     </select>
                   </div>
 
-                  @if ($isRecur)
+                  @if (!$isRecur)
                   <div class="form-group mb-2">
                     <label for="serviceFee" class="font-weight-semibold">One-time Service Fee <span class="text-danger">*</span></label>
                     <input type="number" min="1" step="1" class="form-control" id="serviceFee" name="serviceFee" value="{{ $subscrPlan->onetime_fee }}" readonly>
