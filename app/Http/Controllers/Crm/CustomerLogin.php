@@ -148,17 +148,19 @@ class CustomerLogin extends Controller
                 ]);
             }
 
-            // create subscription plan debit charge
+            // debit charge for the subscription plan 
             $package = SubPackage::findOrFail(request('sub_package_id'));
             $amount = $package->price + $package->onetime_fee;
+            $notes = stripos($package->name, 'Plan') !== false? 
+                $package->name : "{$package->name} Plan";
             $receipt = PaymentReceipt::create([
                 'entry_type' => 'debit',
                 'customer_id' => $customer->id,
                 'date' => now()->toDateString(),
-                'notes' => "{$package->name} Plan",
+                'notes' => $notes,
                 'amount' => $amount,
                 'debit' => $amount,
-                'payment_for' => 'charge',
+                'subscription_id' => $subscr->id,
                 'ins' => $ins,
             ]);
 
