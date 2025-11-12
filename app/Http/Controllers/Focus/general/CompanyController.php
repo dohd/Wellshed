@@ -84,7 +84,7 @@ class CompanyController extends Controller
             'icon', 'phone', 'email', 'clock_in', 'clock_out', 'etr_code','performance_percent', 'fiscal_month','notification_number','rate', 'review_url',
             'whatsapp_business_url', 'default_quote_type','company_commission','commission_1','commission_2','commission_3','location','website_url',
             'linkedIn_url','twitter_url','facebook_url','instagram_url','tiktok_url',
-            'chatgpt_email'
+            'chatgpt_email', 'whatsapp_business_account_id', 'whatsapp_phone_no_id', 'meta_developer_app_id', 'whatsapp_access_token',
         ]);
         $data2 = $request->only(['custom_field']);
 

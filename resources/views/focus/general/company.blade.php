@@ -23,7 +23,12 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link h4 pt-1" id="active-tab2" data-toggle="tab" href="#active2" aria-controls="active2" role="tab">
-                                Logo & Icons
+                                Logo & Icons & Links
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link h4 pt-1" id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">
+                                Meta WhatsApp Config
                             </a>
                         </li>
                     </ul>
@@ -365,6 +370,51 @@
                                                 </small>                                        
                                             </div>
                                         </div>                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Meta Whatsapp config -->
+                        <div class="tab-pane in" id="active3" aria-labelledby="active-tab3" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="row no-gutters mb-1">
+                                        <div class="col-md-6">
+                                            <div class='col'>
+                                                <label for="review_url">Whatsapp Business Account ID</label>
+                                                <input type="text" name="whatsapp_business_account_id" class="form-control"
+                                                    value="{{ @$company->whatsapp_business_account_id }}"
+                                                    placeholder=""
+                                                >
+                                            </div>                                            
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class='col'>
+                                                <label for="review_url">Whatsapp Business Phone Number ID</label>
+                                                <input type="text" name="whatsapp_phone_no_id" class="form-control"
+                                                    value="{{ @$company->whatsapp_phone_no_id }}"
+                                                    placeholder=""
+                                                >
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row no-gutters mb-1">
+                                        <div class="col-md-6">
+                                            <div class='col'>
+                                                <label for="review_url">Meta Developer App ID</label>
+                                                <input type="text" name="meta_developer_app_id" class="form-control"
+                                                    value="{{ @$company->meta_developer_app_id }}"
+                                                    placeholder=""
+                                                >
+                                            </div>                                            
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class='col'>
+                                                <label for="review_url">Whatsapp Access Token</label>
+                                                <textarea rows="1" name="whatsapp_access_token" class="form-control">{{ @$company->whatsapp_access_token }}</textarea>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
