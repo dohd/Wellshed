@@ -18,6 +18,8 @@ use App\Jobs\SendCustStatementJob;
 use App\Models\Company\Company;
 use App\Models\manualjournal\Journal;
 use App\Models\project\Project;
+use App\Models\subpackage\SubPackage;
+use App\Models\target_zone\TargetZone;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Response;
@@ -70,7 +72,9 @@ class CustomersController extends Controller
      */
     public function create(CreateCustomerRequest $request)
     {
-        return new CreateResponse('focus.customers.create');
+        $subpackages = SubPackage::all();
+        $targetzones = TargetZone::with('items')->get();
+        return view('focus.customers.create', compact('subpackages', 'targetzones'));
     }
 
     /**
@@ -82,27 +86,34 @@ class CustomersController extends Controller
     public function store(CreateCustomerRequest $request)
     {
         $request->validate([
-            // 'ar_account_id' => 'required',
-            'company' => 'required',
-            'password' => request('password') ? 'required_with:user_email | min:7' : '',
-            'password_confirmation' => 'required_with:password | same:password'
+            'sub_package_id' => 'required',
+            'segment' => 'required',
+            'company' => 'required_if:segment,office',
+            'first_name' => 'required_if:segment,household',
+            'last_name' => 'required_if:segment,household',
+            'email' => 'required_without:phone_no',
+            'phone_no' => 'required_without:email',
+            'password' => 'required',
+            'target_zone_id' => 'required',
+            'target_zone_item_id' => ['required', 'array', 'min:1'],
+            'building_name' => 'required',
+            'floor_no' => 'required',
+            'door_no' => 'required',
+        ], [
+            'sub_package_id' => 'package is required',
+            'target_zone_id' => 'delivery zone is required',
+            'target_zone_item_id' => 'location is required',
         ]);
-        if (request('password')) {
-            if (!preg_match("/[a-z][A-Z]|[A-Z][a-z]/i", $request->password)) 
-                throw ValidationException::withMessages(['password' => 'Password Must Contain Upper and Lowercase letters']);
-            if (!preg_match("/[0-9]/", $request->password)) 
-                throw ValidationException::withMessages(['password' => 'Password Must Contain At Least One Number']);
-            if (!preg_match("/[^A-Za-z 0-9]/", $request->password)) 
-                throw ValidationException::withMessages(['password' => 'Password Must Contain A Symbol']);
-        }
-            
+
+        $input = $request->all();
+        $input['full_name'] = $input['first_name']? "{$input['first_name']} {$input['last_name']}" : '';
+
         try {
-            $result = $this->repository->create($request->except(['_token', 'ins', 'balance']));
+            $result = $this->repository->create($input);
+            return new RedirectResponse(route('biller.customers.index'), ['flash_success' => trans('alerts.backend.customers.created')]);
         } catch (\Throwable $th) {
-            return errorHandler('Error Creating Customers '.$th->getMessage(), $th);
-        }
-            
-        return new RedirectResponse(route('biller.customers.index'), ['flash_success' => trans('alerts.backend.customers.created')]);
+            return errorHandler('Error Creating Customer', $th);
+        }            
     }
 
     /**
@@ -114,7 +125,14 @@ class CustomersController extends Controller
      */
     public function edit(Customer $customer, EditCustomerRequest $request)
     {
-        return new EditResponse($customer);
+        $subpackages = SubPackage::all();
+        $targetzones = TargetZone::with('items')->get();
+        $projects = collect();
+
+        $customer->load(['package', 'hrm', 'customer_zones', 'mainAddress']);
+        $customerZone = optional($customer->customer_zones->first());
+
+        return view('focus.customers.edit', compact('customerZone', 'customer', 'subpackages', 'targetzones', 'projects'));
     }
 
     /**
@@ -127,27 +145,34 @@ class CustomersController extends Controller
     public function update(EditCustomerRequest $request, Customer $customer)
     {
         $request->validate([
-            // 'ar_account_id' => 'required',
-            'company' => 'required',
-            'password' => request('password') ? 'required_with:user_email | min:7' : '',
-            'password_confirmation' => 'required_with:password | same:password'
+            // 'sub_package_id' => 'required',
+            'segment' => 'required',
+            'company' => 'required_if:segment,office',
+            'first_name' => 'required_if:segment,household',
+            'last_name' => 'required_if:segment,household',
+            'email' => 'required_without:phone_no',
+            'phone_no' => 'required_without:email',
+            // 'password' => 'required',
+            'target_zone_id' => 'required',
+            'target_zone_item_id' => ['required', 'array', 'min:1'],
+            'building_name' => 'required',
+            'floor_no' => 'required',
+            'door_no' => 'required',
+        ], [
+            'sub_package_id' => 'package is required',
+            'target_zone_id' => 'delivery zone is required',
+            'target_zone_item_id' => 'location is required',
         ]);
-        if (request('password')) {
-            if (!preg_match("/[a-z][A-Z]|[A-Z][a-z]/i", $request->password)) 
-                throw ValidationException::withMessages(['password' => 'Password Must Contain Upper and Lowercase letters']);
-            if (!preg_match("/[0-9]/", $request->password)) 
-                throw ValidationException::withMessages(['password' => 'Password Must Contain At Least One Number']);
-            if (!preg_match("/[^A-Za-z 0-9]/", $request->password)) 
-                throw ValidationException::withMessages(['password' => 'Password Must Contain A Symbol']);
-        }
-    
+
+        $input = $request->all();
+        $input['full_name'] = $input['first_name']? "{$input['first_name']} {$input['last_name']}" : '';
+
         try {
-            $this->repository->update($customer, $request->except(['_token', 'ins', 'balance']));
+            $this->repository->update($customer, $input);
+            return new RedirectResponse(route('biller.customers.show', $customer), ['flash_success' => trans('alerts.backend.customers.updated')]);
         } catch (\Throwable $th) {
             return errorHandler('Error Updating Customers', $th);
         }
-
-        return new RedirectResponse(route('biller.customers.show', $customer), ['flash_success' => trans('alerts.backend.customers.updated')]);
     }
 
     /**
@@ -161,11 +186,15 @@ class CustomersController extends Controller
     {
         try {
             $this->repository->delete($customer);
+            return new RedirectResponse(route('biller.customers.index'), ['flash_success' => trans('alerts.backend.customers.deleted')]);
         } catch (\Throwable $th) {
             return errorHandler('Error Deleting Customers', $th);
-        }
-       
-        return new RedirectResponse(route('biller.customers.index'), ['flash_success' => trans('alerts.backend.customers.deleted')]);
+        }       
+    }
+
+    public function customerAgingCluster()
+    {
+        return [];
     }
 
     /**
@@ -178,283 +207,10 @@ class CustomersController extends Controller
     public function show(ManageCustomerRequest $request, Customer $customer)
     {
         $projects = collect();
-
-        $startDate = date('Y-m-d');
-        $endDate = "2000-01-01";
-        $customerBills = $this->repository->agingFilteredBills($customer->id, $startDate);      
-        $aging_cluster = $this->customerAgingCluster($customerBills, $startDate, $endDate);
-        // journal adjustment on aging
-        $aging_cluster = $this->agingJournalAdjustment($customer, $aging_cluster);
-
-        $customer->on_account = $customer->unallocated_amount;
-        $account_balance = array_sum($aging_cluster);
-
-        return new ViewResponse('focus.customers.view', compact('customer', 'aging_cluster', 'account_balance', 'projects'));
-    }
-
-
-    public function agingJournalAdjustment($customer, $aging_cluster) 
-    {
-        return $aging_cluster;
-
-        $journals = Journal::doesntHave('invoice')
-            ->whereHas('items', fn($q) => $q->where('customer_id', $customer->id))
-            ->with(['items' => fn($q) => $q->where('customer_id', $customer->id)])
-            ->get(['id', 'date', 'note', 'debit_ttl', 'credit_ttl']);
-        foreach ($journals as $journal) {
-            $debit = +optional($journal->items->first())->debit;
-            $credit = +optional($journal->items->first())->credit;
-            $secondsDiff = abs(strtotime(date('Y-m-d')) - strtotime($journal->date));
-            $daysDiff = floor($secondsDiff / (60*60*24));
-            if ($debit > 0) {
-                if ($daysDiff >= 0 && $daysDiff <= 30) {
-                    $aging_cluster[0] += $debit;
-                } else if ($daysDiff >= 31 && $daysDiff <= 60) {
-                    $aging_cluster[1] += $debit;
-                } else if ($daysDiff >= 61 && $daysDiff <= 90) {
-                    $aging_cluster[2] += $debit;
-                } else if ($daysDiff >= 91 && $daysDiff <= 120) {
-                    $aging_cluster[3] += $debit;
-                } else if ($daysDiff > 120) {
-                    $aging_cluster[4] += $debit;
-                }
-            } else if ($credit > 0) {
-                $n = count($aging_cluster)-1;
-                while ($n > -1) {
-                    $value = $aging_cluster[$n];
-                    if ($credit <= $value) {
-                        $aging_cluster[$n] -= $credit;
-                        $credit = 0;
-                    } else {
-                        $aging_cluster[$n] -= $value;
-                        $credit -= $value;
-                    }
-                    $n--;
-                }
-            }
-        }
-
-        return $aging_cluster;
-    }
-
-
-    /**
-     * Customer Aging Summary Index Page
-     */
-    public function aging_report()
-    {
-        $customers = Customer::query()
-        ->where(fn($q) => $q->whereHas('invoices')->orWhereHas('deposits'))
-        // ->whereIn('id', [95])
-        ->orderBy('id', 'ASC')
-        ->get()
-        // ;dd($customers->toArray());
-        ->map(function($customer) {
-            $startDate = date('Y-m-d');
-            $endDate = "2000-01-01";
-            $customerBills = $this->repository->agingFilteredBills($customer->id, $startDate);      
-            $agingCluster = $this->customerAgingCluster($customerBills, $startDate, $endDate);
-            // journal adjustment on aging
-            $agingCluster = $this->agingJournalAdjustment($customer, $agingCluster);
-
-            return [
-                'customer' => $customer,
-                'aging_cluster' => $agingCluster,
-                'total_aging' => round(array_sum($agingCluster), 4),
-            ];
-        })
-        ->filter(fn($data) => (bool) round($data['total_aging']));
-
-        // $agingArr = [];
-        // foreach ($customers as $key => $data) {
-        //     $agingArr[$data['customer']['id']] = numberFormat($data['total_aging']);
-        // }
-        // dd($agingArr);
-
-        return new ViewResponse('focus.customers.customer_aging_report', ['customers_data' => $customers]);
-    }
-
-    /**
-     * Customer Aging Summary Filtered
-     */
-    public function get_aging_report(Request $request) {
-        $request->validate(['start_date' => 'required', 'end_date' => 'required']);
-
-        $customers = Customer::query()
-        ->where(fn($q) => $q->whereHas('invoices')->orWhereHas('deposits'))
-        // ->whereIn('id', [214])
-        ->orderBy('id', 'ASC')
-        ->get()
-        // ;dd($customers->toArray());
-        ->map(function($customer) {
-            $startDate = date_for_database(request('start_date'));
-            $endDate = date_for_database(request('end_date'));   
-            $customerBills = $this->repository->agingFilteredBills($customer->id, $startDate);      
-            $agingCluster = $this->customerAgingCluster($customerBills, $startDate, $endDate);
-            // journal adjustment on aging
-            $agingCluster = $this->agingJournalAdjustment($customer, $agingCluster);
-
-            return [
-                'customer' => '<a href="'. route('biller.customers.show', $customer) .'">'.($customer->company ?: $customer->name).'</a>',
-                'aging_cluster' => $agingCluster,
-                'total_aging' => round(array_sum($agingCluster), 4),
-            ];
-        })
-        ->filter(fn($data) => (bool) round($data['total_aging']));
-
-        return response()->json([
-            'customers_data' => $customers->values(),
-        ]);
-    }
-
-    /**
-     * Aging By Customer method
-     */
-    public function customerAgingCluster($bills, $startDate, $endDate)
-    {
-        // 5 date intervals of between 0 - 120+ days prior 
-        $intervals = array();
-        for ($i = 0; $i < 5; $i++) {
-            $from = $startDate;
-            $to = date('Y-m-d', strtotime($from . ' - 30 days'));
-            if ($i > 0) {
-                $prev = $intervals[$i - 1][1];
-                $from = date('Y-m-d', strtotime($prev . ' - 1 day'));
-                $to = date('Y-m-d', strtotime($from . ' - 28 days'));
-            }
-            $intervals[] = [$from, $to];
-        }
-
-        $aging_cluster = array_fill(0, 5, 0);
-        foreach ($bills as $bill) {
-            $due_date = new DateTime($bill->date);
-            $balance = $bill->debit - $bill->credit;
-
-            // Check if due_date is within the given date range
-            if (strtotime($due_date->format('Y-m-d')) <= strtotime($startDate) && strtotime($due_date->format('Y-m-d')) >= strtotime($endDate)) {
-                // Check due_date against each interval
-                foreach ($intervals as $i => $dates) {
-                    // dd($dates[0], $due_date);
-                    $start = $dates[0];
-                    $end = $dates[1];
-                    if (strtotime($start) >= strtotime($due_date->format('Y-m-d')) && strtotime($end) <= strtotime($due_date->format('Y-m-d'))) {
-                        $aging_cluster[$i] += $balance;
-                        break;
-                    }
-                }
-                // If due_date is older than the last interval, categorize it as 120+ days
-                if (strtotime($due_date->format('Y-m-d')) < strtotime($intervals[4][1])) {
-                    $aging_cluster[4] += $balance;
-                }
-            }
-        }
-        return $aging_cluster;
-    }
-
-
-    public function check_limit(Request $request)
-    {
-        $customer = Customer::find($request->customer_id);
-        $invoices = $this->statement_invoices($customer);
-        $aging_cluster = $this->aging_cluster($customer, $invoices);
-        $total_aging = 0;         
-        for ($i = 0; $i < count($aging_cluster); $i++) {
-            $total_aging += $aging_cluster[$i];
-        } 
-        return response()->json([
-            'total_aging' => floatval($total_aging),
-            'outstanding_balance' => floatval($customer->on_account),
-            'credit_limit' => floatval($customer->credit_limit),
-        ]);
-    }
-
-    /**
-     * Customer Statement Invoices
-     */
-    public function statement_invoices($customer)
-    {
-        $invoices = collect();
-        if (!$customer) return $invoices;
-
-        $statement = $this->repository->getStatementForDataTable($customer->id);
-        foreach ($statement as $row) {
-            if ($row->type == 'invoice') $invoices->add($row);
-            else {
-                $last_invoice = $invoices->last();
-                if ($last_invoice->invoice_id == $row->invoice_id) {
-                    $last_invoice->credit += $row->credit;
-                }
-            }
-        }
-
-        return $invoices;
-    }
-    public function statement_invoices_for_mail($customer)
-    {
-        $invoices = collect();
-        $statement = $this->repository->getStatementForMail($customer->id);
-        foreach ($statement as $row) {
-            if ($row->type == 'invoice') $invoices->add($row);
-            else {
-                $last_invoice = $invoices->last();
-                if ($last_invoice->invoice_id == $row->invoice_id) {
-                    $last_invoice->credit += $row->credit;
-                }
-            }
-        }
-
-        return $invoices;
-    }
-
-
-    /**
-     * Aging report from customer statement invoices
-     */
-    public function aging_cluster($customer, $invoices)
-    {
-        // 5 date intervals of between 0 - 120+ days prior 
-        $intervals = array();
-        for ($i = 0; $i < 5; $i++) {
-            $from = date('Y-m-d');
-            $to = date('Y-m-d', strtotime($from . ' - 30 days'));
-            if ($i > 0) {
-                $prev = $intervals[$i-1][1];
-                $from = date('Y-m-d', strtotime($prev . ' - 1 day'));
-                $to = date('Y-m-d', strtotime($from . ' - 28 days'));
-            }
-            $intervals[] = [$from, $to];
-        }
-
-        // aging balance from extracted invoices
-        $aging_cluster = array_fill(0, 5, 0);
-        $agingClusterArr = [];
-        foreach ($invoices as $invoice) {
-            $invoiceDate = new DateTime($invoice->date);
-            $invoiceBalance = floatval($invoice->debit) - floatval($invoice->credit);
-            // over payment
-            if ($invoiceBalance < 0) {
-                // $customer->on_account += $invoiceBalance * -1;
-                $invoiceBalance = 0;
-            }
-            // due_date between 0 - 120 days
-            foreach ($intervals as $i => $dates) {
-                $start  = new DateTime($dates[0]);
-                $end = new DateTime($dates[1]);
-                if ($start >= $invoiceDate && $end <= $invoiceDate) {
-                    $aging_cluster[$i] += $invoiceBalance;
-                    // $dateKey = "{{$dates[1]} to $dates[0]}";
-                    // $agingClusterArr[$dateKey][] = $invoice;
-                    break;
-                }
-            }
-            // due_date in 120+ days
-            if ($invoiceDate < new DateTime($intervals[4][1])) {
-                $aging_cluster[4] += $invoiceBalance;
-                // $agingClusterArr["< {$intervals[4][1]}"][] = $invoice;
-            }
-        }
-        // dd($aging_cluster, $agingClusterArr);
-        return $aging_cluster;
+        $aging_cluster = [];
+        $account_balance = $customer->paymentReceipts->sum(fn($v) => $v->debit - $v->credit);
+        
+        return view('focus.customers.view', compact('customer', 'projects', 'aging_cluster', 'account_balance'));
     }
 
     /**

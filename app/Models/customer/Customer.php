@@ -65,18 +65,26 @@ class Customer extends Model
     {
         parent::boot();
 
-        if (auth()->id()) {
-            static::creating(function ($model) {
-                $model->tid = Customer::max('tid')+1;
+        static::creating(function ($model) {
+            $model->tid = Customer::max('tid')+1;
+            if (auth()->id()) {
                 $model->created_by = auth()->id();
-                return $model;
-            });
+            }
+            return $model;
+        });
 
-            static::updating(function ($model) {
+        static::updating(function ($model) {
+            if (auth()->id()) {
                 $model->updated_by = auth()->id();
-                return $model;
-            });
-        }        
+            }            
+            return $model;
+        });
+           
+        static::addGlobalScope('ins', function ($builder) {
+            if (isset(auth()->user()->ins)) {
+                $builder->where('ins', auth()->user()->ins);
+            }
+        });       
     }
 
     /**

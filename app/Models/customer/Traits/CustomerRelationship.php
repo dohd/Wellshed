@@ -9,6 +9,8 @@ use App\Models\promotions\CustomersPromoCodeReservation;
 use App\Models\branch\Branch;
 use App\Models\client_product\ClientProduct;
 use App\Models\currency\Currency;
+use App\Models\customer\CustomerAddress;
+use App\Models\hrm\Hrm;
 use App\Models\invoice_payment\InvoicePayment;
 use App\Models\job_valuation\JobValuation;
 use App\Models\lead\Lead;
@@ -32,6 +34,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 trait CustomerRelationship
 {
+    public function mainAddress()
+    {
+        return $this->hasOneThrough(CustomerAddress::class, CustomerZoneItem::class, 'customer_id', 'id', 'id', 'customer_address_id')
+        ->withoutGlobalScopes();
+    } 
+
+    public function hrm()
+    {
+        return $this->hasOne(Hrm::class);
+    } 
+
     public function paymentReceipts() 
     {
         return $this->hasMany(PaymentReceipt::class);

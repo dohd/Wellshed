@@ -28,7 +28,7 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link h4 pt-1" id="active-tab3" data-toggle="tab" href="#active3" aria-controls="active3" role="tab">
-                                Meta WhatsApp Config
+                                WhatsApp Meta Config
                             </a>
                         </li>
                     </ul>
@@ -375,7 +375,7 @@
                             </div>
                         </div>
 
-                        <!-- Meta Whatsapp config -->
+                        <!-- Whatsapp Meta config -->
                         <div class="tab-pane in" id="active3" aria-labelledby="active-tab3" role="tabpanel">
                             <div class="row">
                                 <div class="col-md-8">

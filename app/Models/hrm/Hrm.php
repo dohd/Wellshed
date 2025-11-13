@@ -68,12 +68,16 @@ class Hrm extends Model
     {
         parent::boot();
 
-        if (auth()->id()) {
-            static::creating(function ($model) {
-                $model->tid = Hrm::max('tid')+1;
-                return $model;
-            });            
-        }
+        static::creating(function ($model) {
+            $model->tid = Hrm::max('tid')+1;
+            return $model;
+        }); 
+
+        static::addGlobalScope('ins', function ($builder) {
+            if (isset(auth()->user()->ins)) {
+                $builder->where('ins', auth()->user()->ins);
+            }
+        });    
     }
     /**
      * Set password attribute.

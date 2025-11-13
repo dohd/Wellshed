@@ -14,7 +14,6 @@
                                         <h6 class="card-subtitle line-on-side text-muted text-center font-small-3 pt-2">
                                             <span>Registration Details</span>
                                         </h6>
-
                                         <form class="form-horizontal" method="POST" action="{{ route('crm.register') }}" id="registerForm">
                                             {{ csrf_field() }}
 

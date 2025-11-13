@@ -1,5 +1,4 @@
 @extends ('core.layouts.app')
-
 @section ('title', trans('labels.backend.customers.management') . ' | ' . trans('labels.backend.customers.edit'))
 
 @section('content')
