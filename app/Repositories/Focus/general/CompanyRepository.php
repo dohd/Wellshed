@@ -62,7 +62,7 @@ class CompanyRepository extends BaseRepository
         if (@$data['stamp']) $data['stamp'] = $this->uploadPicture($input['data']['stamp'], $this->file_picture_path);
 
         DB::beginTransaction();
-
+        // dd($data);
         $company = auth()->user()->business;
         $result = $company->update($data);
 

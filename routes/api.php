@@ -18,10 +18,15 @@ use App\Http\Controllers\Focus\quote\QuoteBudgetController;
 use App\Http\Controllers\Focus\quote\QuotesController;
 use App\Http\Controllers\Focus\rfq\RfQController;
 use App\Http\Controllers\Focus\sale_agent\SaleAgentsController;
-use GuzzleHttp\Client;
+use App\Http\Controllers\Focus\whatsapp\WhatsappWebhookController;
+
 
 // DigiTax Callback
 Route::post('digitax/validation_cb', [DigitaxController::class, 'validationCb'])->name('digitax.validation_cb');
+
+// Meta whatsapp webhook
+Route::get('meta_whatsapp_webhook', [WhatsappWebhookController::class, '__invoke']);
+Route::post('meta_whatsapp_webhook', [WhatsappWebhookController::class, '__invoke']); 
 
 // Omniconvo Whatsapp Routes
 Route::post('whatsapp_broadcasts/report', [MediaBlocksController::class, 'whatsappBroadcastReport'])->name('api.whatsapp_broadcast.report');
