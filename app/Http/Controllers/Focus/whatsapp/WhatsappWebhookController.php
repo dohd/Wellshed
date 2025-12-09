@@ -20,21 +20,22 @@ class WhatsappWebhookController extends Controller
         $business = Company::whereNotNull('whatsapp_verify_token')->first();
         if ($request->isMethod('get')) {
             $verifyToken = optional($business)->whatsapp_verify_token;
-            $mode = $request->input('hub_mode');
-            $token = $request->input('hub_verify_token');
-            $challenge = $request->input('hub_challenge');
+            $mode = $request->get('hub_mode');
+            $token = $request->get('hub_verify_token');
+            $challenge = $request->get('hub_challenge');
 
             if ($mode === 'subscribe' && $verifyToken === $token) {
                 return response($challenge, 200);
-            } else {
-                return response('Forbidden', 403);
-            }
+            } 
+            
+            \Log::error('Invalid verify token: ' . $token);
+            return response('Invalid verify token', 403);
         }
 
         // incoming messages
         if ($request->isMethod('post')) {
             $data = $request->all();
-            \Log::info("whatsapp-webhook: " . json_encode($data));
+            \Log::info("whatsapp webhook payload: " . json_encode($data));
             return response()->json($data);
         }
     }
