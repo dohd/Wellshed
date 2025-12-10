@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Focus\whatsapp;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ViewResponse;
+use App\Models\Company\Company;
 use Exception;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
@@ -68,7 +69,7 @@ class WhatsappController extends Controller
         $input['name'] = trim($input['name']);
         
         try {
-            $business = optional(auth()->user()->business);
+            $business = Company::where('is_main', 1)->first() ?? optional(auth()->user())->business;
             $url = $business->graph_api_url .  "/{$business->whatsapp_business_account_id}";
             $token = $business->whatsapp_access_token;
 
@@ -262,7 +263,7 @@ class WhatsappController extends Controller
                 }                
             }
 
-            $business = optional(auth()->user()->business);
+            $business = Company::where('is_main', 1)->first() ?? optional(auth()->user())->business;
             $url = $business->graph_api_url . "/{$business->whatsapp_phone_no_id}";
             $token = $business->whatsapp_access_token;
 

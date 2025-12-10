@@ -17,6 +17,8 @@ use App\Http\Requests\Focus\customer\EditCustomerRequest;
 use App\Jobs\SendCustStatementJob;
 use App\Models\Company\Company;
 use App\Models\manualjournal\Journal;
+use App\Models\orders\Orders;
+use App\Models\payment_receipt\PaymentReceipt;
 use App\Models\project\Project;
 use App\Models\subpackage\SubPackage;
 use App\Models\target_zone\TargetZone;
@@ -376,5 +378,28 @@ class CustomersController extends Controller
         } catch (\Throwable $th) {
             return response()->json(['status' => 'error', 'message' => $th->getMessage()], 500);
         }
+    }
+
+    public function show_form($customer_id){
+        $customer = Customer::findOrFail($customer_id);
+        $balance = PaymentReceipt::where('customer_id', $customer->id)->selectRaw('SUM(credit-debit) total')->value('total');
+        $receipts = PaymentReceipt::where('customer_id', $customer->id)->latest()->get();
+
+        $subscription = $customer->subscription;
+        $subscrPlan = optional($customer->subscription->package);
+        if ($subscription->status !== 'active') $subscrPlan = null;
+
+        $charges = PaymentReceipt::where('customer_id', $customer->id)
+        ->where('entry_type', 'debit')
+        ->get(['id', 'tid', 'notes', 'amount'])
+        ->map(function($v) {
+            $v->tid = gen4tid('RCPT-', $v->tid);
+            return $v;
+        });
+
+        $isRecur = Orders::where('customer_id', $customer->id)
+            ->where('order_type', 'recurring')
+            ->doesntExist();
+        return view('focus.customers.show_form', compact('isRecur', 'balance', 'receipts', 'customer', 'subscrPlan', 'charges', 'subscription'));
     }
 }

@@ -21,6 +21,7 @@
                         <select name="type" id="editType" class="form-control" disabled>
                             <option value="">---select type of task---</option>
                             <option value="dispatch_notification">Dispatch Notification</option>
+                            <option value="subscription">Subscription Notification</option>
                             
                         </select>
                     </div>

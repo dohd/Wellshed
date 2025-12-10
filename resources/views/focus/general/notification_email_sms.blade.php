@@ -23,6 +23,7 @@
                                     <select name="type" id="type" class="form-control">
                                         <option value="">---select type of task---</option>
                                         <option value="dispatch_notification">Dispatch Notification</option>
+                                        <option value="subscription">Subscription Notification</option>
                                         
                                     </select>
                                 </div>
@@ -123,6 +124,7 @@
                                             }
                                             $types = [
                                                 'dispatch_notification'     => 'Dispatch Notification',
+                                                'subscription'              => 'Subscription Notification',
                                                 
                                             ];
 
@@ -214,7 +216,7 @@
                     $('#editEmail').val(email);
                     $('#editSms').val(sms);
                     const specificTypes = [
-                        'dispatch_notification'
+                        'dispatch_notification','subscription'
                     ];
 
                     if (specificTypes.includes(type)) {
@@ -276,7 +278,7 @@
                 $('#type').change(function () {
                     const type = $(this).val();
                     const userTypes = [
-                        'dispatch_notification'
+                        'dispatch_notification','subscription'
                     ];
 
                     if (userTypes.includes(type)) {

@@ -2,15 +2,20 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Focus\message_template\MessageTemplatesController;
+use App\Models\Company\RecipientSetting;
 use App\Models\customer\Customer;
+use App\Models\message_template\MessageTemplate;
 use App\Models\send_email\SendEmail;
 use App\Models\subscription\Subscription;
 use App\Repositories\AdvantaSmsService;
 use App\Repositories\Focus\general\RosemailerRepository;
+use App\Repositories\Focus\message_template\MessageTemplateRepository;
 use App\Services\SmsService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class NotifySubscriptionExpiry extends Command
 {
@@ -23,7 +28,7 @@ class NotifySubscriptionExpiry extends Command
     {
         $tz = config('app.timezone', 'Africa/Nairobi');
         $today = Carbon::today($tz);
-        $tMinus3 = (clone $today)->addDays(3);
+        $tMinus3 = (clone $today)->addDays(7);
 
         $dry = (bool) $this->option('dry');
 
@@ -80,10 +85,10 @@ class NotifySubscriptionExpiry extends Command
                     $emailSubject = 'Your subscription expires in 3 days';
                     $emailBody = "Hello {$customerName},\n\n"
                         . "This is a friendly reminder that your subscription (Package: {$packageName}) "
-                        . "will expire in 3 days on {$endDateStr}.\n\n"
+                        . "will expire in 7 days on {$endDateStr}.\n\n"
                         . "Kindly renew to avoid service interruption.\n\n"
                         . "Thank you.";
-                    $smsText = "Hi {$customerName}, your subscription ({$packageName}) expires in 3 days on {$endDateStr}. Please renew to avoid interruption.";
+                    $smsText = "Hi {$customerName}, your subscription ({$packageName}) expires in 7 days on {$endDateStr}. Please renew to avoid interruption.";
                 } else {
                     $emailSubject = 'Your subscription has expired';
                     $emailBody = "Hello {$customerName},\n\n"
@@ -105,15 +110,17 @@ class NotifySubscriptionExpiry extends Command
 
                 DB::beginTransaction();
                 try {
+                    $setting = RecipientSetting::withoutGlobalScopes()->where(['type' => 'subscription'])->first();
                     // Send SMS
-                    if ($customerPhone) {
+                    if ($customerPhone && $setting && $setting->sms == 'yes') {
                         /** @var AdvantaSmsService $smsService */
                         $smsService = app(AdvantaSmsService::class);
                         $smsService->send($customerPhone, $smsText);
+                        $this->send_whatsapp($customerPhone,$customer, $customerName, $packageName, $endDateStr,$mode);
                     }
 
                     // Send Email
-                    if ($customerEmail && $tenantId) {
+                    if ($customerEmail && $tenantId && $setting && $setting->email == 'yes') {
                         $email_input = [
                             'text'    => $emailBody,
                             'subject' => $emailSubject,
@@ -163,4 +170,41 @@ class NotifySubscriptionExpiry extends Command
 
         return compact('sent', 'skipped');
     }
+
+    public function send_whatsapp($phone_number, $customer, $customerName, $packageName, $endDateStr, $mode)
+    {
+        // Determine template
+        $message_temp = '';
+        if ($mode == 'expiring') {
+            $message_temp = MessageTemplate::where('type', 'subscription_expiring')->first();
+        } else {
+            $message_temp = MessageTemplate::where('type', 'subscription_expired')->first();
+        }
+
+        if ($message_temp && $message_temp->template_id) {
+
+            // Create payment link (customer subscription view with Pay button)
+            $payment_link = route('crm.customer.subscription.view', $customer->id);
+
+            // Variables used inside the template
+            $variables = [
+                $customerName,
+                $packageName,
+                $endDateStr,
+                $payment_link // <-- added payment link as new variable
+            ];
+
+            $what_data = [
+                'template_id' => $message_temp->template_id,
+                'variable'   => $variables,
+                'phone'      => $phone_number
+            ];
+
+            $what_request_data = new Request($what_data);
+            $repository = new MessageTemplateRepository;
+            $message_template = new MessageTemplatesController($repository);
+            $message_template->getTemplateVariables($what_request_data);
+        }
+    }
+
 }

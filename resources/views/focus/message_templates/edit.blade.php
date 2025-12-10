@@ -57,3 +57,89 @@
         </div>
     </div>
 @endsection
+@section('after-scripts')
+{{ Html::script('focus/js/select2.min.js') }}
+<script>
+    const config = {
+        ajax: { 
+            headers: { 
+                'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                'Authorization': "Bearer {{ $business->whatsapp_access_token }}",
+            } 
+        },
+        date: {format: "{{ config('core.user_date_format') }}", autoHide: true},
+        spinner: '<div class="text-center"><span class="font-large-1"><i class="fa fa-spinner spinner"></i></span></div>',
+    };
+
+    const Index = {
+        business: @json($business),
+        selectedTemplate: "{{ $message_template->template_id ?? '' }}", // ✅ preselect on edit
+
+        init() {
+            $.ajaxSetup(config.ajax);
+            $('#mediaBlocksSelect').select2({ allowClear: true });
+            $('#mediaBlocksSelect').change(Index.templateChange);
+            $('#type').change(Index.typeChange);
+            Index.drawDataToSelect();
+            Index.typeChange();
+        },
+        typeChange(){
+            const type = $('#type').val();
+            if(type){
+                $('#mediaBlocksSelect').attr('disabled',false);
+            }else $('#mediaBlocksSelect').attr('disabled',true);
+        },
+
+        templateChange() {
+            let template_id = $(this).val();
+            $('#text_message').attr('readonly',true);
+            $.ajax({
+                url: "{{ route('biller.message_templates.get_whatapp_temps') }}",
+                method: "POST",
+                data: {
+                    template_id: template_id
+                },
+                success: function(response) {
+                    let bodyText = response.template.components[0].text;
+                    $('#text_message').val(bodyText);
+                }
+            })
+        },
+
+        drawDataToSelect() {
+            // clear previous options
+            $('#mediaBlocksSelect').empty();
+
+            const business = Index.business;
+            const url = `${business.graph_api_url}/${business.whatsapp_business_account_id}/message_templates`;
+
+            $.get(url)
+                .then(({ data }) => {
+                    if (data.length) {
+                        // Add a default placeholder option
+                        $('#mediaBlocksSelect').append('<option value="">-- Select Template --</option>');
+
+                        data.forEach((v) => {
+                            let isSelected = (v.id === Index.selectedTemplate) ? 'selected' : '';
+                            $('#mediaBlocksSelect').append(`
+                                <option value="${v.id}" ${isSelected}>
+                                    ${v.name} (${v.status ? 'Approved' : 'Rejected'}) - ${v.category}
+                                </option>
+                            `);
+                        });
+
+                        // ✅ ensure Select2 UI updates on edit
+                        if (Index.selectedTemplate) {
+                            $('#mediaBlocksSelect').val(Index.selectedTemplate).trigger('change');
+                        }
+                    }
+                })
+                .fail((xhr, status, err) => {
+                    console.log(err);
+                });
+        }
+    };
+
+    $(() => Index.init());
+</script>
+@endsection
