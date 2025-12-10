@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Focus\customer\CustomersController;
 
 Route::group(['namespace' => 'Crm', 'prefix' => 'crm', 'as' => 'crm.'], function () {
     Route::get('', 'CustomerLogin@showLoginForm')->name('login');
@@ -12,6 +13,9 @@ Route::group(['namespace' => 'Crm', 'prefix' => 'crm', 'as' => 'crm.'], function
     Route::post('password/email', 'ForgotPasswordController@sendResetLinkEmail')->name('password.email');
     Route::get('password/reset/{token}', 'ResetPasswordController@showResetForm')->name('password.reset.form');
     Route::post('password/reset', 'ResetPasswordController@reset')->name('password.reset');
+
+    Route::get('/customer/subscription/{id}', [CustomersController::class, 'show_form'])
+    ->name('customer.subscription.view');
     /*
      _  crm profile routes
      */

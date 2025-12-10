@@ -262,6 +262,7 @@ Route::group(['namespace' => 'import_request'], function () {
     Route::post('import_requests/get', 'ImportRequestsTableController')->name('import_requests.get');
 });
 Route::group(['namespace' => 'message_template'], function () {
+    Route::post('message_templates/get_whatapp_temps', 'MessageTemplatesController@getTemplateVariables')->name('message_templates.get_whatapp_temps');
     Route::resource('message_templates', 'MessageTemplatesController');
     //For Datatable
     Route::post('message_templates/get', 'MessageTemplatesTableController')->name('message_templates.get');

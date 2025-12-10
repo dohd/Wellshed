@@ -19,13 +19,16 @@ namespace App\Http\Controllers\Focus\message_template;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Focus\whatsapp\WhatsappController;
 use App\Http\Responses\RedirectResponse;
 use App\Http\Responses\ViewResponse;
 use App\Http\Responses\Focus\message_template\CreateResponse;
 use App\Http\Responses\Focus\message_template\EditResponse;
+use App\Models\Company\Company;
 use App\Models\message_template\MessageTemplate;
 use App\Models\tenant\Tenant;
 use App\Repositories\Focus\message_template\MessageTemplateRepository;
+use GuzzleHttp\Client;
 
 /**
  * MessageTemplatesController
@@ -66,7 +69,8 @@ class MessageTemplatesController extends Controller
      */
     public function create()
     {
-        return view('focus.message_templates.create');
+        $business = auth()->user()->business;
+        return view('focus.message_templates.create',compact('business'));
     }
 
     /**
@@ -101,7 +105,8 @@ class MessageTemplatesController extends Controller
      */
     public function edit(MessageTemplate $message_template)
     {
-        return view('focus.message_templates.edit', compact('message_template'));
+        $business = auth()->user()->business;
+        return view('focus.message_templates.edit', compact('message_template','business'));
     }
 
     /**
@@ -159,5 +164,110 @@ class MessageTemplatesController extends Controller
         //returning with successfull message
         return new ViewResponse('focus.message_templates.view', compact('message_template'));
     }
+
+    function extractTemplateVariables(array $templateJson, array $values = [], $phoneNo = null)
+    {
+        $variableTypes = [];
+        $variables     = [];
+
+        foreach ($templateJson["components"] as $component) {
+            if ($component["type"] === "BODY" && isset($component["text"])) {
+                preg_match_all('/\{\{(\d+|\w+)\}\}/', $component["text"], $matches);
+
+                foreach ($matches[0] as $index => $match) {
+                    $variableTypes[] = "body";
+                    $variables[]     = $values[$index] ?? null;
+                }
+            }
+
+            if ($component["type"] === "HEADER" && isset($component["text"])) {
+                preg_match_all('/\{\{(\d+|\w+)\}\}/', $component["text"], $matches);
+
+                foreach ($matches[0] as $index => $match) {
+                    $variableTypes[] = "header";
+                    $variables[]     = $values[$index] ?? null;
+                }
+            }
+
+            if ($component["type"] === "BUTTONS" && isset($component["buttons"])) {
+                foreach ($component["buttons"] as $btnIndex => $button) {
+                    if (!empty($button["text"])) {
+                        preg_match_all('/\{\{(\d+|\w+)\}\}/', $button["text"], $matches);
+
+                        foreach ($matches[0] as $index => $match) {
+                            $variableTypes[] = "button_text";
+                            $variables[]     = $values[$index] ?? null;
+                        }
+                    }
+
+                    if (!empty($button["url"])) {
+                        preg_match_all('/\{\{(\d+|\w+)\}\}/', $button["url"], $matches);
+
+                        foreach ($matches[0] as $index => $match) {
+                            $variableTypes[] = "button_url";
+                            $variables[]     = $values[$index] ?? null;
+                        }
+                    }
+                }
+            }
+        }
+
+        return [
+            "template_name" => $templateJson["name"] ?? null,
+            "template_id"   => $templateJson["id"] ?? null,
+            "phone_no"      => $phoneNo,
+            "variable_type" => $variableTypes,
+            "variable"      => $variables,
+            // 'button_type'   => ['url'],
+        ];
+    }
+
+
+    public function getWhatsappTemplates($business)
+    {
+        $client = new Client();
+
+        $url = "{$business->graph_api_url}/{$business->whatsapp_business_account_id}/message_templates";
+
+        $response = $client->request('GET', $url, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $business->whatsapp_access_token,
+                'Accept'        => 'application/json',
+            ],
+            'query' => [
+                'limit' => 50, // optional
+            ],
+        ]);
+
+        $body = json_decode($response->getBody()->getContents(), true);
+
+        return $body['data'] ?? [];
+    }
+
+    public function getTemplateVariables(Request $request)
+    {
+        $templateId = $request->input('template_id');
+        $phone = $request->input('phone');
+        $values = $request->input('variable',[]);
+        $business = Company::find(2) ?? optional(auth()->user()->business);// adjust this to your app
+
+        $templates = $this->getWhatsappTemplates($business);
+
+        $selected = collect($templates)->firstWhere('id', $templateId);
+
+        if (!$selected) {
+            return response()->json(['error' => 'Template not found'], 404);
+        }
+        $result = $this->extractTemplateVariables($selected,$values,$phone);
+
+        $whatsapp = new WhatsappController;
+        $what_request_data = new Request($result);
+        $whatsapp->messages_store($what_request_data);
+        return response()->json([
+            'template'  => $selected,
+            'variables' => $result
+        ]);
+    }
+
 
 }
