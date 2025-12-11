@@ -206,7 +206,7 @@
                             </select>
                         </div>
 
-                        @if (!$isRecur && $subscrPlan)
+                        @if (!$isRecur)
                             <div class="form-group mb-2">
                                 <label for="serviceFee" class="font-weight-semibold">One-time Service Fee <span
                                         class="text-danger">*</span></label>

@@ -387,7 +387,7 @@ class CustomersController extends Controller
 
         $subscription = $customer->subscription;
         $subscrPlan = optional($customer->subscription->package);
-        if ($subscription->status !== 'active') $subscrPlan = null;
+        // if ($subscription->status !== 'active') $subscrPlan = null;
 
         $charges = PaymentReceipt::where('customer_id', $customer->id)
         ->where('entry_type', 'debit')
