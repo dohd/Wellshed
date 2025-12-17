@@ -11,6 +11,8 @@ Route::get('login', 'Focus\general\CoreController@showLoginForm')->middleware('i
 // Route::get('login', 'Focus\general\CoreController@showLoginForm')->name('login');
 
 Route::group(['namespace' => 'Focus', 'as' => 'biller.'], function () {
+    Route::get('register_login', 'general\CoreController@showLoginForm')->name('register_login');
+    
     //publicUserLoggedOut
     Route::get('', 'general\CoreController@showLoginForm')->name('index');
     Route::post('login', 'general\CoreController@login')->name('login');

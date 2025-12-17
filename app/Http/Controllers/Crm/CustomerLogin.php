@@ -66,7 +66,7 @@ class CustomerLogin extends Controller
             $targetzones = TargetZone::with('items')->get();
             return view('crm.register', compact('subpackages', 'targetzones'));
         }
-        // dd($request->all());
+        
         $request->validate([
             'sub_package_id' => 'required',
             'segment' => 'required',
@@ -151,8 +151,8 @@ class CustomerLogin extends Controller
             // debit charge for the subscription plan 
             $package = SubPackage::findOrFail(request('sub_package_id'));
             $amount = $package->price + $package->onetime_fee;
-            $notes = stripos($package->name, 'Plan') !== false? 
-                $package->name : "{$package->name} Plan";
+            $notes = "{$package->name} Plan";
+            if (stripos($package->name, 'Plan') !== false) $notes = $package->name;
             $receipt = PaymentReceipt::create([
                 'entry_type' => 'debit',
                 'customer_id' => $customer->id,
@@ -168,9 +168,7 @@ class CustomerLogin extends Controller
 
             if ($user) NotifyCustomerRegistration::dispatch($user,$input['password'],$ins);
 
-            return redirect()
-                ->route('login')
-                ->with(['flash_success' => 'Registration Successful']);
+            return redirect()->route('biller.register_login')->with(['flash_success' => 'Registration Successful']);
         } catch (\Exception $e) {
             return errorHandler('Registration Error: Please contact admin', $e);            
         }
