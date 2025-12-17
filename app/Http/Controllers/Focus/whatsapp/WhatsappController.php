@@ -210,6 +210,9 @@ class WhatsappController extends Controller
         return new ViewResponse('focus.whatsapp.messages', compact('business'));
     }
 
+    /**
+     *  Messages Data table
+     * **/
     public function messagesDataTable()
     {
         $q = MetaWhatsappThread::whereNotNull('status');
@@ -220,6 +223,9 @@ class WhatsappController extends Controller
             ->editColumn('status', function($q) {
                 if ($q->status === 'read') {
                     return '<span class="badge bg-primary">'. $q->status .'</span>';
+                }
+                if ($q->status === 'sent') {
+                    return '<span class="badge bg-warning">'. $q->status .'</span>';
                 }
                 return '<span class="badge bg-secondary">'. $q->status .'</span>';
             })
@@ -334,8 +340,6 @@ class WhatsappController extends Controller
                     ];
                 }
             }
-
-            // dd($jsonData);
         
             $client = new \GuzzleHttp\Client();
             $promise = $client->postAsync($url . '/messages', [
@@ -373,7 +377,7 @@ class WhatsappController extends Controller
                 // Try to decode JSON error message
                 $errorData = json_decode($errorBody, true);
                 $msg = $errorData['error']['error_data']['details'] ?? $errorData['error']['message'];
-                Log::error($errorData['error']);
+                Log::error('whatsapp-payload posting error: ' . $errorData['error']);
                 return response()->json([
                     'status' => 'Error', 
                     'message' => $msg,
@@ -382,7 +386,7 @@ class WhatsappController extends Controller
 
             return response()->json([
                 'status' => 'Error', 
-                'message' => 'Error posting message! Please try again later or contact system admin',
+                'message' => 'Error posting whatsapp message',
             ], 500);
         }
     }
