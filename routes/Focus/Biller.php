@@ -457,6 +457,7 @@ Route::group(['namespace' => 'whatsapp'], function () {
     Route::get('whatsapp/messages', 'WhatsappController@messages')->name('whatsapp.messages.index');
     Route::get('whatsapp/messages/create', 'WhatsappController@messages_create')->name('whatsapp.messages.create');
     Route::post('whatsapp/messages/store', 'WhatsappController@messages_store')->name('whatsapp.messages.store');
+    Route::post('whatsapp/statuses', 'WhatsappController@messagesDataTable')->name('whatsapp_statuses.get');
 });
 
 Route::group(['namespace' => 'ai'], function () {

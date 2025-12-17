@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Focus\whatsapp;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ViewResponse;
 use App\Models\Company\Company;
+use App\Models\meta_whatsapp\MetaWhatsappThread;
+use Carbon\Carbon;
 use Exception;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
 use Log;
 use Validator;
+use Yajra\DataTables\Facades\DataTables;
 
 class WhatsappController extends Controller
 {
@@ -205,6 +208,25 @@ class WhatsappController extends Controller
     {
         $business = auth()->user()->business;
         return new ViewResponse('focus.whatsapp.messages', compact('business'));
+    }
+
+    public function messagesDataTable()
+    {
+        $q = MetaWhatsappThread::whereNotNull('status');
+
+        return DataTables::of($q)
+            ->escapeColumns(['id'])
+            ->addIndexColumn()
+            ->editColumn('status', function($q) {
+                if ($q->status === 'read') {
+                    return '<span class="badge bg-primary">'. $q->status .'</span>';
+                }
+                return '<span class="badge bg-secondary">'. $q->status .'</span>';
+            })
+            ->editColumn('timestamp', function($q) {
+                return Carbon::createFromTimestamp($q->timestamp);
+            })
+            ->make(true);
     }
 
     /**

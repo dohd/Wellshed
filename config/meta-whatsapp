@@ -1,0 +1,43 @@
+<?php
+return [
+	// Webhook payload
+	"webhook_payload" => [
+	    "object" => "whatsapp_business_account",
+	    "entry" => [
+	        [
+	            "id" => "1146181001002020",
+	            "changes" => [
+	                [
+	                    "value" => [
+	                        "messaging_product" => "whatsapp",
+	                        "metadata" => [
+	                            "display_phone_number" => "254710100100",
+	                            "phone_number_id" => "890281001002020"
+	                        ],
+	                        "contacts" => [
+	                            [
+	                                "profile" => [
+	                                    "name" => "@Tonito"
+	                                ],
+	                                "wa_id" => "254710100100"
+	                            ]
+	                        ],
+	                        "messages" => [
+	                            [
+	                                "from" => "254710100100",
+	                                "id" => "wamid.JdlaljdLjsdskYY",
+	                                "timestamp" => "1765262853",
+	                                "text" => [
+	                                    "body" => "Good morning,  how are you?"
+	                                ],
+	                                "type" => "text"
+	                            ]
+	                        ]
+	                    ],
+	                    "field" => "messages"
+	                ]
+	            ],
+	        ],
+	    ],
+	],
+];
