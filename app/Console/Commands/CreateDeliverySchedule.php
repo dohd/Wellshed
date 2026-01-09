@@ -38,7 +38,6 @@ class CreateDeliverySchedule extends Command
                     ? Carbon::parse($activeSubscription->end_date)->endOfDay()
                     : $today->copy()->addMonths($this->generationWindowMonths)->endOfMonth();
 
-                Log::info("Processing Order ID {$order->id}: Start {$startDate->toDateString()} - End {$endDate->toDateString()}");
 
                 if ($startDate->gt($endDate)) {
                     Log::warning("Skipping Order ID {$order->id} because start date is after end date.");
@@ -53,7 +52,6 @@ class CreateDeliverySchedule extends Command
                     $locationsMap = $this->safeAssoc($freq->locations_for_days);
                     $qtyPerDay    = $this->safeAssoc($freq->qty_per_day);
 
-                    Log::info("Order ID {$order->id}, Frequency: {$frequency}, Days: " . json_encode($deliveryDays) . ", Weeks: " . json_encode($weekNumbers));
 
                     switch ($frequency) {
                         case 'daily':
@@ -76,7 +74,6 @@ class CreateDeliverySchedule extends Command
             }
 
             DB::commit();
-            Log::info("✅ Delivery schedules generated successfully for all orders.");
             $this->info('✅ Delivery schedules generated successfully');
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -96,7 +93,6 @@ class CreateDeliverySchedule extends Command
 
             $qty = intval($qtyPerDay[$dayName] ?? 0);
             if ($qty > 0) {
-                Log::info("Creating DAILY schedule: Order ID {$order->id}, Date {$date->toDateString()}, Qty {$qty}");
                 $this->createSchedule($order, $freq, $date, $locationId, $qty);
             }
 
@@ -117,7 +113,6 @@ class CreateDeliverySchedule extends Command
 
                 // dd($dayNameFull,$qty);
                 if ($qty > 0) {
-                    Log::info("Creating WEEKLY schedule: Order ID {$order->id}, Date {$date->toDateString()}, Qty {$qty}");
                     $this->createSchedule($order, $freq, $date, $locationId, $qty);
                 }
             }
@@ -142,7 +137,6 @@ class CreateDeliverySchedule extends Command
 
 
                         if ($weekQty > 0) {
-                            Log::info("Creating CUSTOM schedule: Order ID {$order->id}, Date {$targetDate->toDateString()}, Week {$weekNum}, Qty {$weekQty}");
                             $this->createSchedule($order, $freq, $targetDate, $locationId, $weekQty);
                         }
                     }
@@ -186,7 +180,6 @@ class CreateDeliverySchedule extends Command
 
         if ($items) {
             DeliveryScheduleItem::insert($items);
-            Log::info("Inserted " . count($items) . " schedule items for Order ID {$order->id} on {$date->toDateString()}");
         }
     }
 
