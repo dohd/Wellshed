@@ -71,7 +71,7 @@ class PaymentReceipt extends Model
             $builder->whereNull('deleted_at');
         });
 
-        static::addGlobalScope('payment_method', function ($builder) {
+        static::addGlobalScope('mpesa_ref_check', function ($builder) {
             $builder->where(function($q) {
                 $q->where('payment_method', '!=', 'mpesa')
                 ->orWhere(function($q) {
