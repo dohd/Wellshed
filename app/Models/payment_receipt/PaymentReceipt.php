@@ -72,9 +72,11 @@ class PaymentReceipt extends Model
         });
 
         static::addGlobalScope('payment_method', function ($builder) {
-            $builder->where('payment_method', '!=', 'mpesa')
-            ->orWhere(function($q) {
-                $q->where('payment_method', 'mpesa')->whereNotNull('mpesa_ref');
+            $builder->where(function($q) {
+                $q->where('payment_method', '!=', 'mpesa')
+                ->orWhere(function($q) {
+                    $q->where('payment_method', 'mpesa')->whereNotNull('mpesa_ref');
+                });
             });
         });        
     }
