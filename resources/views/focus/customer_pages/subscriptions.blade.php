@@ -82,12 +82,12 @@
     {{-- ✅ Active Subscription (Dummy Example) --}}
     @isset ($authsubscr->package)
     <div class="glass-card">
-        <span class="sub-status active-status">Active</span>
+        <span class="sub-status active-status">Active</span><br>
         <h5 class="fw-bold">{{ @$authsubscr->package->name }} Plan</h5>
         <p class="mb-1">{{ @$authsubscr->package->max_bottle }} Bottles Monthly</p>
         <p class="price mb-1">KSh {{ numberFormat(@$authsubscr->package->price) }} / month</p>
         <p class="text-muted small mb-2"><strong>Next Delivery:</strong> {{ $nextSchedule? date('M d, Y', $nextSchedule->delivery_date) : '_' }}</p>
-        <span class="badge bg-primary">View Subscription</span>
+        {{-- <span class="badge bg-primary">View Subscription</span> --}}
         {{-- <a href="#" class="btn btn-sm btn-outline-primary">View Subscription</a> --}}
     </div>
     @endisset
