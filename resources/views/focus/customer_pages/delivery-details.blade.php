@@ -53,7 +53,7 @@
                 <option value="">-- Delivery Frequency Type --</option>
                 {{-- <option value="daily">Daily</option> --}}
                 <option value="weekly">Weekly</option>
-                <option value="custom">Custom</option>
+                <option value="custom">Monthly</option>
             </select>
         </div>
 
