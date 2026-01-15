@@ -206,72 +206,106 @@ $(function() {
     });
     $('#serviceFee').keyup();
 
-  // ==== Handle form submit ====
-  $('#mpesaPromptForm').on('submit', function(e){
-    e.preventDefault();
+    // ==== Handle form submit ====
+    $('#mpesaPromptForm').on('submit', function(e){
+        e.preventDefault();
+        // Simple validation
+        const phone = $('#mpesaPhone').val().trim();
+        const amount = $('#mpesaAmount').val().trim();
+        const notes = $('#mpesaNotes').val().trim() || null;
+        if(!phone || !amount || !notes) { 
+            return alert('Please fill all required fields.'); 
+        }
+        const customerName = customer.company || customer.name;
+        if (!customerName) return alert('Customer name or company required');
 
-    // Simple validation
-    const phone = $('#mpesaPhone').val().trim();
-    const amount = $('#mpesaAmount').val().trim();
-    const notes = $('#mpesaNotes').val().trim() || null;
-    if(!phone || !amount || !notes) { 
-        return alert('Please fill all required fields.'); 
-    }
-    const customerName = customer.company || customer.name;
-    if (!customerName) return alert('Customer name or company required');
+        $('#mpesaStatusArea').removeClass('d-none');
+        $('#btnSendMpesa').prop('disabled', true);
 
-    $('#mpesaStatusArea').removeClass('d-none');
-    $('#btnSendMpesa').prop('disabled', true);
+        // AJAX stub
+        $.ajax({
+            url: "{{ route('api.mpesa_stkpush') }}",
+            method: 'POST',
+            data: {
+                phone,
+                amount,
+                account_reference: customerName,
+                description: notes,
+                ins: customer.ins,
+            },
+            success: function(res) {
+                if (res.ok && res.status === "PENDING") {
+                    $('#mpesaStatusArea .alert')
+                      .removeClass('alert-info')
+                      .addClass('alert-success')
+                      .html('<i class="fas fa-check-circle mr-2"></i> Prompt sent ✅ — Enter M-Pesa PIN');
+                      setTimeout(() => {
+                        $('#mpesaModal').modal('hide');
+                        $('#btnSendMpesa').prop('disabled', false);
+                        startPolling();
+                      }, 2500);                
+                } else {
+                    const errorMsg = "Error: " + (res.gateway?.ResponseDescription || res.message);
+                    $('#mpesaStatusArea .alert')
+                      .removeClass('alert-info')
+                      .addClass('alert-danger')
+                      .html(`<i class="fas fa-check-circle mr-2"></i> ${errorMsg}`);
+                }            
+            },
+            error: function() {
+                $('#mpesaStatusArea .alert')
+                  .removeClass('alert-info')
+                  .addClass('alert-danger')
+                  .html('<i class="fas fa-times-circle mr-2"></i> Failed to send prompt. Please retry.');
+                  $('#btnSendMpesa').prop('disabled', false);
+            }
+        });
 
-
-    // Example AJAX stub
-    $.ajax({
-      url: "{{ route('api.mpesa_stkpush') }}",
-      method: 'POST',
-      data: {
-        phone,
-        amount,
-        account_reference: customerName,
-        description: notes,
-        ins: customer.ins,
-      },
-      success: function(res){
-        $('#mpesaStatusArea .alert')
-          .removeClass('alert-info')
-          .addClass('alert-success')
-          .html('<i class="fas fa-check-circle mr-2"></i> Prompt sent successfully. Ask customer to complete on phone.');
-          setTimeout(() => {
-            $('#mpesaModal').modal('hide');
-            $('#btnSendMpesa').prop('disabled', false);
-            postPaymentLocally(res);
-          }, 2500);
-      },
-      error: function(){
-        $('#mpesaStatusArea .alert')
-          .removeClass('alert-info')
-          .addClass('alert-danger')
-          .html('<i class="fas fa-times-circle mr-2"></i> Failed to send prompt. Please retry.');
-        $('#btnSendMpesa').prop('disabled', false);
-      }
+        function testStub() {
+            $('#mpesaStatusArea .alert')
+                .removeClass('alert-info')
+                .addClass('alert-success')
+                .html('<i class="fas fa-check-circle mr-2"></i> Prompt sent successfully. Ask customer to complete on phone.');
+            setTimeout(() => {
+                $('#mpesaModal').modal('hide');
+                $('#btnSendMpesa').prop('disabled', false);
+                postPaymentLocally({merchant_request_id: 1234567, checkout_request_id: 1234567});
+            }, 2500);   
+        }
+        
+        // Test
+        @if (env('APP_ENV') === 'local' && env('APP_DEBUG') === true)
+            testStub();
+        @endif 
     });
 
-    function testStub() {
-        $('#mpesaStatusArea .alert')
-              .removeClass('alert-info')
-              .addClass('alert-success')
-              .html('<i class="fas fa-check-circle mr-2"></i> Prompt sent successfully. Ask customer to complete on phone.');
-        setTimeout(() => {
-            $('#mpesaModal').modal('hide');
-            $('#btnSendMpesa').prop('disabled', false);
-            postPaymentLocally({merchant_request_id: 1234567, checkout_request_id: 1234567});
-        }, 2500);   
+
+    /** ✅ Step 2 — Poll status until SUCCESS */
+    function startPolling() {
+        $('#mpesaStatusArea .alert').html('<i class="fas fa-check-circle mr-2"></i> Awaiting confirmation...');
+        pollTimer = setInterval(function() {
+            $.get(`/api/mpesa_payment/${checkoutID}`, function(res) {
+                if (!res.ok) {
+                    clearInterval(pollTimer);
+                    return;
+                }
+                let status = res.status;
+                $('#mpesaStatusArea .alert').html(`<i class="fas fa-check-circle mr-2"></i> ${status}`);
+                if (status === "SUCCESS") {
+                    clearInterval(pollTimer);
+                    $('#mpesaStatusArea .alert').html(`<i class="fas fa-check-circle mr-2"></i> Payment Confirmed ✅`);
+                    setTimeout(() => postPaymentLocally(res.data), 600);
+                }
+                if (status === "FAILED" || status === "CANCELLED") {
+                    clearInterval(pollTimer);
+                    $('#mpesaStatusArea .alert')
+                      .removeClass('alert-info')
+                      .addClass('alert-danger')
+                      .html(`<i class="fas fa-times-circle mr-2"></i> Payment ${status} ❌`);
+                }
+            });
+        }, 3500);
     }
-    
-    // Test
-    @if (env('APP_ENV') === 'local' && env('APP_DEBUG') === true)
-        testStub();
-    @endif 
-  });
 
   // ==== Locally POST payment ====
   function postPaymentLocally(data) {
@@ -292,6 +326,7 @@ $(function() {
         'checkout_request_id': data.checkout_request_id,
         'refs': {
             mpesa_phone: $('#mpesaPhone').val().trim(),
+            mpesa: data.mpesa_receipt_number,
         },
       },
       success: function(res){

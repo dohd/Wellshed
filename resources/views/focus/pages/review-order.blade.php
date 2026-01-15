@@ -213,16 +213,13 @@ $(function() {
 
         /** ✅ Step 1 — Start STK Push */
         $("#mpesaPayBtn").on("click", function() {
-
             let phone = $("#mpesaPhone").val();
             let ins = $("#ins").val();
             if (!phone) {
                 alert("Enter phone number");
                 return;
             }
-
             $("#mpesaStatus").text("Sending STK push…");
-
             $.ajax({
                 url: "{{ route('api.mpesa_stkpush') }}",
                 method: "POST",
@@ -235,16 +232,11 @@ $(function() {
                     ins: ins,
                 },
                 success: function (res) {
-
                     console.log("STK Response:", res);
-
                     if (res.ok && res.status === "PENDING") {
-
                         checkoutID = res.checkout_request_id;
                         $("#mpesaStatus").text("STK sent ✅ — Enter M-Pesa PIN");
-
                         startPolling();
-
                     } else {
                         $("#mpesaStatus").text("Error: " + (res.gateway?.ResponseDescription || res.message));
                     }
@@ -257,41 +249,30 @@ $(function() {
 
         /** ✅ Step 2 — Poll status until SUCCESS */
         function startPolling() {
-
             $("#mpesaStatus").text("Waiting for confirmation…");
-
             pollTimer = setInterval(function() {
-
                 $.get(`/api/mpesa_payment/${checkoutID}`, function(res) {
-
                     console.log("Polling:", res);
-
                     if (!res.ok) return;
-
                     let status = res.status;
                     $("#mpesaStatus").text("Status: " + status);
-
                     if (status === "SUCCESS") {
                         clearInterval(pollTimer);
                         $("#mpesaStatus").html(`<span class='text-success fw-bold'>Payment Confirmed ✅</span>`);
-
                         setTimeout(() => {
                             postPaymentLocally(res.data);
                         }, 600);
                     }
-
                     if (status === "FAILED" || status === "CANCELLED") {
                         clearInterval(pollTimer);
                         $("#mpesaStatus").html(`<span class='text-danger fw-bold'>Payment ${status} ❌</span>`);
                     }
                 });
-
             }, 3500);
         }
 
         /** ✅ Step 3 — Save payment locally then submit order */
         function postPaymentLocally(data) {
-
             $.ajax({
                 url: "{{ route('biller.payment_receipts.store') }}",
                 method: 'POST',
@@ -312,15 +293,12 @@ $(function() {
                 },
                 success: function (res) {
                     console.log("Local save:", res);
-
                     const paymentId =
                         res?.payment?.id ||
                         null;
-
                     if (paymentId) {
                         $("#paymentId").val(paymentId);   // ✅ attach to the form
                     }
-
                     // ✅ Submit order only AFTER storing receipt
                     $("#submitOrderForm").submit();
                 },
