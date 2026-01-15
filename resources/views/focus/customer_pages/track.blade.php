@@ -2,5 +2,5 @@
 @section('title', 'Track Order')
 
 @section('content')
-  @include('focus.pages.track-section')
+  @include('focus.customer_pages.track-section')
 @endsection

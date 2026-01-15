@@ -29,7 +29,7 @@ class CustomerPagesController extends Controller
         $prev_schedules = DeliverySchedule::where('customer_id', $customer->id)->where('status', 'delivered')->take(5)->get();
         $incoming_schedules = DeliverySchedule::where('customer_id', $customer->id)->whereIn('status', ['scheduled', 'en_route'])->take(2)->get();
         // dd($incoming_schedules);
-        return view('focus.pages.home', compact('customer', 'prev_schedules', 'incoming_schedules'));
+        return view('focus.customer_pages.home', compact('customer', 'prev_schedules', 'incoming_schedules'));
     }
 
     /**
@@ -73,18 +73,18 @@ class CustomerPagesController extends Controller
                 });
         }
 
-        return view('focus.pages.orders', compact('products', 'recurring'));
+        return view('focus.customer_pages.orders', compact('products', 'recurring'));
     }
 
     public function track()
     {
-        return view('focus.pages.track');
+        return view('focus.customer_pages.track');
     }
 
     public function profile()
     {
         $customer = Customer::where('id', auth()->user()->customer_id)->first();
-        return view('focus.pages.profile', compact('customer'));
+        return view('focus.customer_pages.profile', compact('customer'));
     }
 
     public function delivery()
@@ -101,18 +101,18 @@ class CustomerPagesController extends Controller
         }
         $customer = Customer::where('id', auth()->user()->customer_id)->first();
         $customer_zones = $customer->customer_zones()->with('location')->get();
-        return view('focus.pages.delivery-details', compact('customer', 'customer_zones', 'recurring', 'qty'));
+        return view('focus.customer_pages.delivery-details', compact('customer', 'customer_zones', 'recurring', 'qty'));
     }
 
     public function review()
     {
         $customer = Customer::where('id', auth()->user()->customer_id)->first();
-        return view('focus.pages.review-order', compact('customer'));
+        return view('focus.customer_pages.review-order', compact('customer'));
     }
 
     public function thank_you()
     {
-        return view('focus.pages.thank-you');
+        return view('focus.customer_pages.thank-you');
     }
 
     /**
@@ -140,7 +140,7 @@ class CustomerPagesController extends Controller
             ->where('order_type', 'recurring')
             ->doesntExist();
 
-        return view('focus.pages.payments', 
+        return view('focus.customer_pages.payments', 
             compact('isRecur', 'balance', 'receipts', 'customer', 'subscrPlan', 'charges', 'subscription'),            
         );
     }
@@ -153,14 +153,14 @@ class CustomerPagesController extends Controller
         $nextSchedule = DeliverySchedule::where('customer_id', $customerId)->where('status', 'scheduled')
             ->first();
 
-        return view('focus.pages.subscriptions', compact('authsubscr', 'subscriptions', 'nextSchedule'));
+        return view('focus.customer_pages.subscriptions', compact('authsubscr', 'subscriptions', 'nextSchedule'));
     }
 
     public function my_orders()
     {
         $customer = Customer::where('id', auth()->user()->customer_id)->first();
         $orders = Orders::where('customer_id', $customer->id)->latest()->get();
-        return view('focus.pages.my_orders', compact('orders'));
+        return view('focus.customer_pages.my_orders', compact('orders'));
     }
 
     public function submit_order(Request $request)

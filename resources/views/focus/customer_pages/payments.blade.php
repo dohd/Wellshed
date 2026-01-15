@@ -163,7 +163,7 @@
         </a>
     </div>
 </div>
-@include('focus.pages.modals.mpesa_modal')
+@include('focus.customer_pages.modals.mpesa_modal')
 @endsection
 
 @section('after-scripts')
