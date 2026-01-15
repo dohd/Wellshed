@@ -50,8 +50,8 @@
         <div class='mb-3'>
             {{ Form::label('frequency_type', 'Frequency', ['class' => 'control-label']) }}
             <select name="frequency" id="frequency_type" class="form-control">
-                <option value="">--select frequency type--</option>
-                <option value="daily">Daily</option>
+                <option value="">-- Delivery Frequency Type --</option>
+                {{-- <option value="daily">Daily</option> --}}
                 <option value="weekly">Weekly</option>
                 <option value="custom">Custom</option>
             </select>
