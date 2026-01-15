@@ -207,6 +207,8 @@ $(function() {
     $('#serviceFee').keyup();
 
     // ==== Handle form submit ====
+    let checkoutID = null;
+    let pollTimer = null;
     $('#mpesaPromptForm').on('submit', function(e){
         e.preventDefault();
         // Simple validation
@@ -222,7 +224,7 @@ $(function() {
         $('#mpesaStatusArea').removeClass('d-none');
         $('#btnSendMpesa').prop('disabled', true);
 
-        // AJAX stub
+        /** ✅ Step 1 — Start STK Push */
         $.ajax({
             url: "{{ route('api.mpesa_stkpush') }}",
             method: 'POST',
@@ -235,6 +237,7 @@ $(function() {
             },
             success: function(res) {
                 if (res.ok && res.status === "PENDING") {
+                    checkoutID = res.checkout_request_id;
                     $('#mpesaStatusArea .alert')
                       .removeClass('alert-info')
                       .addClass('alert-success')
@@ -278,7 +281,6 @@ $(function() {
             testStub();
         @endif 
     });
-
 
     /** ✅ Step 2 — Poll status until SUCCESS */
     function startPolling() {
