@@ -22,7 +22,8 @@ class Kernel extends ConsoleKernel
         Commands\CreateDeliverySchedule::class,
         Commands\UpdateSmsDeliveryStatus::class,
         Commands\NotifySubscriptionExpiry::class,
-        Commands\CheckSubscription::class
+        Commands\CheckSubscription::class,
+        Commands\RecoverMpesaStkCallbacks::class,
     ];
 
     /**
@@ -42,6 +43,8 @@ class Kernel extends ConsoleKernel
 
         // Queue Worker
         $schedule->command('queue:work --tries=3 --timeout=90')->everyMinute()->withoutOverlapping();
+        // Recover missed Mpesa STK callbacks
+        $schedule->command('mpesa:recover-stk')->everyTwoMinutes()->withoutOverlapping()->runInBackground();
     }
 
     /**

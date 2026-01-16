@@ -20,6 +20,7 @@ class StkPush extends Model
         'mpesa_receipt_number',
         'paid_at',
         'raw_callback',
+        'raw_query',
         'status',
     ];
 
