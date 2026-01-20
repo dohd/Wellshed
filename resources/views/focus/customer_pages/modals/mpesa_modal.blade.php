@@ -37,7 +37,7 @@
                   @if (!$isRecur)
                   <div class="form-group mb-2">
                     <label for="serviceFee" class="font-weight-semibold">One-time Service Fee <span class="text-danger">*</span></label>
-                    <input type="number" min="1" step="1" class="form-control" id="serviceFee" name="serviceFee" value="{{ $subscrPlan->onetime_fee }}" readonly>
+                    <input type="number" min="1" step="1" class="form-control" id="serviceFee" name="serviceFee" value="{{ $subscrPlan->onetime_fee ?? 1 }}" readonly>
                   </div>
                   @endif
 

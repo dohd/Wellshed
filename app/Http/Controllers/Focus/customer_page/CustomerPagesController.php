@@ -125,8 +125,12 @@ class CustomerPagesController extends Controller
         $receipts = PaymentReceipt::where('customer_id', $customer->id)->latest()->get();
 
         $subscription = $customer->subscription;
-        $subscrPlan = optional($customer->subscription->package);
-        if ($subscription->status !== 'active') $subscrPlan = null;
+
+        $subscrPlan = optional($subscription)->package;
+
+        if (! $subscription || $subscription->status !== 'active') {
+            $subscrPlan = null;
+        }
 
         $charges = PaymentReceipt::where('customer_id', $customer->id)
         ->where('entry_type', 'debit')

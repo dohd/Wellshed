@@ -81,6 +81,18 @@ class OrdersTableController extends Controller
                     . ucfirst($status) .
                     '</span>';
             })
+            ->addColumn('total', function ($orders) {
+                $total = 0;
+                if($orders->order_type == 'recurring') {
+                    $package = $orders->customer ? $orders->customer->package : '';
+                    if($package){
+                        $total = $package->price;
+                    }
+                }else{
+                    $total = $orders->total;
+                }
+                return amountFormat($total);
+            })
             ->addColumn('created_at', function ($orders) {
                 return Carbon::parse($orders->created_at)->toDateString();
             })
