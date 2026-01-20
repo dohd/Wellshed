@@ -38,33 +38,50 @@ class CustomerPagesController extends Controller
     public function orders()
     {
         $recurring = 0;
-        $products = collect();
+        $products  = collect();
 
-        $customer = Customer::where('id', auth()->user()->customer_id)->first();
+        $customer = Customer::find(auth()->user()->customer_id);
+
         $order = Orders::where('customer_id', $customer->id)
             ->whereNotIn('status', ['cancelled', 'completed'])
             ->first();
 
         if ($order) {
+
+            // Normal (non-recurring) order
             $products = ProductVariation::where('type', 'full')
                 ->get([
                     'id',
                     'name',
-                    DB::raw('price * 1.16 as price'), // adds 16% VAT
+                    DB::raw('price * 1.16 as price'),
                     'name as eta',
                 ]);
 
         } else {
+
             $recurring = 1;
-            $subscription = $customer->subscriptions()->where('status', 'active')->first();
+
+            $subscription = $customer->subscriptions()
+                ->where('status', 'active')
+                ->first();
+
+            // 👉 NO ACTIVE SUBSCRIPTION → BYPASS
+            if (! $subscription || ! $subscription->package) {
+                return view(
+                    'focus.customer_pages.orders',
+                    compact('products', 'recurring')
+                );
+            }
+
             $package = $subscription->package;
-            //Subscription products only
+
+            // Subscription-only product
             $products = ProductVariation::where('id', $package->productvar_id)
                 ->where('type', 'full')
                 ->get([
                     'id',
                     'name',
-                     DB::raw('price * 1.16 as price'), // adds 16% VAT
+                    DB::raw('price * 1.16 as price'),
                     'name as eta',
                 ])
                 ->map(function ($q) use ($package) {
