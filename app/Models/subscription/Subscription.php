@@ -6,6 +6,7 @@ use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\subscription\Traits\CustomerAttribute;
 use App\Models\subscription\Traits\SubscriptionRelationship;
+use Carbon\Carbon;
 
 class Subscription extends Model
 {
@@ -85,5 +86,14 @@ class Subscription extends Model
             if (isset(auth()->user()->ins))
             $builder->where('ins', auth()->user()->ins);
         });
+    }
+
+    public function isExpired()
+    {
+        if (! $this->end_date) {
+            return false; // or true, depending on your business rule
+        }
+
+        return Carbon::now()->gt(Carbon::parse($this->end_date));
     }
 }

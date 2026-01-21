@@ -42,13 +42,34 @@ class CustomerPagesController extends Controller
 
         $customer = Customer::find(auth()->user()->customer_id);
 
+        // Get the latest subscription (active or expired)
+        $subscription = $customer->subscriptions()
+            ->latest()
+            ->first();
+
+        /**
+         * 1️⃣ NEVER SUBSCRIBED
+         */
+        if (! $subscription) {
+            return view('focus.customer_pages.no_subscription');
+        }
+
+        /**
+         * 2️⃣ SUBSCRIBED BUT EXPIRED / INACTIVE
+         */
+        if ($subscription->status !== 'active' || $subscription->isExpired()) {
+            return view('focus.customer_pages.subscription_expired');
+        }
+
+        /**
+         * 3️⃣ SUBSCRIPTION IS ACTIVE → continue normal flow
+         */
         $order = Orders::where('customer_id', $customer->id)
             ->whereNotIn('status', ['cancelled', 'completed'])
             ->first();
 
+        // One-time order exists
         if ($order) {
-
-            // Normal (non-recurring) order
             $products = ProductVariation::where('type', 'full')
                 ->get([
                     'id',
@@ -57,41 +78,42 @@ class CustomerPagesController extends Controller
                     'name as eta',
                 ]);
 
-        } else {
-
-            $recurring = 1;
-
-            $subscription = $customer->subscriptions()
-                ->where('status', 'active')
-                ->first();
-
-            // 👉 NO ACTIVE SUBSCRIPTION → BYPASS
-            if (! $subscription || ! $subscription->package) {
-                return view(
-                    'focus.customer_pages.orders',
-                    compact('products', 'recurring')
-                );
-            }
-
-            $package = $subscription->package;
-
-            // Subscription-only product
-            $products = ProductVariation::where('id', $package->productvar_id)
-                ->where('type', 'full')
-                ->get([
-                    'id',
-                    'name',
-                    DB::raw('price * 1.16 as price'),
-                    'name as eta',
-                ])
-                ->map(function ($q) use ($package) {
-                    $q->qty = $package->max_bottle;
-                    return $q;
-                });
+            return view(
+                'focus.customer_pages.orders',
+                compact('products', 'recurring')
+            );
         }
+
+        /**
+         * 4️⃣ RECURRING (ACTIVE SUBSCRIPTION)
+         */
+        $recurring = 1;
+
+        // Package is guaranteed here
+        $package = $subscription->package;
+
+        if (! $package) {
+            // Safety fallback (should never happen)
+            return view('focus.customer_pages.subscription_expired');
+        }
+
+        $products = ProductVariation::where('id', $package->productvar_id)
+            ->where('type', 'full')
+            ->get([
+                'id',
+                'name',
+                DB::raw('price * 1.16 as price'),
+                'name as eta',
+            ])
+            ->map(function ($q) use ($package) {
+                $q->qty = $package->max_bottle;
+                return $q;
+            });
 
         return view('focus.customer_pages.orders', compact('products', 'recurring'));
     }
+
+
 
     public function track()
     {
