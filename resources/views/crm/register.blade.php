@@ -153,6 +153,53 @@
                                                         <input type="password" class="form-control form-control-lg" id="user-password" name="password" placeholder="Enter Password" required>
                                                         <div class="form-control-position"><i class="fa fa-key"></i></div>                                                        
                                                     </fieldset>
+                                                    {{-- Legal consent --}}
+                                                <div class="form-group mt-1">
+
+                                                    <div class="custom-control custom-checkbox mb-1">
+                                                        <input type="checkbox"
+                                                            class="custom-control-input"
+                                                            id="accept_terms"
+                                                            name="accept_terms"
+                                                            value="1"
+                                                            {{ old('accept_terms') ? 'checked' : '' }}
+                                                            required>
+                                                        <label class="custom-control-label" for="accept_terms">
+                                                            I accept the
+                                                            <a href="#" target="_blank" rel="noopener">
+                                                                Terms &amp; Conditions / Terms of Use
+                                                            </a>
+                                                        </label>
+                                                    </div>
+
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input type="checkbox"
+                                                            class="custom-control-input"
+                                                            id="accept_privacy"
+                                                            name="accept_privacy"
+                                                            value="1"
+                                                            {{ old('accept_privacy') ? 'checked' : '' }}
+                                                            required>
+                                                        <label class="custom-control-label" for="accept_privacy">
+                                                            I consent to data processing for onboarding –
+                                                            <a href="#" target="_blank" rel="noopener">
+                                                                Privacy Policy
+                                                            </a>
+                                                        </label>
+                                                    </div>
+
+                                                    @if ($errors->has('accept_terms') || $errors->has('accept_privacy'))
+                                                        <div class="alert bg-warning alert-dismissible m-1" role="alert">
+                                                            <button type="button" class="close" data-dismiss="alert">
+                                                                <span>×</span>
+                                                            </button>
+                                                            {{ $errors->first('accept_terms') ?? $errors->first('accept_privacy') }}
+                                                        </div>
+                                                    @endif
+
+                                                </div>
+
+
                                                 </div>
 
                                                 <!-- Delivery Information -->
@@ -338,7 +385,17 @@
                     });
                 }               
             }
-        },    
+        },  
+        formSubmit(e) {
+            if (!$('#accept_terms').is(':checked') || !$('#accept_privacy').is(':checked')) {
+                e.preventDefault();
+                alert('You must accept the Terms of Use and Privacy Policy to complete registration.');
+                return false;
+            }
+            return true;
+        },
+
+  
     };
 
     $(Form.init);

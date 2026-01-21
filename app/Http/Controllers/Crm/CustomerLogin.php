@@ -81,7 +81,11 @@ class CustomerLogin extends Controller
             'building_name' => 'required',
             'floor_no' => 'required',
             'door_no' => 'required',
+            'accept_terms'   => ['required', 'accepted'],
+            'accept_privacy' => ['required', 'accepted'],
         ], [
+            'accept_terms.accepted'   => 'You must accept the Terms & Conditions / Terms of Use.',
+            'accept_privacy.accepted' => 'You must consent to data processing as per the Privacy Policy.',
             'sub_package_id' => 'package is required',
             'target_zone_id' => 'delivery zone is required',
             'target_zone_item_id' => 'location is required',
@@ -122,6 +126,8 @@ class CustomerLogin extends Controller
                 'confirmed' => 1,
                 'customer_id' => $customer->id,
                 'ins' => $ins,
+                'accept_terms' => $input['accept_terms'],
+                'accept_privacy' => $input['accept_privacy'],
             ]);
 
             // create subscription
