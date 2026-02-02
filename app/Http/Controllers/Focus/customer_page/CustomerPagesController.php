@@ -413,4 +413,34 @@ class CustomerPagesController extends Controller
 
         return view('focus.terms.terms_and_conditions', compact('data'));
     }
+
+    public function privacyPolicy()
+    {
+        $data = [
+            'title' => 'Privacy Policy - Project Management ERP',
+
+            'companyName' => 'Project Management ERP (PME)',
+
+            'effectiveDate' => '02/09/2025',
+
+            'email' => 'info@erpproject.co.ke',
+
+            'websiteUrl' => 'https://erpproject.co.ke',
+            'websiteText' => 'erpproject.co.ke',
+
+            'addressLine' => 'Aztech Building, Mombasa Road, Opposite Nextgen Mall, Nairobi, Kenya',
+
+            'productsText' => 'PME ERP, PME CRM, and Virtual Sales Force (VSF)',
+
+            // footer
+            'privacyUrl' => route('privacy_policy'),
+            'termsUrl' => route('water_subscription'),
+            'deletionUrl' => "#",
+            'copyrightYear' => date('Y'),
+            'companyShort' => 'PME (Project Management ERP)',
+            'addressShort' => 'Aztech Building, Mombasa Road, Nairobi, Kenya',
+        ];
+
+        return view('focus.terms.privacy', compact('data'));
+    }
 }

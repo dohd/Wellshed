@@ -182,7 +182,7 @@
                                                             required>
                                                         <label class="custom-control-label" for="accept_privacy">
                                                             I consent to data processing for onboarding –
-                                                            <a href="#" target="_blank" rel="noopener">
+                                                            <a href="{{ route('privacy_policy') }}" target="_blank" rel="noopener">
                                                                 Privacy Policy
                                                             </a>
                                                         </label>

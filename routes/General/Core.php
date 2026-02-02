@@ -12,6 +12,7 @@ Route::get('login', 'Focus\general\CoreController@showLoginForm')->middleware('i
 
 //terms
 Route::get('water-subscription', [CustomerPagesController::class, 'waterSubscription'])->name('water_subscription');
+Route::get('privacy-policy', [CustomerPagesController::class, 'privacyPolicy'])->name('privacy_policy');
 // Route::get('login', 'Focus\general\CoreController@showLoginForm')->name('login');
 
 Route::group(['namespace' => 'Focus', 'as' => 'biller.'], function () {
