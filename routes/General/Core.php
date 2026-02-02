@@ -4,10 +4,14 @@
  * core
  *
  */
+use App\Http\Controllers\Focus\customer_page\CustomerPagesController;
 
 //General Application
 Route::get('testemail', 'Focus\general\TestController@testemail')->name('testemail');
 Route::get('login', 'Focus\general\CoreController@showLoginForm')->middleware('install')->name('login');
+
+//terms
+Route::get('water-subscription', [CustomerPagesController::class, 'waterSubscription'])->name('water_subscription');
 // Route::get('login', 'Focus\general\CoreController@showLoginForm')->name('login');
 
 Route::group(['namespace' => 'Focus', 'as' => 'biller.'], function () {

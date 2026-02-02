@@ -383,4 +383,34 @@ class CustomerPagesController extends Controller
             return errorHandler('Error Creating Delivery Schedule', $th);
         }
     }
+    public function waterSubscription()
+    {
+        // Optional: load these from config(.env) or database if you prefer.
+        $data = [
+            'title' => 'Terms and Conditions - Water Subscription Service',
+
+            'companyName' => 'Wellshed Group Limited',
+            'addressLine1' => 'P.o. Box – 16972',
+            'addressLine2' => '00100 NAIROBI',
+            'locationLine' => 'Karen, Nairobi Kenya',
+
+            'phone1' => '+254 708 660 147',
+            'phone2' => '+254 755 993 524',
+            'phoneLocal1' => '0708660147',
+            'phoneLocal2' => '0755993524',
+
+            'email' => 'info@wellshedgroup.com',
+            'websiteUrl' => 'https://www.wellshedgroup.com',
+            'websiteText' => 'www.wellshedgroup.com',
+
+            // As per document
+            'lastUpdated' => 'February 2nd 2026',
+
+            // Footer contact website shown in doc
+            'contactWebsiteUrl' => 'https://www.grange-park.com',
+            'contactWebsiteText' => 'www.grange-park.com',
+        ];
+
+        return view('focus.terms.terms_and_conditions', compact('data'));
+    }
 }

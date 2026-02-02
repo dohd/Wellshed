@@ -166,7 +166,7 @@
                                                             required>
                                                         <label class="custom-control-label" for="accept_terms">
                                                             I accept the
-                                                            <a href="#" target="_blank" rel="noopener">
+                                                            <a href="{{ route('water_subscription') }}" target="_blank" rel="noopener">
                                                                 Terms &amp; Conditions / Terms of Use
                                                             </a>
                                                         </label>
