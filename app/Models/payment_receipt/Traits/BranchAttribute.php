@@ -16,6 +16,6 @@ trait BranchAttribute
         return 
             // $this->getViewButtonAttribute("manage-branch", "biller.branches.show")
             // . ' ' . $this->getEditButtonAttribute("edit-branch", "biller.branches.edit") . ' ' .
-             $this->getDeleteButtonAttribute("delete-branch", "biller.branches.destroy");
+             $this->getDeleteButtonAttribute("delete-branch", "biller.payment_receipts.destroy");
     }
 }

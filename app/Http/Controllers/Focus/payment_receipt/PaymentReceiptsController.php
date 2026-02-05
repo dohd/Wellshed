@@ -215,12 +215,14 @@ class PaymentReceiptsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(PaymentReceipt $paymentreceipt)
+    public function destroy($paymentreceipt_id)
     {
+        $paymentreceipt = PaymentReceipt::findOrFail($paymentreceipt_id);
         try {
             $paymentreceipt->update(['deleted_at' => now(), 'deleted_by' => auth()->id()]);
         } catch (\Exception $e) {
             return errorHandler('Error deleting Receipt');
         }
+        return redirect(route('biller.payment_receipts.index'))->with(['flash_success' => 'Receipt Deleted Successfully']);
     }
 }
