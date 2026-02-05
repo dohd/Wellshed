@@ -86,6 +86,10 @@ class Subscription extends Model
             if (isset(auth()->user()->ins))
             $builder->where('ins', auth()->user()->ins);
         });
+        
+        static::addGlobalScope('deleted_at', function ($builder) {
+            $builder->whereNull('deleted_at');
+        });
     }
 
     public function isExpired()
